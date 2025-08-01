@@ -737,8 +737,8 @@ const finalIcon =
         }
 
         function fitRevealLine(el, type) {
-          if (type === "photo") return;
-          textFit(el, {
+          if (type === "photo" || typeof window.textFit !== "function") return;
+          window.textFit(el, {
             alignVert: true,
             alignHoriz: true,
             multiLine: true,
