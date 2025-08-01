@@ -46,6 +46,16 @@ Line-specific color parameters fall back to `textColor` and `outlineColor` if om
 
 `color` only affects the overlay background, whereas `textColor` and `outlineColor` control the message text and its outline.
 
+### Resetting parameters
+
+To revert to the default message while keeping a custom final slot icon, clear
+all query parameters except `finalIcon` in the page URL. For example:
+
+```
+index.html?finalIcon=girls.png
+```
+
+
 ### Example links
 
 ```
