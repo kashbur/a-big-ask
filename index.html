@@ -480,6 +480,14 @@
           "instructionsOverlay",
         );
         const params = getParams();
+        const finalIconMap = {
+          "ringflower": "img/ringflower.png",
+          "ringflower.png": "img/ringflower.png",
+          "teambride": "img/teambride.png",
+          "teambride.png": "img/teambride.png",
+          "girls": "img/girls.png",
+          "girls.png": "img/girls.png",
+        };
         const safeTextColor = sanitizeColor(params.textcolor, "#ffffff");
         const safeOutlineColor = sanitizeColor(params.outlinecolor, "#7e5e4f");
 
@@ -650,7 +658,8 @@
           const spinDuration = 900;
           const delayStep = 600;
           if (spinCount === 4) {
-            const finalIcon = "img/ringflower.png";
+const finalIcon =
+  finalIconMap[(params.finalicon || "").toLowerCase()] || "img/ringflower.png";
             reels.forEach((reel, i) => {
               const delay = i * delayStep;
               const callback =

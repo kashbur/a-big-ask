@@ -37,6 +37,8 @@ xdg-open index.html        # Linux
 - `fontSub` – font family for the secondary line
 - `fontDate` – font family for the date line
 - `fontFrom` – font family for the closing signature
+- `finalIcon` – icon to display on the fourth spin. Allowed values:
+  `ringflower.png`, `teambride.png`, `girls.png`
 
 Font parameters expect Google Fonts family names just like `font`, using `+` instead of spaces.
 
@@ -79,5 +81,6 @@ a `slot-spin-down` animation. After the configured duration, the class is
 removed and `createSingleIcon()` displays the final symbol for that reel.
 
 During the first three spins the grid stops on random, nonmatching symbols. On
-the fourth spin all reels are forced to stop on the blue bottle icon and
+the fourth spin all reels are forced to stop on the icon specified by the
+`finalIcon` parameter (default is the blue bottle). After that,
 `showReveal()` is triggered, revealing the personalized message overlay.
