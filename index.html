@@ -91,21 +91,12 @@
         align-items: center;
         justify-content: flex-start;
         transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);      }
-      @keyframes slot-spin-down {
-        0% {
-          transform: translateY(-20%);
-        }
-        100% {
-          transform: translateY(0);
-        }
-      }
-      .reel-strip.spinning {
-        animation: slot-spin-down 0.2s linear infinite;
-      }
       .reel-strip {
         display: flex;
         flex-direction: column;
         will-change: transform;
+        transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+        transform: translate3d(0,0,0);
       }
       .reel-item {
         height: 100%;
@@ -475,8 +466,7 @@
           reel.innerHTML = `<div class="reel-inner"><img src="${icon}" alt="Slot Icon"></div>`;
         }
 
-        function createReelStrip(reel) {
-          reel.innerHTML = "";
+        function createReelStrip() {
           const strip = document.createElement("div");
           strip.className = "reel-strip";
           for (let i = 0; i < 10; i++) {
@@ -488,7 +478,6 @@
             item.appendChild(img);
             strip.appendChild(item);
           }
-          reel.appendChild(strip);
           return strip;
         }
 
@@ -500,6 +489,7 @@
         for (let i = 1; i <= 3; i++) {
           reels.push(document.getElementById(`reel${i}`));
         }
+        const reelStrips = reels.map(() => createReelStrip());
         const introOverlay = document.getElementById("introOverlay");
         const introLinesDiv = document.getElementById("introLines");
         const introColorOverlay = introOverlay.querySelector(".color-overlay");
@@ -694,14 +684,14 @@ const finalIcon =
               const delay = i * delayStep;
               const callback =
                 i === reels.length - 1 ? () => setTimeout(showReveal, 500) : null;
-              spinReel(reel, delay, spinDuration, finalIcon, callback);
+              spinReel(reel, reelStrips[i], delay, spinDuration, finalIcon, callback);
             });
             currentSymbols = reels.map(() => finalIcon);
           } else {
             generateRandomNonMatchingSymbols();
             reels.forEach((reel, i) => {
               const delay = i * delayStep;
-              spinReel(reel, delay, spinDuration, currentSymbols[i]);
+              spinReel(reel, reelStrips[i], delay, spinDuration, currentSymbols[i]);
             });
           }
           const pointerDelay =
@@ -717,12 +707,22 @@ const finalIcon =
           } while (new Set(symbols).size < 2);
           currentSymbols = symbols;
         }
-        function spinReel(reel, delay, duration, finalIcon, callback) {
+        function spinReel(reel, strip, delay, duration, finalIcon, callback) {
           setTimeout(() => {
-            const strip = createReelStrip(reel);
-            strip.classList.add("spinning");
+            for (let i = 0; i < strip.children.length; i++) {
+              const img = strip.children[i].querySelector("img");
+              img.src =
+                i === strip.children.length - 1
+                  ? finalIcon || getRandomIcon()
+                  : getRandomIcon();
+            }
+            reel.innerHTML = "";
+            reel.appendChild(strip);
+            strip.style.transition = `transform ${duration}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
+            strip.style.transform = `translate3d(0, -${(strip.children.length - 1) * 100}%, 0)`;
             setTimeout(() => {
-              strip.classList.remove("spinning");
+              strip.style.transition = "none";
+              strip.style.transform = "translate3d(0,0,0)";
               createSingleIcon(reel, finalIcon || getRandomIcon());
               if (callback) callback();
             }, duration);
