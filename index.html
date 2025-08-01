@@ -483,6 +483,14 @@
           "instructionsOverlay",
         );
         const params = getParams();
+        const finalIconMap = {
+          "ringflower": "img/ringflower.png",
+          "ringflower.png": "img/ringflower.png",
+          "teambride": "img/teambride.png",
+          "teambride.png": "img/teambride.png",
+          "girls": "img/girls.png",
+          "girls.png": "img/girls.png",
+        };
         const safeTextColor = sanitizeColor(params.textcolor, "#ffffff");
         const safeOutlineColor = sanitizeColor(params.outlinecolor, "#7e5e4f");
 
@@ -653,14 +661,15 @@
           const spinDuration = 900;
           const delayStep = 600;
           if (spinCount === 4) {
-            const babyBottle = icons[5];
+            const finalIcon =
+              finalIconMap[(params.finalicon || "").toLowerCase()] || icons[5];
             reels.forEach((reel, i) => {
               const delay = i * delayStep;
               const callback =
                 i === reels.length - 1 ? () => setTimeout(showReveal, 500) : null;
-              spinReel(reel, delay, spinDuration, babyBottle, callback);
+              spinReel(reel, delay, spinDuration, finalIcon, callback);
             });
-            currentSymbols = reels.map(() => babyBottle);
+            currentSymbols = reels.map(() => finalIcon);
           } else {
             generateRandomNonMatchingSymbols();
             reels.forEach((reel, i) => {
