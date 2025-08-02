@@ -15,7 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/textfit/2.4.0/textFit.min.js"></script>
     <style>
       :root {
-        --font-family: 'Poppins';
+        --font-family: "Poppins";
       }
       html,
       body {
@@ -123,16 +123,16 @@
         align-items: center;
       }
       #reel1 {
-        left: 16.0%;
-        top: 38.0%;
+        left: 16%;
+        top: 38%;
       }
       #reel2 {
         left: 39.1%;
-        top: 38.0%;
+        top: 38%;
       }
       #reel3 {
         left: 61.8%;
-        top: 38.0%;
+        top: 38%;
       }
       .reel-item img {
         width: 72.25%;
@@ -151,7 +151,7 @@
         position: absolute;
         width: 52.81%;
         height: 9.49%;
-        left: 22.50%;
+        left: 22.5%;
         top: 66.34%;
         cursor: pointer;
         filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.18));
@@ -519,11 +519,11 @@
         );
         const params = getParams();
         const finalIconMap = {
-          "ringflower": "img/ringflower.png",
+          ringflower: "img/ringflower.png",
           "ringflower.png": "img/ringflower.png",
-          "teambride": "img/teambride.png",
+          teambride: "img/teambride.png",
           "teambride.png": "img/teambride.png",
-          "girls": "img/girls.png",
+          girls: "img/girls.png",
           "girls.png": "img/girls.png",
         };
         const safeTextColor = sanitizeColor(params.textcolor, "#ffffff");
@@ -580,33 +580,33 @@
                 document.documentElement.style.setProperty("--font-family", ff);
                 fonts.main = fonts.sub = fonts.date = fonts.from = ff;
               }
-            })
+            }),
           );
         }
 
         fontPromises.push(
           loadGoogleFont(params.fontmain).then((ff) => {
             if (ff) fonts.main = ff;
-          })
+          }),
         );
         fontPromises.push(
           loadGoogleFont(params.fontsub).then((ff) => {
             if (ff) fonts.sub = ff;
-          })
+          }),
         );
         fontPromises.push(
           loadGoogleFont(params.fontdate).then((ff) => {
             if (ff) fonts.date = ff;
-          })
+          }),
         );
         fontPromises.push(
           loadGoogleFont(params.fontfrom).then((ff) => {
             if (ff) fonts.from = ff;
-          })
+          }),
         );
 
         Promise.all(fontPromises).then(() =>
-          document.fonts.ready.then(refitAllLines)
+          document.fonts.ready.then(refitAllLines),
         );
 
         // Set overlay color on reveal
@@ -694,12 +694,15 @@
           const spinDuration = 1200;
           const delayStep = 600;
           if (spinCount === 4) {
-const finalIcon =
-  finalIconMap[(params.finalicon || "").toLowerCase()] || "img/ringflower.png";
+            const finalIcon =
+              finalIconMap[(params.finalicon || "").toLowerCase()] ||
+              "img/ringflower.png";
             reels.forEach((reel, i) => {
               const delay = i * delayStep;
               const callback =
-                i === reels.length - 1 ? () => setTimeout(showReveal, 500) : null;
+                i === reels.length - 1
+                  ? () => setTimeout(showReveal, 500)
+                  : null;
               spinReel(reel, delay, spinDuration, finalIcon, callback);
             });
             currentSymbols = reels.map(() => finalIcon);
@@ -711,7 +714,9 @@ const finalIcon =
             });
           }
           const pointerDelay =
-            delayStep * (reels.length - 1) + spinDuration + (spinCount === 4 ? 500 : 0);
+            delayStep * (reels.length - 1) +
+            spinDuration +
+            (spinCount === 4 ? 500 : 0);
           setTimeout(() => {
             spinButton.style.pointerEvents = "auto";
           }, pointerDelay);
@@ -729,25 +734,20 @@ const finalIcon =
             const imgs = strip.querySelectorAll("img");
 
             // Capture the currently visible symbol so we can restore it
-            const prevSrc =
-              strip.style.transform && strip.style.transform !== "translateY(0)"
-                ? imgs[imgs.length - 1].src
-                : imgs[0].src;
+            const prevSrc = imgs[0].src;
 
-            // Reset position without transition to avoid visible jump
+            // Prepare the strip for a downward spin
             strip.style.transition = "none";
-            strip.style.transform = "translateY(0)";
-            imgs[0].src = prevSrc;
-
-            // Fill the rest of the strip with random icons
+            imgs[imgs.length - 1].src = prevSrc;
             for (let i = 1; i < imgs.length - 1; i++) {
               imgs[i].src = getRandomIcon();
             }
-            imgs[imgs.length - 1].src = finalIcon || getRandomIcon();
+            strip.style.transform = `translateY(-${(imgs.length - 1) * 100}%)`;
+            imgs[0].src = finalIcon || getRandomIcon();
 
             void strip.offsetHeight;
             strip.style.transition = `transform ${duration}ms ease-out`;
-            strip.style.transform = `translateY(-${(imgs.length - 1) * 100}%)`;
+            strip.style.transform = "translateY(0)";
 
             function onTransitionEnd() {
               strip.removeEventListener("transitionend", onTransitionEnd);
@@ -779,7 +779,9 @@ const finalIcon =
 
         function refitAllLines() {
           document.querySelectorAll(".reveal-line").forEach((el) => {
-            const type = Array.from(el.classList).find((c) => c !== "reveal-line");
+            const type = Array.from(el.classList).find(
+              (c) => c !== "reveal-line",
+            );
             fitRevealLine(el, type);
           });
         }
@@ -822,10 +824,20 @@ const finalIcon =
                 div.appendChild(img);
               } else {
                 div.textContent =
-                  line.type === "sub" ? line.content.toUpperCase() : line.content;
+                  line.type === "sub"
+                    ? line.content.toUpperCase()
+                    : line.content;
               }
-              const colors = lineColors[line.type] || { text: safeTextColor, outline: safeOutlineColor };
-              applyTextStyles(div, colors.text, colors.outline, fonts[line.type]);
+              const colors = lineColors[line.type] || {
+                text: safeTextColor,
+                outline: safeOutlineColor,
+              };
+              applyTextStyles(
+                div,
+                colors.text,
+                colors.outline,
+                fonts[line.type],
+              );
               div.style.margin = "0";
               revealLinesDiv.appendChild(div);
               fitRevealLine(div, line.type);
@@ -857,7 +869,12 @@ const finalIcon =
             const div = document.createElement("div");
             div.className = "reveal-line main";
             div.textContent = mainLine.content;
-            applyTextStyles(div, lineColors.main.text, lineColors.main.outline, fonts.main);
+            applyTextStyles(
+              div,
+              lineColors.main.text,
+              lineColors.main.outline,
+              fonts.main,
+            );
             introLinesDiv.appendChild(div);
             fitRevealLine(div, "main");
             introOverlay.style.opacity = "1";
@@ -991,8 +1008,8 @@ const finalIcon =
                 }
               } else if (confetti.element.parentNode) {
                 confetti.element.parentNode.removeChild(confetti.element);
-          }
-        });
+              }
+            });
             if (activeConfetti)
               animationFrameId = requestAnimationFrame(animateAllConfetti);
             else

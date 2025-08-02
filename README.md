@@ -55,7 +55,6 @@ all query parameters except `finalIcon` in the page URL. For example:
 index.html?finalIcon=girls.png
 ```
 
-
 ### Example links
 
 ```
@@ -83,7 +82,7 @@ Open one of these URLs in your browser to see the customized reveal.
 ## How the reel spinning works
 
 The slot machine now shows a **1×3 grid** of icons. Each of the three columns is
-a reel that spins vertically. When the spin button is pressed, the
+a reel that spins downward. When the spin button is pressed, the
 `handleSpin()` function disables the button and calls `spinReel()` for each reel
 using small delays so they start one after another. Each reel is initialized
 with a reusable `.reel-strip` of placeholder icons. `spinReel()` updates the
