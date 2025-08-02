@@ -93,4 +93,6 @@ transition. After the configured duration the strip resets back to the start and
 During the first three spins the grid stops on random, nonmatching symbols. On
 the fourth spin all reels are forced to stop on the icon specified by the
 `finalIcon` parameter (default is the blue bottle). After that,
-`showReveal()` is triggered, revealing the personalized message overlay.
+`showReveal()` is triggered, revealing the personalized message overlay. Any
+spins after the reveal return to being completely random, so matches may occur
+naturally.
