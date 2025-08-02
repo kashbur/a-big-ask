@@ -86,10 +86,10 @@ The slot machine now shows a **1×3 grid** of icons. Each of the three columns i
 a reel that spins vertically. When the spin button is pressed, the
 `handleSpin()` function disables the button and calls `spinReel()` for each reel
 using small delays so they start one after another. Each reel is initialized
-with a reusable `.reel-strip` of placeholder icons. `spinReel()` swaps the
-images in place on that strip, toggles a `spinning` class to animate it, and
-after the configured duration updates the first image to show the final symbol
-without replacing the container.
+with a reusable `.reel-strip` of placeholder icons. `spinReel()` updates the
+`src` of those images in place, applies a `transform` transition to scroll
+through them, and after the transition snaps the strip back so the chosen symbol
+sits in the first slot—without rebuilding the container.
 
 During the first three spins the grid stops on random, nonmatching symbols. On
 the fourth spin all reels are forced to stop on the icon specified by the
