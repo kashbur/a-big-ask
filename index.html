@@ -121,7 +121,11 @@
         animation: slot-spin-down 0.25s linear infinite;
       }
       .reel-item {
+        flex: 0 0 100%;
         height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
       #reel1 {
         left: 16.0%;
@@ -135,7 +139,7 @@
         left: 61.8%;
         top: 38.0%;
       }
-      .reel img {
+      .reel-item img {
         width: 85%;
         height: 85%;
         object-fit: contain;
@@ -482,8 +486,14 @@
 
         function createSingleIcon(reel, icon) {
           const strip = reel.querySelector(".reel-strip");
-          const firstImg = strip.querySelector(".reel-item img");
-          if (firstImg) firstImg.src = icon;
+          strip.innerHTML = "";
+          const item = document.createElement("div");
+          item.className = "reel-item";
+          const img = document.createElement("img");
+          img.src = icon;
+          img.alt = "Slot Icon";
+          item.appendChild(img);
+          strip.appendChild(item);
         }
 
         function createReelStrip(reel) {
@@ -730,10 +740,7 @@ const finalIcon =
         }
         function spinReel(reel, delay, duration, finalIcon, callback) {
           setTimeout(() => {
-            const strip = reel.querySelector(".reel-strip");
-            strip.querySelectorAll("img").forEach((img) => {
-              img.src = getRandomIcon();
-            });
+            const strip = createReelStrip(reel);
             strip.classList.add("spinning");
             setTimeout(() => {
               strip.classList.remove("spinning");
