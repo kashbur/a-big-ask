@@ -718,6 +718,10 @@ const finalIcon =
             }
             reel.innerHTML = "";
             reel.appendChild(strip);
+            // ensure the browser registers the start state before animating
+            strip.style.transition = "none";
+            strip.style.transform = "translate3d(0,0,0)";
+            void strip.offsetWidth; // force reflow
             strip.style.transition = `transform ${duration}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
             strip.style.transform = `translate3d(0, -${(strip.children.length - 1) * 100}%, 0)`;
             setTimeout(() => {

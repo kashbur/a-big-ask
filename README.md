@@ -86,9 +86,9 @@ The slot machine now shows a **1×3 grid** of icons. Each of the three columns i
 a reel that spins vertically. When the spin button is pressed, the
 `handleSpin()` function disables the button and calls `spinReel()` for each reel
 using small delays so they start one after another. `spinReel()` builds a
-vertical strip of random icons and applies the `spinning` CSS class, which runs
-a `slot-spin-down` animation. After the configured duration, the class is
-removed and `createSingleIcon()` displays the final symbol for that reel.
+vertical strip of random icons and animates it upward using a CSS `transform`
+transition. After the configured duration the strip resets back to the start and
+`createSingleIcon()` displays the final symbol for that reel.
 
 During the first three spins the grid stops on random, nonmatching symbols. On
 the fourth spin all reels are forced to stop on the icon specified by the
