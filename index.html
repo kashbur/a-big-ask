@@ -104,21 +104,10 @@
         transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
         will-change: transform;
       }
-      @keyframes slot-spin-down {
-        0% {
-          transform: translate3d(0, -20%, 0);
-        }
-        100% {
-          transform: translate3d(0, 0, 0);
-        }
-      }
       .reel-strip {
         display: flex;
         flex-direction: column;
         will-change: transform;
-      }
-      .reel-strip.spinning {
-        animation: slot-spin-down 0.25s linear infinite;
       }
       .reel-item {
         flex: 0 0 100%;
@@ -483,30 +472,13 @@
           return icons[Math.floor(Math.random() * icons.length)];
         }
 
-        function createSingleIcon(reel, icon) {
-          let strip = reel.querySelector(".reel-strip");
-          if (!strip) {
-            reel.innerHTML = "";
-            strip = document.createElement("div");
-            strip.className = "reel-strip";
-            reel.appendChild(strip);
-          } else {
-            strip.innerHTML = "";
-          }
-          const item = document.createElement("div");
-          item.className = "reel-item";
-          const img = document.createElement("img");
-          img.src = icon;
-          img.alt = "Slot Icon";
-          item.appendChild(img);
-          strip.appendChild(item);
-        }
-
-        function createReelStrip(reel) {
-          reel.innerHTML = "";
+        const STRIP_SIZE = 15;
+        function initializeReel(reel) {
+          const existing = reel.querySelector(".reel-strip");
+          if (existing) return existing;
           const strip = document.createElement("div");
           strip.className = "reel-strip";
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < STRIP_SIZE; i++) {
             const item = document.createElement("div");
             item.className = "reel-item";
             const img = document.createElement("img");
@@ -515,6 +487,7 @@
             item.appendChild(img);
             strip.appendChild(item);
           }
+          reel.innerHTML = "";
           reel.appendChild(strip);
           return strip;
         }
@@ -527,7 +500,7 @@
         for (let i = 1; i <= 3; i++) {
           const reel = document.getElementById(`reel${i}`);
           reels.push(reel);
-          createSingleIcon(reel, getRandomIcon());
+          initializeReel(reel);
         }
         const introOverlay = document.getElementById("introOverlay");
         const introLinesDiv = document.getElementById("introLines");
@@ -712,7 +685,7 @@
         function handleSpin() {
           spinCount++;
           spinButton.style.pointerEvents = "none";
-          const spinDuration = 900;
+          const spinDuration = 1200;
           const delayStep = 600;
           if (spinCount === 4) {
 const finalIcon =
@@ -746,13 +719,28 @@ const finalIcon =
         }
         function spinReel(reel, delay, duration, finalIcon, callback) {
           setTimeout(() => {
-            const strip = createReelStrip(reel);
-            strip.classList.add("spinning");
-            setTimeout(() => {
-              strip.classList.remove("spinning");
-              createSingleIcon(reel, finalIcon || getRandomIcon());
+            const strip = initializeReel(reel);
+            const imgs = strip.querySelectorAll("img");
+            for (let i = 0; i < imgs.length - 1; i++) {
+              imgs[i].src = getRandomIcon();
+            }
+            imgs[imgs.length - 1].src = finalIcon || getRandomIcon();
+            strip.style.transition = "none";
+            strip.style.transform = "translateY(0)";
+            void strip.offsetHeight;
+            strip.style.transition = `transform ${duration}ms ease-out`;
+            strip.style.transform = `translateY(-${(imgs.length - 1) * 100}%)`;
+            function onTransitionEnd() {
+              strip.removeEventListener("transitionend", onTransitionEnd);
+              const finalSrc = imgs[imgs.length - 1].src;
+              strip.style.transition = "none";
+              strip.style.transform = "translateY(0)";
+              imgs.forEach((img, idx) => {
+                img.src = idx === 0 ? finalSrc : getRandomIcon();
+              });
               if (callback) callback();
-            }, duration);
+            }
+            strip.addEventListener("transitionend", onTransitionEnd);
           }, delay);
         }
 
