@@ -721,23 +721,31 @@ const finalIcon =
           setTimeout(() => {
             const strip = initializeReel(reel);
             const imgs = strip.querySelectorAll("img");
-            for (let i = 0; i < imgs.length - 1; i++) {
+
+            // Capture the currently visible symbol so we can restore it
+            const prevSrc =
+              strip.style.transform && strip.style.transform !== "translateY(0)"
+                ? imgs[imgs.length - 1].src
+                : imgs[0].src;
+
+            // Reset position without transition to avoid visible jump
+            strip.style.transition = "none";
+            strip.style.transform = "translateY(0)";
+            imgs[0].src = prevSrc;
+
+            // Fill the rest of the strip with random icons
+            for (let i = 1; i < imgs.length - 1; i++) {
               imgs[i].src = getRandomIcon();
             }
             imgs[imgs.length - 1].src = finalIcon || getRandomIcon();
-            strip.style.transition = "none";
-            strip.style.transform = "translateY(0)";
+
             void strip.offsetHeight;
             strip.style.transition = `transform ${duration}ms ease-out`;
             strip.style.transform = `translateY(-${(imgs.length - 1) * 100}%)`;
+
             function onTransitionEnd() {
               strip.removeEventListener("transitionend", onTransitionEnd);
-              const finalSrc = imgs[imgs.length - 1].src;
               strip.style.transition = "none";
-              strip.style.transform = "translateY(0)";
-              imgs.forEach((img, idx) => {
-                img.src = idx === 0 ? finalSrc : getRandomIcon();
-              });
               if (callback) callback();
             }
             strip.addEventListener("transitionend", onTransitionEnd);
