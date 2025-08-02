@@ -83,20 +83,31 @@
         perspective: 600px;
         overflow: hidden;
       }
-      .reel-track {
+      .reel-inner {
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: column;
-        transform: translateY(0);
-        will-change: transform;
-      }
-      .reel-track.spinning {
-        animation: slot-spin-down var(--duration)
-          cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-      }
+        align-items: center;
+        justify-content: flex-start;
+        transition: transform 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);      }
       @keyframes slot-spin-down {
-        to {
-          transform: translateY(var(--final-offset));
+        0% {
+          transform: translateY(-20%);
         }
+        100% {
+          transform: translateY(0);
+        }
+      }
+      .reel-strip.spinning {
+        animation: slot-spin-down 0.2s linear infinite;
+      }
+      .reel-strip {
+        display: flex;
+        flex-direction: column;
+      }
+      .reel-item {
+        height: 100%;
       }
       #reel1 {
         left: 16.0%;
@@ -110,12 +121,18 @@
         left: 61.8%;
         top: 38.0%;
       }
-      .reel-track img {
-        width: 100%;
-        height: 100%;
+      .reel img {
+        width: 85%;
+        height: 85%;
         object-fit: contain;
         display: block;
+        margin: auto;
         background: transparent;
+        transition: transform 0.05s;
+        box-shadow: none;
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+        transform-origin: 50% 50%;
       }
       .spin-button {
         position: absolute;
@@ -129,9 +146,6 @@
         transition:
           all 0.08s,
           filter 0.5s ease;
-      }
-      .spin-button.blur-background {
-        filter: blur(8px);
       }
       .spin-button img {
         width: 100%;
@@ -304,13 +318,19 @@
       <div class="slot-machine-container">
         <div class="slot-machine blur-background" id="slotMachine"></div>
         <div id="reel1" class="reel blur-background">
-          <div class="reel-track"></div>
+          <div class="reel-inner">
+            <img src="img/champagne.png" alt="Champagne" />
+          </div>
         </div>
         <div id="reel2" class="reel blur-background">
-          <div class="reel-track"></div>
+          <div class="reel-inner">
+            <img src="img/key.png" alt="Key" />
+          </div>
         </div>
         <div id="reel3" class="reel blur-background">
-          <div class="reel-track"></div>
+          <div class="reel-inner">
+            <img src="img/lipstick.png" alt="Lipstick" />
+          </div>
         </div>
         <div class="spin-button blur-background" id="spinButton">
           <img src="img/taptospin.png" alt="Spin" />
@@ -424,47 +444,34 @@
           return icons[Math.floor(Math.random() * icons.length)];
         }
 
-        function preloadImages(paths) {
-          return Promise.all(
-            paths.map((src) => {
-              return new Promise((res) => {
-                const img = new Image();
-                img.onload = img.onerror = res;
-                img.src = src;
-              });
-            }),
-          );
+        function createSingleIcon(reel, icon) {
+          reel.innerHTML = <div class="reel-inner"><img src="${icon}" alt="Slot Icon"></div>;
         }
 
-        preloadImages([
-          ...icons,
-          "img/ringflower.png",
-          "img/teambride.png",
-          "img/girls.png",
-          "img/taptospin.png",
-          "img/background.png",
-          "img/directions.png",
-        ]);
-
-        function createSingleIcon(reel, src) {
-          const track = document.createElement("div");
-          track.className = "reel-track";
-          const img = document.createElement("img");
-          img.src = src;
-          img.alt = "Slot Icon";
-          track.appendChild(img);
-          const existing = reel.querySelector(".reel-track");
-          if (existing) existing.replaceWith(track);
-          else reel.appendChild(track);
+        function createReelStrip(reel) {
+          reel.innerHTML = "";
+          const strip = document.createElement("div");
+          strip.className = "reel-strip";
+          for (let i = 0; i < 10; i++) {
+            const item = document.createElement("div");
+            item.className = "reel-item";
+            const img = document.createElement("img");
+            img.src = getRandomIcon();
+            img.alt = "Slot Icon";
+            item.appendChild(img);
+            strip.appendChild(item);
+          }
+          reel.appendChild(strip);
+          return strip;
         }
 
+        let spinCount = 0;
+        let currentSymbols = [];
         const slotMachine = document.getElementById("slotMachine");
         const spinButton = document.getElementById("spinButton");
         const reels = [];
         for (let i = 1; i <= 3; i++) {
-          const reel = document.getElementById(`reel${i}`);
-          createSingleIcon(reel, getRandomIcon());
-          reels.push(reel);
+          reels.push(document.getElementById(reel${i}));
         }
         const introOverlay = document.getElementById("introOverlay");
         const introLinesDiv = document.getElementById("introLines");
@@ -476,20 +483,14 @@
           "instructionsOverlay",
         );
         const params = getParams();
-        const finalIconName = (params.finalicon || "").toLowerCase();
-        const allowedFinalIcons = [
-          "ringflower.png",
-          "teambride.png",
-          "girls.png",
-          "champagne.png",
-        ];
-        const finalIconSrc = `img/${
-          allowedFinalIcons.includes(finalIconName)
-            ? finalIconName
-            : "champagne.png"
-        }`;
-        let spinCount = 0;
-        let revealed = false;
+        const finalIconMap = {
+          "ringflower": "img/ringflower.png",
+          "ringflower.png": "img/ringflower.png",
+          "teambride": "img/teambride.png",
+          "teambride.png": "img/teambride.png",
+          "girls": "img/girls.png",
+          "girls.png": "img/girls.png",
+        };
         const safeTextColor = sanitizeColor(params.textcolor, "#ffffff");
         const safeOutlineColor = sanitizeColor(params.outlinecolor, "#7e5e4f");
 
@@ -519,13 +520,13 @@
           if (!familyParam) return Promise.resolve(null);
           const familyName = familyParam.replace(/\+/g, " ");
           const link = document.createElement("link");
-          link.href = `https://fonts.googleapis.com/css2?family=${familyParam}&display=swap`;
+          link.href = https://fonts.googleapis.com/css2?family=${familyParam}&display=swap;
           link.rel = "stylesheet";
           document.head.appendChild(link);
           return document.fonts
-            .load(`1em '${familyName}'`)
-            .then(() => `'${familyName}'`)
-            .catch(() => `'${familyName}'`);
+            .load(1em '${familyName}')
+            .then(() => '${familyName}')
+            .catch(() => '${familyName}');
         }
 
         const fonts = {
@@ -572,8 +573,6 @@
         Promise.all(fontPromises).then(() =>
           document.fonts.ready.then(refitAllLines)
         );
-
-
 
         // Set overlay color on reveal
         colorOverlay.style.background = getColorOverlay(params);
@@ -655,67 +654,48 @@
         spinButton.addEventListener("click", handleSpin);
 
         function handleSpin() {
-          spinButton.style.pointerEvents = "none";
-          const spinDuration = 1200;
-          const delayStep = 300;
           spinCount++;
-          const isRevealSpin = !revealed && spinCount === 4;
-          const finalIcons = [];
-          if (isRevealSpin) {
-            for (let i = 0; i < reels.length; i++) finalIcons[i] = finalIconSrc;
+          spinButton.style.pointerEvents = "none";
+          const spinDuration = 900;
+          const delayStep = 600;
+          if (spinCount === 4) {
+const finalIcon =
+  finalIconMap[(params.finalicon || "").toLowerCase()] || "img/ringflower.png";
+            reels.forEach((reel, i) => {
+              const delay = i * delayStep;
+              const callback =
+                i === reels.length - 1 ? () => setTimeout(showReveal, 500) : null;
+              spinReel(reel, delay, spinDuration, finalIcon, callback);
+            });
+            currentSymbols = reels.map(() => finalIcon);
           } else {
-            for (let i = 0; i < reels.length; i++) {
-              finalIcons[i] = getRandomIcon();
-            }
-            if (!revealed && spinCount <= 3) {
-              while (
-                finalIcons[0] === finalIcons[1] &&
-                finalIcons[1] === finalIcons[2]
-              ) {
-                for (let i = 0; i < reels.length; i++) {
-                  finalIcons[i] = getRandomIcon();
-                }
-              }
-            }
+            generateRandomNonMatchingSymbols();
+            reels.forEach((reel, i) => {
+              const delay = i * delayStep;
+              spinReel(reel, delay, spinDuration, currentSymbols[i]);
+            });
           }
-          reels.forEach((reel, i) => {
-            const delay = i * delayStep;
-            spinReel(reel, delay, spinDuration, finalIcons[i]);
-          });
-          const totalDelay = delayStep * (reels.length - 1) + spinDuration;
+          const pointerDelay =
+            delayStep * (reels.length - 1) + spinDuration + (spinCount === 4 ? 500 : 0);
           setTimeout(() => {
             spinButton.style.pointerEvents = "auto";
-            if (isRevealSpin) {
-              revealed = true;
-              showReveal();
-            }
-          }, totalDelay + 100);
+          }, pointerDelay);
         }
-
-        function spinReel(reel, delay, duration, finalIcon) {
+        function generateRandomNonMatchingSymbols() {
+          let symbols;
+          do {
+            symbols = reels.map(() => getRandomIcon());
+          } while (new Set(symbols).size < 2);
+          currentSymbols = symbols;
+        }
+        function spinReel(reel, delay, duration, finalIcon, callback) {
           setTimeout(() => {
-            const track = document.createElement("div");
-            track.className = "reel-track spinning";
-            const iconCount = 10;
-            for (let i = 0; i < iconCount; i++) {
-              const img = document.createElement("img");
-              img.src = getRandomIcon();
-              img.alt = "Slot Icon";
-              track.appendChild(img);
-            }
-            const finalImg = document.createElement("img");
-            finalImg.src = finalIcon;
-            finalImg.alt = "Slot Icon";
-            track.appendChild(finalImg);
-            const existing = reel.querySelector(".reel-track");
-            if (existing) existing.replaceWith(track);
-            else reel.appendChild(track);
-            const iconHeight = reel.offsetHeight;
-            const finalOffset = -(track.children.length - 1) * iconHeight;
-            track.style.setProperty("--final-offset", `${finalOffset}px`);
-            track.style.setProperty("--duration", `${duration}ms`);
+            const strip = createReelStrip(reel);
+            strip.classList.add("spinning");
             setTimeout(() => {
-              createSingleIcon(reel, finalIcon);
+              strip.classList.remove("spinning");
+              createSingleIcon(reel, finalIcon || getRandomIcon());
+              if (callback) callback();
             }, duration);
           }, delay);
         }
@@ -728,8 +708,8 @@
         }
 
         function fitRevealLine(el, type) {
-          if (type === "photo" || typeof window.textFit !== "function") return;
-          window.textFit(el, {
+          if (type === "photo") return;
+          textFit(el, {
             alignVert: true,
             alignHoriz: true,
             multiLine: true,
@@ -752,11 +732,11 @@
             el.style.textShadow = "none";
             el.style.webkitTextStroke = "0";
           } else {
-            el.style.textShadow = `-1px -1px 0 ${outlineColor}, 1px -1px 0 ${outlineColor}, -1px 1px 0 ${outlineColor}, 1px 1px 0 ${outlineColor}`;
-            el.style.webkitTextStroke = `1px ${outlineColor}`;
+            el.style.textShadow = -1px -1px 0 ${outlineColor}, 1px -1px 0 ${outlineColor}, -1px 1px 0 ${outlineColor}, 1px 1px 0 ${outlineColor};
+            el.style.webkitTextStroke = 1px ${outlineColor};
           }
           if (fontFamily) {
-            el.style.fontFamily = `${fontFamily}, sans-serif`;
+            el.style.fontFamily = ${fontFamily}, sans-serif;
           }
         }
 
@@ -800,8 +780,6 @@
               .filter(Boolean)
               .forEach(addLine);
             const hideDelay = 30000;
-
-
 
             revealOverlay.style.opacity = "1";
             revealOverlay.style.pointerEvents = "auto";
@@ -890,20 +868,20 @@
             const scale = 0.7 + Math.random() * 0.6;
             const color = colors[Math.floor(Math.random() * colors.length)];
             const rotation = Math.random() * 360;
-            confetti.style.left = `${left}px`;
-            confetti.style.top = `${top}px`;
+            confetti.style.left = ${left}px;
+            confetti.style.top = ${top}px;
             if (shapeType === 0) {
-              confetti.style.width = `${size}px`;
-              confetti.style.height = `${size}px`;
+              confetti.style.width = ${size}px;
+              confetti.style.height = ${size}px;
             } else if (shapeType === 1) {
-              confetti.style.width = `${size * 0.5}px`;
-              confetti.style.height = `${size * 1.5}px`;
+              confetti.style.width = ${size * 0.5}px;
+              confetti.style.height = ${size * 1.5}px;
             } else {
-              confetti.style.width = `${size}px`;
-              confetti.style.height = `${size}px`;
+              confetti.style.width = ${size}px;
+              confetti.style.height = ${size}px;
             }
             confetti.style.backgroundColor = color;
-            confetti.style.transform = `rotate(${rotation}deg) scale(${scale})`;
+            confetti.style.transform = rotate(${rotation}deg) scale(${scale});
             confetti.style.boxShadow = "0 0 4px rgba(255,255,255,0.7)";
             container.appendChild(confetti);
             confettiElements.push({
@@ -939,11 +917,11 @@
                   Math.sin(wobblePhase) * confetti.horizontalWobble;
                 confetti.rotation += confetti.rotationSpeed * 0.5 * deltaTime;
                 const el = confetti.element;
-                el.style.top = `${confetti.y}px`;
-                el.style.left = `${confetti.x + wobble}px`;
+                el.style.top = ${confetti.y}px;
+                el.style.left = ${confetti.x + wobble}px;
                 const scale =
                   el.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1;
-                el.style.transform = `rotate(${confetti.rotation}deg) scale(${scale})`;
+                el.style.transform = rotate(${confetti.rotation}deg) scale(${scale});
                 const shimmer = 0.8 + Math.sin(confetti.y * 0.006) * 0.18;
                 if (confetti.y > viewportHeight - 120) {
                   const fadeOut =
