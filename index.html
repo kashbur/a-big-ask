@@ -484,8 +484,15 @@
         }
 
         function createSingleIcon(reel, icon) {
-          const strip = reel.querySelector(".reel-strip");
-          strip.innerHTML = "";
+          let strip = reel.querySelector(".reel-strip");
+          if (!strip) {
+            reel.innerHTML = "";
+            strip = document.createElement("div");
+            strip.className = "reel-strip";
+            reel.appendChild(strip);
+          } else {
+            strip.innerHTML = "";
+          }
           const item = document.createElement("div");
           item.className = "reel-item";
           const img = document.createElement("img");
@@ -520,7 +527,7 @@
         for (let i = 1; i <= 3; i++) {
           const reel = document.getElementById(`reel${i}`);
           reels.push(reel);
-          createReelStrip(reel);
+          createSingleIcon(reel, getRandomIcon());
         }
         const introOverlay = document.getElementById("introOverlay");
         const introLinesDiv = document.getElementById("introLines");
