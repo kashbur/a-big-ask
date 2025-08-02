@@ -470,7 +470,9 @@
         }
 
         function createSingleIcon(reel, icon) {
-          reel.innerHTML = `<div class="reel-inner"><img src="${icon}" alt="Slot Icon"></div>`;
+          const strip = reel.querySelector(".reel-strip");
+          const firstImg = strip.querySelector(".reel-item img");
+          if (firstImg) firstImg.src = icon;
         }
 
         function createReelStrip(reel) {
@@ -496,7 +498,9 @@
         const spinButton = document.getElementById("spinButton");
         const reels = [];
         for (let i = 1; i <= 3; i++) {
-          reels.push(document.getElementById(`reel${i}`));
+          const reel = document.getElementById(`reel${i}`);
+          reels.push(reel);
+          createReelStrip(reel);
         }
         const introOverlay = document.getElementById("introOverlay");
         const introLinesDiv = document.getElementById("introLines");
@@ -715,7 +719,10 @@ const finalIcon =
         }
         function spinReel(reel, delay, duration, finalIcon, callback) {
           setTimeout(() => {
-            const strip = createReelStrip(reel);
+            const strip = reel.querySelector(".reel-strip");
+            strip.querySelectorAll("img").forEach((img) => {
+              img.src = getRandomIcon();
+            });
             strip.classList.add("spinning");
             setTimeout(() => {
               strip.classList.remove("spinning");
