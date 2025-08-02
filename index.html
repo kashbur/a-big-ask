@@ -849,6 +849,8 @@ const finalIcon =
             setTimeout(() => {
               revealOverlay.style.opacity = "0";
               revealOverlay.style.pointerEvents = "none";
+              // Reset count so a full cycle can play again
+              spinCount = 0;
             }, hideDelay);
           }
 
