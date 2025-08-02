@@ -470,7 +470,7 @@
         }
 
         function createSingleIcon(reel, icon) {
-          reel.innerHTML = <div class="reel-inner"><img src="${icon}" alt="Slot Icon"></div>;
+          reel.innerHTML = `<div class="reel-inner"><img src="${icon}" alt="Slot Icon"></div>`;
         }
 
         function createReelStrip(reel) {
@@ -496,7 +496,7 @@
         const spinButton = document.getElementById("spinButton");
         const reels = [];
         for (let i = 1; i <= 3; i++) {
-          reels.push(document.getElementById(reel${i}));
+          reels.push(document.getElementById(`reel${i}`));
         }
         const introOverlay = document.getElementById("introOverlay");
         const introLinesDiv = document.getElementById("introLines");
@@ -545,13 +545,13 @@
           if (!familyParam) return Promise.resolve(null);
           const familyName = familyParam.replace(/\+/g, " ");
           const link = document.createElement("link");
-          link.href = https://fonts.googleapis.com/css2?family=${familyParam}&display=swap;
+          link.href = `https://fonts.googleapis.com/css2?family=${familyParam}&display=swap`;
           link.rel = "stylesheet";
           document.head.appendChild(link);
           return document.fonts
-            .load(1em '${familyName}')
-            .then(() => '${familyName}')
-            .catch(() => '${familyName}');
+            .load(`1em ${familyName}`)
+            .then(() => `${familyName}`)
+            .catch(() => `${familyName}`);
         }
 
         const fonts = {
@@ -757,11 +757,11 @@ const finalIcon =
             el.style.textShadow = "none";
             el.style.webkitTextStroke = "0";
           } else {
-            el.style.textShadow = -1px -1px 0 ${outlineColor}, 1px -1px 0 ${outlineColor}, -1px 1px 0 ${outlineColor}, 1px 1px 0 ${outlineColor};
-            el.style.webkitTextStroke = 1px ${outlineColor};
+            el.style.textShadow = `-1px -1px 0 ${outlineColor}, 1px -1px 0 ${outlineColor}, -1px 1px 0 ${outlineColor}, 1px 1px 0 ${outlineColor}`;
+            el.style.webkitTextStroke = `1px ${outlineColor}`;
           }
           if (fontFamily) {
-            el.style.fontFamily = ${fontFamily}, sans-serif;
+            el.style.fontFamily = `${fontFamily}, sans-serif`;
           }
         }
 
@@ -893,20 +893,20 @@ const finalIcon =
             const scale = 0.7 + Math.random() * 0.6;
             const color = colors[Math.floor(Math.random() * colors.length)];
             const rotation = Math.random() * 360;
-            confetti.style.left = ${left}px;
-            confetti.style.top = ${top}px;
+            confetti.style.left = `${left}px`;
+            confetti.style.top = `${top}px`;
             if (shapeType === 0) {
-              confetti.style.width = ${size}px;
-              confetti.style.height = ${size}px;
+              confetti.style.width = `${size}px`;
+              confetti.style.height = `${size}px`;
             } else if (shapeType === 1) {
-              confetti.style.width = ${size * 0.5}px;
-              confetti.style.height = ${size * 1.5}px;
+              confetti.style.width = `${size * 0.5}px`;
+              confetti.style.height = `${size * 1.5}px`;
             } else {
-              confetti.style.width = ${size}px;
-              confetti.style.height = ${size}px;
+              confetti.style.width = `${size}px`;
+              confetti.style.height = `${size}px`;
             }
             confetti.style.backgroundColor = color;
-            confetti.style.transform = rotate(${rotation}deg) scale(${scale});
+            confetti.style.transform = `rotate(${rotation}deg) scale(${scale})`;
             confetti.style.boxShadow = "0 0 4px rgba(255,255,255,0.7)";
             container.appendChild(confetti);
             confettiElements.push({
@@ -942,11 +942,11 @@ const finalIcon =
                   Math.sin(wobblePhase) * confetti.horizontalWobble;
                 confetti.rotation += confetti.rotationSpeed * 0.5 * deltaTime;
                 const el = confetti.element;
-                el.style.top = ${confetti.y}px;
-                el.style.left = ${confetti.x + wobble}px;
+                el.style.top = `${confetti.y}px`;
+                el.style.left = `${confetti.x + wobble}px`;
                 const scale =
                   el.style.transform.match(/scale\(([^)]+)\)/)?.[1] || 1;
-                el.style.transform = rotate(${confetti.rotation}deg) scale(${scale});
+                el.style.transform = `rotate(${confetti.rotation}deg) scale(${scale})`;
                 const shimmer = 0.8 + Math.sin(confetti.y * 0.006) * 0.18;
                 if (confetti.y > viewportHeight - 120) {
                   const fadeOut =
