@@ -1,6 +1,6 @@
 # The Big Reveal
 
-This project contains a single HTML file that displays an interactive slot machine-style reveal. Spinning the reels a few times eventually triggers a personalized message overlay with optional confetti effects. It's designed for fun occasions like pregnancy announcements, graduations, or other surprises.
+This project contains a single HTML file that displays an interactive slot machine-style reveal. Spinning the reels a few times eventually triggers a personalized message overlay with a celebratory balloon drop. It's designed for fun occasions like pregnancy announcements, graduations, or other surprises.
 
 ## Opening the page
 
