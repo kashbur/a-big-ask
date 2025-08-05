@@ -16,7 +16,8 @@ xdg-open index.html        # Linux
 
 `index.html` supports several query parameters so you can customize the reveal text and appearance. Parameters are optional and can be combined:
 
-- `main` – main headline (default: "We are expecting!")
+- `message` – message displayed after the reels match (default: "Will you be my bridesmaid?")
+- `main` – alias for `message` to maintain backward compatibility
 - `sub` – secondary line of text
 - `date` – additional date or detail line
 - `photo` – URL to an image shown as a circular avatar
@@ -56,6 +57,10 @@ index.html?finalIcon=girls.png
 ```
 
 ### Example links
+
+```
+index.html?message=Will%20you%20join%20the%20party%3F
+```
 
 ```
 index.html?main=We%27re%20Engaged!&sub=Save%20the%20Date&date=June%202024

@@ -411,7 +411,8 @@
         if (photo && !/^(https?:|data:image\/)/i.test(photo)) {
           photo = "";
         }
-        const main = params.main || "We are expecting!";
+        const main =
+          params.message || params.main || "Will you be my bridesmaid?";
         const sub = params.sub || "";
         const date = params.date || "";
         const from = params.from || "";
