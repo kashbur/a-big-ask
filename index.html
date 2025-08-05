@@ -194,7 +194,7 @@
         padding: 1vh;
         gap: 1vh;
         box-sizing: border-box;
-        z-index: 2000;
+        z-index: 5000;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s;
@@ -627,8 +627,8 @@
         );
 
         // Set overlay color on reveal
-        colorOverlay.style.background = getColorOverlay(params);
-        introColorOverlay.style.background = getColorOverlay(params);
+        colorOverlay.style.background = "transparent";
+        introColorOverlay.style.background = "transparent";
 
         // Hide instructions overlay
         function hideInstructionsOverlay() {
@@ -718,7 +718,10 @@
               const delay = i * delayStep;
               const callback =
                 i === reels.length - 1
-                  ? () => setTimeout(showReveal, 500)
+                  ? () => {
+                      setTimeout(dropBalloons, 200);
+                      setTimeout(showReveal, 700);
+                    }
                   : null;
               spinReel(reel, delay, spinDuration, finalIcon, callback);
             });
@@ -733,7 +736,7 @@
           const pointerDelay =
             delayStep * (reels.length - 1) +
             spinDuration +
-            (spinCount === 4 ? 500 : 0);
+            (spinCount === 4 ? 700 : 0);
           setTimeout(() => {
             spinButton.style.pointerEvents = "auto";
           }, pointerDelay);
@@ -820,103 +823,57 @@
         // ------------- REVEAL LOGIC -----------------
         function showReveal() {
           const allLines = getRevealLinesFromParams(params);
-          const mainLine = allLines.find((l) => l.type === "main");
-          const otherLines = allLines.filter((l) => l.type !== "main");
-          let balloonsDropped = false;
+          revealLinesDiv.innerHTML = "";
 
-          function showStageTwo() {
-            revealLinesDiv.innerHTML = "";
-
-            function addLine(line) {
-              const div = document.createElement("div");
-              div.className = "reveal-line " + line.type;
-              if (line.type === "photo") {
-                const img = document.createElement("img");
-                img.src = line.content;
-                img.alt = "photo";
-                img.onerror = () => {
-                  div.style.display = "none";
-                };
-                img.className = "reveal-photo";
-                div.appendChild(img);
-              } else {
-                div.textContent =
-                  line.type === "sub"
-                    ? line.content.toUpperCase()
-                    : line.content;
-              }
-              const colors = lineColors[line.type] || {
-                text: safeTextColor,
-                outline: safeOutlineColor,
+          function addLine(line) {
+            const div = document.createElement("div");
+            div.className = "reveal-line " + line.type;
+            if (line.type === "photo") {
+              const img = document.createElement("img");
+              img.src = line.content;
+              img.alt = "photo";
+              img.onerror = () => {
+                div.style.display = "none";
               };
-              applyTextStyles(
-                div,
-                colors.text,
-                colors.outline,
-                fonts[line.type],
-              );
-              div.style.margin = "0";
-              revealLinesDiv.appendChild(div);
-              fitRevealLine(div, line.type);
+              img.className = "reveal-photo";
+              div.appendChild(img);
+            } else {
+              div.textContent =
+                line.type === "sub"
+                  ? line.content.toUpperCase()
+                  : line.content;
             }
-            const subLine = otherLines.find((l) => l.type === "sub");
-            const dateLine = otherLines.find((l) => l.type === "date");
-            const photoLine = otherLines.find((l) => l.type === "photo");
-            const fromLine = otherLines.find((l) => l.type === "from");
-            [subLine, dateLine, photoLine, fromLine]
-              .filter(Boolean)
-              .forEach(addLine);
-            const hideDelay = 30000;
-
-            revealOverlay.style.opacity = "1";
-            revealOverlay.style.pointerEvents = "auto";
-            refitAllLines();
-            setTimeout(() => {
-              revealOverlay.style.opacity = "0";
-              revealOverlay.style.pointerEvents = "none";
-            }, hideDelay);
+            const colors = lineColors[line.type] || {
+              text: safeTextColor,
+              outline: safeOutlineColor,
+            };
+            applyTextStyles(
+              div,
+              colors.text,
+              colors.outline,
+              fonts[line.type],
+            );
+            div.style.margin = "0";
+            revealLinesDiv.appendChild(div);
+            fitRevealLine(div, line.type);
           }
 
-          function startReveal() {
-            setTimeout(() => {
-              if (mainLine) {
-                introLinesDiv.innerHTML = "";
-                const div = document.createElement("div");
-                div.className = "reveal-line main";
-                div.textContent = mainLine.content;
-                applyTextStyles(
-                  div,
-                  lineColors.main.text,
-                  lineColors.main.outline,
-                  fonts.main,
-                );
-                introLinesDiv.appendChild(div);
-                fitRevealLine(div, "main");
-                const headline = mainLine.content;
-                function proceed() {
-                  introOverlay.style.opacity = "0";
-                  introOverlay.style.pointerEvents = "none";
-                  if (!balloonsDropped) {
-                    dropBalloons();
-                    balloonsDropped = true;
-                  }
-                  setTimeout(showStageTwo, 400);
-                }
-                introOverlay.style.opacity = "1";
-                introOverlay.style.pointerEvents = "auto";
-                refitAllLines();
-                setTimeout(proceed, readingDelay(headline));
-              } else {
-                if (!balloonsDropped) {
-                  dropBalloons();
-                  balloonsDropped = true;
-                }
-                showStageTwo();
-              }
-            }, 100);
-          }
+          const order = ["main", "sub", "date", "photo", "from"];
+          order.forEach((type) => {
+            const line = allLines.find((l) => l.type === type);
+            if (line) addLine(line);
+          });
 
-          setTimeout(startReveal, 1000);
+          const hideDelay = 30000;
+
+          revealOverlay.style.opacity = "1";
+          revealOverlay.style.pointerEvents = "auto";
+          colorOverlay.style.background = "transparent";
+          refitAllLines();
+          setTimeout(() => {
+            revealOverlay.style.opacity = "0";
+            revealOverlay.style.pointerEvents = "none";
+          }, hideDelay);
         }
         // -------- Balloon logic --------
         function dropBalloons() {
