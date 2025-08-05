@@ -197,7 +197,7 @@
         z-index: 5000;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.2s;
+        transition: opacity 0.16s;
       }
       .reveal-overlay .color-overlay {
         position: absolute;
@@ -717,8 +717,8 @@
               const callback =
                 i === reels.length - 1
                   ? () => {
-                      setTimeout(dropBalloons, 200);
-                      setTimeout(showReveal, 1200);
+                      setTimeout(dropBalloons, 160);
+                      setTimeout(showReveal, 960);
                     }
                   : null;
               spinReel(reel, delay, spinDuration, finalIcon, callback);
@@ -892,9 +892,9 @@
             balloon.style.setProperty("--rotate", (Math.random() * 60 - 30) + "deg");
             balloon.style.setProperty("--sway", (10 + Math.random() * 20) + "px");
 
-            const delay = Math.random() * 2;
-            const dropDuration = 2.5 + Math.random() * 2;
-            const swayDuration = 2 + Math.random() * 2;
+            const delay = Math.random() * 2 * 0.8;
+            const dropDuration = (2.5 + Math.random() * 2) * 0.8;
+            const swayDuration = (2 + Math.random() * 2) * 0.8;
 
             balloon.style.animation =
               `balloonDrop ${dropDuration}s linear ${delay}s forwards, ` +
