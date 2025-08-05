@@ -868,53 +868,51 @@
               .forEach(addLine);
             const hideDelay = 30000;
 
-            if (!balloonsDropped) {
-              dropBalloons();
-              balloonsDropped = true;
-            }
+            revealOverlay.style.opacity = "1";
+            revealOverlay.style.pointerEvents = "auto";
+            refitAllLines();
             setTimeout(() => {
-              revealOverlay.style.opacity = "1";
-              revealOverlay.style.pointerEvents = "auto";
-              refitAllLines();
-              setTimeout(() => {
-                revealOverlay.style.opacity = "0";
-                revealOverlay.style.pointerEvents = "none";
-              }, hideDelay);
-            }, 1000);
+              revealOverlay.style.opacity = "0";
+              revealOverlay.style.pointerEvents = "none";
+            }, hideDelay);
           }
 
-          if (mainLine) {
-            introLinesDiv.innerHTML = "";
-            const div = document.createElement("div");
-            div.className = "reveal-line main";
-            div.textContent = mainLine.content;
-            applyTextStyles(
-              div,
-              lineColors.main.text,
-              lineColors.main.outline,
-              fonts.main,
-            );
-            introLinesDiv.appendChild(div);
-            fitRevealLine(div, "main");
-            const headline = mainLine.content;
-            function proceed() {
-              introOverlay.style.opacity = "0";
-              introOverlay.style.pointerEvents = "none";
-              setTimeout(showStageTwo, 400);
-            }
+          function startReveal() {
             if (!balloonsDropped) {
               dropBalloons();
               balloonsDropped = true;
             }
             setTimeout(() => {
-              introOverlay.style.opacity = "1";
-              introOverlay.style.pointerEvents = "auto";
-              refitAllLines();
-              setTimeout(proceed, readingDelay(headline));
-            }, 1000);
-          } else {
-            setTimeout(showStageTwo, 100);
+              if (mainLine) {
+                introLinesDiv.innerHTML = "";
+                const div = document.createElement("div");
+                div.className = "reveal-line main";
+                div.textContent = mainLine.content;
+                applyTextStyles(
+                  div,
+                  lineColors.main.text,
+                  lineColors.main.outline,
+                  fonts.main,
+                );
+                introLinesDiv.appendChild(div);
+                fitRevealLine(div, "main");
+                const headline = mainLine.content;
+                function proceed() {
+                  introOverlay.style.opacity = "0";
+                  introOverlay.style.pointerEvents = "none";
+                  setTimeout(showStageTwo, 400);
+                }
+                introOverlay.style.opacity = "1";
+                introOverlay.style.pointerEvents = "auto";
+                refitAllLines();
+                setTimeout(proceed, readingDelay(headline));
+              } else {
+                showStageTwo();
+              }
+            }, 100);
           }
+
+          setTimeout(startReveal, 1000);
         }
         // -------- Balloon logic --------
         function dropBalloons() {
