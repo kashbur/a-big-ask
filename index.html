@@ -321,7 +321,7 @@
         transform: translateX(-50%) rotate(var(--rotate));
         animation: balloonDrop 8s linear forwards,
           balloonSway 3s ease-in-out infinite;
-        z-index: 1001;
+        z-index: 3000;
       }
 
       @keyframes balloonDrop {
@@ -445,14 +445,14 @@
 
         const color = (input || "beige").toLowerCase();
         const overlays = {
-          beige: "#f3ddbb",
-          pink: "#fcc0c5",
-          blue: "#add4fd",
-          yellow: "#fef3c7",
-          green: "#cbf7d0",
-          purple: "#d2c5fc",
-          gold: "#ffdf9a",
-          white: "#ffffff",
+          beige: "#f3ddbbcc",
+          pink: "#fcc0c5cc",
+          blue: "#add4fdcc",
+          yellow: "#fef3c7cc",
+          green: "#cbf7d0cc",
+          purple: "#d2c5fccc",
+          gold: "#ffdf9acc",
+          white: "#ffffffcc",
           none: "transparent",
         };
         return overlays[color] || overlays.beige;
@@ -878,10 +878,6 @@
           }
 
           function startReveal() {
-            if (!balloonsDropped) {
-              dropBalloons();
-              balloonsDropped = true;
-            }
             setTimeout(() => {
               if (mainLine) {
                 introLinesDiv.innerHTML = "";
@@ -900,6 +896,10 @@
                 function proceed() {
                   introOverlay.style.opacity = "0";
                   introOverlay.style.pointerEvents = "none";
+                  if (!balloonsDropped) {
+                    dropBalloons();
+                    balloonsDropped = true;
+                  }
                   setTimeout(showStageTwo, 400);
                 }
                 introOverlay.style.opacity = "1";
@@ -907,6 +907,10 @@
                 refitAllLines();
                 setTimeout(proceed, readingDelay(headline));
               } else {
+                if (!balloonsDropped) {
+                  dropBalloons();
+                  balloonsDropped = true;
+                }
                 showStageTwo();
               }
             }, 100);
