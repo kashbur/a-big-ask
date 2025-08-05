@@ -720,7 +720,7 @@
                 i === reels.length - 1
                   ? () => {
                       setTimeout(dropBalloons, 200);
-                      setTimeout(showReveal, 700);
+                      setTimeout(showReveal, 1200);
                     }
                   : null;
               spinReel(reel, delay, spinDuration, finalIcon, callback);
@@ -877,6 +877,9 @@
         }
         // -------- Balloon logic --------
         function dropBalloons() {
+          slotMachine.classList.add("blur-background");
+          reels.forEach((r) => r.classList.add("blur-background"));
+          spinButton.classList.add("blur-background");
           const container = document.getElementById("container");
           const images = ["img/19.png", "img/20.png", "img/21.png"];
 
