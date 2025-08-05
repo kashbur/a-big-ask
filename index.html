@@ -13,6 +13,9 @@
       rel="stylesheet"
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/textfit/2.4.0/textFit.min.js"></script>
+    <link rel="preload" href="img/19.png" as="image" />
+    <link rel="preload" href="img/20.png" as="image" />
+    <link rel="preload" href="img/21.png" as="image" />
     <style>
       :root {
         --font-family: "Poppins";
@@ -329,11 +332,38 @@
         /* box-shadow: none; */
         /* border: none; */
       }
+
+      .balloon {
+        position: absolute;
+        top: -60%;
+        pointer-events: none;
+        transform: translateX(-50%) rotate(var(--rotate));
+        animation: balloonDrop 8s linear forwards,
+          balloonSway 3s ease-in-out infinite;
+        z-index: 1001;
+      }
+
+      @keyframes balloonDrop {
+        to {
+          top: 110%;
+        }
+      }
+
+      @keyframes balloonSway {
+        0%,
+        100% {
+          transform: translateX(-50%) rotate(var(--rotate));
+        }
+        50% {
+          transform: translateX(calc(-50% + var(--sway, 20px)))
+            rotate(calc(var(--rotate) + 10deg));
+        }
+      }
     </style>
   </head>
   <body>
     <div class="aspect-container">
-      <div class="slot-machine-container">
+      <div class="slot-machine-container" id="container">
         <div class="slot-machine blur-background" id="slotMachine"></div>
         <div id="reel1" class="reel blur-background">
           <div class="reel-inner">
@@ -861,6 +891,7 @@
             refitAllLines();
             if (!confettiShown) {
               createConfetti();
+              dropBalloons();
               confettiShown = true;
             }
             setTimeout(() => {
@@ -887,6 +918,7 @@
             refitAllLines();
             if (!confettiShown) {
               createConfetti();
+              dropBalloons();
               confettiShown = true;
             }
             const headline = mainLine.content;
@@ -900,6 +932,35 @@
             setTimeout(showStageTwo, 100);
           }
         }
+        // -------- Confetti logic (unchanged) ----------
+        function dropBalloons() {
+          const container = document.getElementById("container");
+          const images = ["img/19.png", "img/20.png", "img/21.png"];
+
+          for (let i = 0; i < 20; i++) {
+            const balloon = document.createElement("img");
+            balloon.src = images[Math.floor(Math.random() * images.length)];
+            balloon.classList.add("balloon");
+
+            const size = 80 + Math.random() * 40;
+            balloon.style.width = size + "px";
+            balloon.style.left = Math.random() * 100 + "%";
+            balloon.style.setProperty("--rotate", (Math.random() * 60 - 30) + "deg");
+            balloon.style.setProperty("--sway", (10 + Math.random() * 20) + "px");
+
+            const delay = Math.random() * 2;
+            const dropDuration = 2.5 + Math.random() * 2;
+            const swayDuration = 2 + Math.random() * 2;
+
+            balloon.style.animation =
+              `balloonDrop ${dropDuration}s linear ${delay}s forwards, ` +
+              `balloonSway ${swayDuration}s ease-in-out ${delay}s infinite`;
+
+            container.appendChild(balloon);
+            balloon.addEventListener("animationend", () => balloon.remove());
+          }
+        }
+
         // -------- Confetti logic (unchanged) ----------
         function createConfetti() {
           document.querySelectorAll(".confetti").forEach((el) => {
