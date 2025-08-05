@@ -348,17 +348,17 @@
         <div class="slot-machine blur-background" id="slotMachine"></div>
         <div id="reel1" class="reel blur-background">
           <div class="reel-inner">
-            <img src="img/champagne.png" alt="Champagne" />
+            <img src="img/cake.png" alt="Cake" />
           </div>
         </div>
         <div id="reel2" class="reel blur-background">
           <div class="reel-inner">
-            <img src="img/key.png" alt="Key" />
+            <img src="img/camera.png" alt="Camera" />
           </div>
         </div>
         <div id="reel3" class="reel blur-background">
           <div class="reel-inner">
-            <img src="img/lipstick.png" alt="Lipstick" />
+            <img src="img/champagnes.png" alt="Champagnes" />
           </div>
         </div>
         <div class="spin-button blur-background" id="spinButton">
@@ -458,16 +458,14 @@
         return overlays[color] || overlays.beige;
       }
 
-      document.addEventListener("DOMContentLoaded", function () {
-        const icons = [
-          "img/box.png",
-          "img/briefcase.png",
-          "img/house.png",
-          "img/champagne.png",
-          "img/key.png",
-          "img/lipstick.png",
-          "img/paw.png",
-        ];
+        document.addEventListener("DOMContentLoaded", function () {
+          const icons = [
+            "img/cake.png",
+            "img/camera.png",
+            "img/champagnes.png",
+            "img/flower.png",
+            "img/gift.png",
+          ];
 
         function preloadImages(paths) {
           return Promise.all(
