@@ -2,6 +2,8 @@
 
 This project contains a single HTML file that displays an interactive slot machine-style reveal. Spinning the reels a few times eventually triggers a personalized message overlay with a celebratory balloon drop. It's designed for fun occasions like pregnancy announcements, graduations, or other surprises.
 
+The overlay message automatically scales to fill the screen, adapting to however much text you supply.
+
 ## Opening the page
 
 You can open `index.html` directly in any modern web browser. Simply double-click the file or serve it through a local HTTP server and navigate to the page.
