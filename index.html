@@ -41,25 +41,23 @@
         left: 0;
         width: 100%;
         height: 100%;
+        background: url("img/introbackground.png") center/cover no-repeat;
         display: flex;
         justify-content: center;
         align-items: center;
         z-index: 1000;
+        cursor: pointer;
+        opacity: 1;
+        transition: opacity 0.5s ease;
       }
 
       .landing-message {
-        background-color: #fee4b8;
-        color: #674c23;
-        border: 3px solid #674c23;
-        padding: 1rem;
-        border-radius: 8px;
-        min-width: 33vw;
-        min-height: 33vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        color: #fff;
         text-align: center;
-        box-sizing: border-box;
+        font-family: var(--font-family), sans-serif;
+        padding: 1rem;
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000,
+          1px 1px 0 #000;
       }
       .aspect-container {
         position: relative;
@@ -579,6 +577,14 @@
             });
           fitLanding();
           window.addEventListener("resize", fitLanding);
+          landingOverlay.addEventListener("click", () => {
+            landingOverlay.style.opacity = "0";
+            landingOverlay.style.pointerEvents = "none";
+            setTimeout(() => {
+              if (landingOverlay.parentNode)
+                landingOverlay.parentNode.removeChild(landingOverlay);
+            }, 500);
+          });
         } else {
           landingOverlay.style.display = "none";
         }
