@@ -674,9 +674,10 @@
           document.fonts.ready.then(refitAllLines),
         );
 
+        const overlayColor = getColorOverlay(params);
         // Set overlay color on reveal
-        colorOverlay.style.background = "transparent";
-        introColorOverlay.style.background = "transparent";
+        colorOverlay.style.background = overlayColor;
+        introColorOverlay.style.background = overlayColor;
 
         // Hide instructions overlay
         function hideInstructionsOverlay() {
@@ -916,7 +917,7 @@
 
           revealOverlay.style.opacity = "1";
           revealOverlay.style.pointerEvents = "auto";
-          colorOverlay.style.background = "transparent";
+          colorOverlay.style.background = overlayColor;
           refitAllLines();
           setTimeout(() => {
             revealOverlay.style.opacity = "0";
