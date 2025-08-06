@@ -26,12 +26,40 @@
         padding: 0;
         height: 100%;
         width: 100%;
-        background: #f0f0f0;
+        background: url("img/introbackground.png") no-repeat center center fixed;
+        background-size: cover;
         font-family: var(--font-family), sans-serif;
         display: flex;
         justify-content: center;
         align-items: center;
         overflow: hidden;
+      }
+
+      .landing-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .landing-message {
+        background-color: #fee4b8;
+        color: #674c23;
+        border: 3px solid #674c23;
+        padding: 1rem;
+        border-radius: 8px;
+        min-width: 33vw;
+        min-height: 33vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        box-sizing: border-box;
       }
       .aspect-container {
         position: relative;
@@ -343,6 +371,9 @@
     </style>
   </head>
   <body>
+    <div id="landingOverlay" class="landing-overlay">
+      <div id="landingMessage" class="landing-message"></div>
+    </div>
     <div class="aspect-container">
       <div class="slot-machine-container" id="container">
         <div class="slot-machine blur-background" id="slotMachine"></div>
@@ -533,6 +564,25 @@
           "instructionsOverlay",
         );
         const params = getParams();
+        const landingOverlay = document.getElementById("landingOverlay");
+        const landingMessage = document.getElementById("landingMessage");
+        const introMessage = params.message;
+        if (introMessage) {
+          landingMessage.textContent = introMessage;
+          const fitLanding = () =>
+            textFit(landingMessage, {
+              multiLine: true,
+              alignHoriz: true,
+              alignVert: true,
+              minFontSize: 12,
+              maxFontSize: 500,
+            });
+          fitLanding();
+          window.addEventListener("resize", fitLanding);
+        } else {
+          landingOverlay.style.display = "none";
+        }
+
         const finalIconMap = {
           ringflower: "img/ringflower.png",
           "ringflower.png": "img/ringflower.png",
