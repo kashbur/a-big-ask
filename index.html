@@ -36,7 +36,7 @@
       }
 
       .landing-overlay {
-        position: fixed;
+        position: absolute;
         top: 0;
         left: 0;
         width: 100%;
@@ -371,10 +371,10 @@
     </style>
   </head>
   <body>
-    <div id="landingOverlay" class="landing-overlay">
-      <div id="landingMessage" class="landing-message"></div>
-    </div>
     <div class="aspect-container">
+      <div id="landingOverlay" class="landing-overlay">
+        <div id="landingMessage" class="landing-message"></div>
+      </div>
       <div class="slot-machine-container" id="container">
         <div class="slot-machine blur-background" id="slotMachine"></div>
         <div id="reel1" class="reel blur-background">
