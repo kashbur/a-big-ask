@@ -20,6 +20,7 @@ xdg-open index.html        # Linux
 
 - `message` – message displayed after the reels match (default: "Will you be my bridesmaid?")
 - `main` – alias for `message` to maintain backward compatibility
+- `landingMessage` – text for the landing overlay before spinning (alias: `landingText`). Use this alongside `message`/`main` to provide both a pre-spin prompt and the reveal message.
 - `sub` – secondary line of text
 - `date` – additional date or detail line
 - `photo` – URL to an image shown as a circular avatar
