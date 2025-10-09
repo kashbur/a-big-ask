@@ -1028,6 +1028,9 @@
 
           const hideDelay = 30000;
 
+          slotMachine.classList.add("blur-background");
+          reels.forEach((r) => r.classList.add("blur-background"));
+          spinButton.classList.add("blur-background");
           revealOverlay.style.opacity = "1";
           revealOverlay.style.pointerEvents = "auto";
           colorOverlay.style.background = "transparent";
@@ -1039,9 +1042,6 @@
         }
         // -------- Balloon logic --------
         function dropBalloons() {
-          slotMachine.classList.add("blur-background");
-          reels.forEach((r) => r.classList.add("blur-background"));
-          spinButton.classList.add("blur-background");
           const container = document.getElementById("container");
           const images = ["img/19.png", "img/20.png", "img/21.png"];
 
