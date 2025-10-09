@@ -655,6 +655,13 @@
                 : displayCharacters.length > 0
                 ? 90
                 : 0;
+            const getTypewriterAdditionalDelay = (character) => {
+              if (!character) return 0;
+              if (character === "\n") return 250;
+              if (/[.!?]/.test(character)) return 120;
+              if (/[,:;]/.test(character)) return 80;
+              return 0;
+            };
             if (displayCharacters.length === 0) {
               if (landingCursorEl)
                 landingCursorEl.classList.add("typewriter-cursor--done");
@@ -662,11 +669,17 @@
               let typeIndex = 0;
               const typeNextCharacter = () => {
                 if (!landingMessageTextEl.isConnected) return;
-                landingMessageTextEl.textContent +=
-                  displayCharacters[typeIndex] ?? "";
+                const currentCharacter = displayCharacters[typeIndex] ?? "";
+                landingMessageTextEl.textContent += currentCharacter;
                 typeIndex += 1;
                 if (typeIndex < displayCharacters.length) {
-                  setTimeout(typeNextCharacter, typeSpeed);
+                  const additionalDelay = getTypewriterAdditionalDelay(
+                    currentCharacter,
+                  );
+                  setTimeout(
+                    typeNextCharacter,
+                    typeSpeed + additionalDelay,
+                  );
                 } else if (landingCursorEl) {
                   landingCursorEl.classList.add("typewriter-cursor--done");
                 }
