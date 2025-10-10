@@ -601,6 +601,27 @@
           reels.push(reel);
           initializeReel(reel);
         }
+        const blurTargets = [slotMachine, ...reels, spinButton].filter(Boolean);
+        function setBlurState(enabled, { immediate = false } = {}) {
+          blurTargets.forEach((el) => {
+            if (!el) return;
+            if (immediate) {
+              const previousTransition = el.style.transition;
+              el.style.transition = "none";
+              if (enabled) {
+                el.classList.add("blur-background");
+              } else {
+                el.classList.remove("blur-background");
+              }
+              void el.offsetWidth;
+              el.style.transition = previousTransition;
+            } else if (enabled) {
+              el.classList.add("blur-background");
+            } else {
+              el.classList.remove("blur-background");
+            }
+          });
+        }
         const introOverlay = document.getElementById("introOverlay");
         const introLinesDiv = document.getElementById("introLines");
         const introColorOverlay = introOverlay.querySelector(".color-overlay");
@@ -795,9 +816,7 @@
         // Hide instructions overlay
         function hideInstructionsOverlay() {
           instructionsOverlay.style.opacity = "0";
-          slotMachine.classList.remove("blur-background");
-          reels.forEach((r) => r.classList.remove("blur-background"));
-          spinButton.classList.remove("blur-background");
+          setBlurState(false);
           instructionsOverlay.style.pointerEvents = "none";
           setTimeout(() => {
             if (instructionsOverlay.parentNode)
@@ -1028,9 +1047,7 @@
 
           const hideDelay = 30000;
 
-          slotMachine.classList.add("blur-background");
-          reels.forEach((r) => r.classList.add("blur-background"));
-          spinButton.classList.add("blur-background");
+          setBlurState(true, { immediate: true });
           revealOverlay.style.opacity = "1";
           revealOverlay.style.pointerEvents = "auto";
           colorOverlay.style.background = "transparent";
