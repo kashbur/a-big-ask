@@ -157,11 +157,13 @@ const STYLE = `
 }
 @keyframes letter-out {
   0% { transform: translate3d(0,0,0); }
+  55% { transform: translate3d(0, -42vh, 0); }
+  75% { transform: translate3d(0, -42vh, 0); }
   100% { transform: translate3d(0, -65vh, 0); }
 }
 .env.is-opening { animation: env-open 2.4s forwards; }
 .env.is-opening .env-flap-top { animation: flap-open 0.9s 0.8s forwards; }
-.env.is-opening .env-letter { animation: letter-out 0.9s 1.6s forwards; }
+.env.is-opening .env-letter { animation: letter-out 2.1s 1.6s forwards; }
 .env:active { transform: scale(.98); }
 `;
 
