@@ -1,7 +1,8 @@
 // Envelope landing animation integration
 const DEFAULT_LETTER_COLOR = "#f2e6d0";
 const OPEN_DURATION_MS = 2400;
-const AUTOCLOSE_OVERLAY = true;
+const AUTOCLOSE_OVERLAY = false;
+const DEFAULT_CONTINUE_PROMPT = "Tap to continue";
 
 function getParams() {
   const url = new URL(window.location.href);
@@ -165,6 +166,38 @@ const STYLE = `
 .env.is-opening .env-flap-top { animation: flap-open 0.9s 0.8s forwards; }
 .env.is-opening .env-letter { animation: letter-out 2.1s 1.6s forwards; }
 .env:active { transform: scale(.98); }
+.env-continue {
+  position: absolute;
+  bottom: clamp(32px, 9vh, 72px);
+  left: 50%;
+  transform: translate(-50%, 12px);
+  padding: 0.85rem 2.4rem;
+  border-radius: 999px;
+  border: none;
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  font-size: clamp(15px, 3.4vw, 20px);
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: #1f1f1f;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.env-continue.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+.env-continue:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.9);
+  outline-offset: 4px;
+}
+.env-continue:active {
+  transform: translate(-50%, 2px);
+}
 `;
 
 const MARKUP = `
@@ -184,6 +217,7 @@ const MARKUP = `
       <div class="env-flap env-flap-top"></div>
     </div>
   </div>
+  <button class="env-continue" id="envContinue" type="button"></button>
 </div>
 `;
 
@@ -239,6 +273,7 @@ function mountEnvelope() {
   const letterTitleEl = node.querySelector("#letterTitle");
   const letterBodyEl = node.querySelector("#letterBody");
   const envLetter = node.querySelector("#envLetter");
+  const continueButton = node.querySelector("#envContinue");
 
   env.setAttribute("role", "button");
   env.setAttribute("tabindex", "0");
@@ -251,8 +286,64 @@ function mountEnvelope() {
   if (letterTitleEl) letterTitleEl.textContent = letterTitle;
   if (letterBodyEl) letterBodyEl.textContent = letterBody;
   if (envLetter) envLetter.style.background = letterColor;
+  if (continueButton) {
+    const rawContinuePrompt =
+      safeDecode(params.continueprompt) || safeDecode(params.continuetext);
+    const continuePrompt = rawContinuePrompt && rawContinuePrompt.trim()
+      ? rawContinuePrompt.trim()
+      : DEFAULT_CONTINUE_PROMPT;
+    continueButton.textContent = continuePrompt;
+    continueButton.setAttribute("aria-label", continuePrompt);
+    continueButton.setAttribute("hidden", "");
+    continueButton.disabled = true;
+  }
 
   let hasOpened = false;
+  let canDismiss = false;
+  let hasDismissed = false;
+
+  function dismissOverlay() {
+    if (hasDismissed) return;
+    hasDismissed = true;
+    canDismiss = false;
+    if (continueButton) {
+      continueButton.disabled = true;
+      continueButton.classList.remove("is-visible");
+    }
+    const overlay =
+      document.getElementById("landingOverlay") ||
+      document.querySelector(".landing-overlay");
+    if (overlay) {
+      overlay.style.opacity = "0";
+      overlay.style.pointerEvents = "none";
+      window.setTimeout(() => overlay.remove(), 500);
+    } else if (envWrap && envWrap.parentNode) {
+      envWrap.parentNode.removeChild(envWrap);
+    }
+  }
+
+  function showContinuePrompt() {
+    if (!continueButton) {
+      dismissOverlay();
+      return;
+    }
+    canDismiss = true;
+    continueButton.disabled = false;
+    continueButton.removeAttribute("hidden");
+    window.requestAnimationFrame(() => {
+      continueButton.classList.add("is-visible");
+      window.setTimeout(() => {
+        if (continueButton.isConnected) {
+          try {
+            continueButton.focus({ preventScroll: true });
+          } catch (error) {
+            continueButton.focus();
+          }
+        }
+      }, 150);
+    });
+  }
+
   function openEnvelope(e) {
     if (hasOpened) return;
     hasOpened = true;
@@ -263,16 +354,9 @@ function mountEnvelope() {
     window.setTimeout(() => {
       document.dispatchEvent(new CustomEvent("envelope:opened"));
       if (AUTOCLOSE_OVERLAY) {
-        const overlay =
-          document.getElementById("landingOverlay") ||
-          document.querySelector(".landing-overlay");
-        if (overlay) {
-          overlay.style.opacity = "0";
-          overlay.style.pointerEvents = "none";
-          window.setTimeout(() => overlay.remove(), 500);
-        }
-      } else if (envWrap && envWrap.parentNode) {
-        envWrap.parentNode.removeChild(envWrap);
+        dismissOverlay();
+      } else {
+        showContinuePrompt();
       }
     }, OPEN_DURATION_MS);
   }
@@ -298,7 +382,11 @@ function mountEnvelope() {
     "click",
     (event) => {
       if (event.target === envWrap) {
-        openEnvelope(event);
+        if (!hasOpened) {
+          openEnvelope(event);
+        } else if (canDismiss) {
+          dismissOverlay();
+        }
       }
     },
     { passive: false },
@@ -308,11 +396,28 @@ function mountEnvelope() {
     (event) => {
       if (event.target === envWrap) {
         event.preventDefault();
-        openEnvelope(event);
+        if (!hasOpened) {
+          openEnvelope(event);
+        } else if (canDismiss) {
+          dismissOverlay();
+        }
       }
     },
     { passive: false },
   );
+
+  if (continueButton) {
+    continueButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      dismissOverlay();
+    });
+    continueButton.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        dismissOverlay();
+      }
+    });
+  }
 }
 
 if (document.readyState === "loading") {
