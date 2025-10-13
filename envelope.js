@@ -59,14 +59,22 @@ const STYLE = `
   font-family: "Courier New", monospace;
   color: #1f1f1f;
   cursor: pointer;
+  /* visual tokens (flat by default) */
+  --env-panel-shadow: none;           /* no elevation */
+  --env-letter-shadow: none;          /* no inset shading */
+  --env-flap-shadow: none;            /* no flap shading */
+  --env-border: none;                 /* remove keyline by default */
+  --env-panel-bg: #fffaf3;            /* soft cream to mesh with peach bg */
+  --env-letter-bg: ${DEFAULT_LETTER_COLOR}; /* parchment */
 }
 .env-front,
 .env-back {
   position: absolute;
   inset: 0;
-  background: #fff;
+  background: var(--env-panel-bg);
   border-radius: 8px;
-  box-shadow: inset 0 0 30px -5px #a87e50, 0 0 20px -5px rgba(0,0,0,.25);
+  box-shadow: var(--env-panel-shadow);
+  border: var(--env-border);
 }
 .env-front {
   backface-visibility: hidden;
@@ -84,10 +92,10 @@ const STYLE = `
 .env-letter {
   position: absolute;
   top: 6px; left: 10px; right: 10px; bottom: 6px;
-  background: ${DEFAULT_LETTER_COLOR};
+  background: var(--env-letter-bg);
   border-radius: 6px;
   padding: 14px;
-  box-shadow: inset 0 0 30px -5px #b08c5b, 0 0 10px -5px rgba(0,0,0,.25);
+  box-shadow: var(--env-letter-shadow);
   overflow: hidden;
 }
 .env-letter-title {
@@ -106,7 +114,7 @@ const STYLE = `
   content: "";
   position: absolute;
   background: #fff;
-  box-shadow: inset 0 0 30px -7px #a87e50;
+  box-shadow: var(--env-flap-shadow);
 }
 .env-flap-top::before, .env-flap-bottom::before { width: 70%; aspect-ratio: 1/1; }
 .env-flap-left::before, .env-flap-right::before {
@@ -198,6 +206,28 @@ const STYLE = `
 .env-continue:active {
   transform: translate(-50%, 2px);
 }
+
+/* Variants */
+.env--flat {
+  --env-panel-shadow: none;
+  --env-letter-shadow: none;
+  --env-flap-shadow: none;
+  --env-border: none;
+  --env-panel-bg: #fffaf3;
+  --env-letter-bg: ${DEFAULT_LETTER_COLOR};
+}
+.env--soft {
+  --env-panel-shadow: 0 6px 16px rgba(0,0,0,.12);
+  --env-letter-shadow: inset 0 0 8px -2px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08);
+  --env-flap-shadow: inset 0 0 12px -4px rgba(0,0,0,.18);
+  --env-border: 1px solid rgba(0,0,0,0.08);
+}
+.env--elevated {
+  --env-panel-shadow: inset 0 0 30px -5px #a87e50, 0 0 20px -5px rgba(0,0,0,.25);
+  --env-letter-shadow: inset 0 0 30px -5px #b08c5b, 0 0 10px -5px rgba(0,0,0,.25);
+  --env-flap-shadow: inset 0 0 30px -7px #a87e50;
+  --env-border: 1px solid rgba(0,0,0,0.10);
+}
 `;
 
 const MARKUP = `
@@ -286,6 +316,16 @@ function mountEnvelope() {
   if (letterTitleEl) letterTitleEl.textContent = letterTitle;
   if (letterBodyEl) letterBodyEl.textContent = letterBody;
   if (envLetter) envLetter.style.background = letterColor;
+
+  // Apply visual variant (flat|soft|elevated). Accepts `envelopestyle` or `envelopeshadow`.
+  const styleParam = (params.envelopestyle || params.envelopeshadow || "").toLowerCase();
+  let variantClass = "";
+  if (styleParam.includes("elev")) variantClass = "env--elevated";
+  else if (styleParam.includes("soft")) variantClass = "env--soft";
+  else if (styleParam.includes("flat") || styleParam === "none") variantClass = "env--flat";
+  // Default is flat via CSS variables; explicitly add class if requested
+  if (env && variantClass) env.classList.add(variantClass);
+
   if (continueButton) {
     const rawContinuePrompt =
       safeDecode(params.continueprompt) || safeDecode(params.continuetext);
