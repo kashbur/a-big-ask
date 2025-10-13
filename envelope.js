@@ -59,6 +59,7 @@ const STYLE = `
   font-family: "Courier New", monospace;
   color: #1f1f1f;
   cursor: pointer;
+  box-shadow: 0 0 30px rgba(255, 238, 200, 0.8);
   /* visual tokens (flat by default) */
   --env-panel-shadow: none;           /* no elevation */
   --env-letter-shadow: none;          /* no inset shading */
@@ -71,7 +72,7 @@ const STYLE = `
 .env-back {
   position: absolute;
   inset: 0;
-  background: var(--env-panel-bg);
+  background: var(--env-panel-bg); 
   border-radius: 8px;
   box-shadow: var(--env-panel-shadow);
   border: var(--env-border);
@@ -110,50 +111,22 @@ const STYLE = `
   font-size: clamp(14px, 3.2vw, 18px);
 }
 .env-flap { position: absolute; inset: 0; overflow: hidden; }
-.env-flap::before {
-  content: "";
-  position: absolute;
-  background: #fff;
-  box-shadow: var(--env-flap-shadow);
-}
-.env-flap-top::before, .env-flap-bottom::before { width: 70%; aspect-ratio: 1/1; }
-.env-flap-left::before, .env-flap-right::before {
-  width: 48%;
-  aspect-ratio: 1/1;
-  top: -5px;
-}
-.env-flap-top { z-index: 5; transform-origin: top center; }
-.env-flap-top::before {
-  transform-origin: top left;
-  transform: rotate(-45deg);
-  left: 14%;
-  top: -30%;
-  border-bottom-left-radius: 36px;
-}
+.env-flap::before { content: none; }
+
+/* New flap geometry using clip-path so edges meet cleanly */
+.env-flap { background: var(--env-panel-bg); }
+
+/* Z stacking matches previous intent */
+.env-flap-top    { z-index: 5; }
 .env-flap-bottom { z-index: 4; }
-.env-flap-bottom::before {
-  transform-origin: left bottom;
-  transform: rotate(45deg);
-  left: 14%;
-  bottom: -30%;
-  border-top-left-radius: 72px;
-}
-.env-flap-left { z-index: 3; }
-.env-flap-left::before {
-  transform-origin: top left;
-  transform: rotate(45deg);
-  left: -12%;
-  top: -5%;
-  border-bottom-right-radius: 24px;
-}
-.env-flap-right { z-index: 2; }
-.env-flap-right::before {
-  right: -12%;
-  top: -5%;
-  transform-origin: top right;
-  transform: rotate(-45deg);
-  border-bottom-left-radius: 24px;
-}
+.env-flap-left   { z-index: 3; }
+.env-flap-right  { z-index: 2; }
+
+/* Triangular flaps; left/right use slight 48/52% overlap so they meet */
+.env-flap-top    { clip-path: polygon(50% 0%, 100% 58%, 0% 58%); }
+.env-flap-bottom { clip-path: polygon(0% 42%, 100% 42%, 50% 100%); }
+.env-flap-left   { clip-path: polygon(0% 50%, 52% 0%, 52% 100%); }
+.env-flap-right  { clip-path: polygon(48% 0%, 100% 50%, 48% 100%); }
 @keyframes env-open {
   0% { transform: translate3d(0,0,0) rotateY(0); }
   33% { transform: translate3d(-100%,0,0) rotateY(-180deg); }
