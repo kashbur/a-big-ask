@@ -38,6 +38,23 @@ const STYLE = `
 .note-title{ margin:0 0 .4em 0; font-weight:800; font-size:clamp(18px,4vw,24px); }
 .note-body{ margin:0; white-space:pre-wrap; font-size:clamp(16px,3.6vw,20px); line-height:1.25; }
 
+.note-body.typewriter{
+  overflow:hidden;
+  border-right: .1em solid rgba(0,0,0,0.6);
+  white-space: pre-wrap;
+  animation: typing 3s steps(40,end), blink .75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink {
+  from, to { border-color: transparent; }
+  50% { border-color: rgba(0,0,0,0.6); }
+}
+
 .note.is-flipped{ transform:rotateY(180deg); transition:transform .6s cubic-bezier(.22,.61,.36,1); }
 .note:not(.is-flipped){ transition:transform .6s cubic-bezier(.22,.61,.36,1); }
 
@@ -99,6 +116,34 @@ function mountNote() {
 
   const note = document.getElementById("note");
   const cont = document.getElementById("noteContinue");
+
+  const bodyEl = document.querySelector('.note-body');
+  const fullText = bodyEl.textContent.trim();
+  bodyEl.textContent = '';
+  bodyEl.classList.add('typewriter');
+
+  const chars = [...fullText];
+  let i = 0;
+  function typeNext(){
+    if (i < chars.length){
+      bodyEl.textContent += chars[i];
+      const ch = chars[i];
+      i++;
+      let delay = 45;
+      if(/[.,!?]/.test(ch)) delay = 300;
+      else if(/[\n]/.test(ch)) delay = 400;
+      setTimeout(typeNext, delay);
+    }
+  }
+  // Start typing when back of note is shown
+  note.addEventListener('transitionend', () => {
+    if(note.classList.contains('is-flipped')){
+      bodyEl.textContent = '';
+      i = 0;
+      typeNext();
+    }
+  });
+
   const wrap = document.getElementById("noteWrap");
   if (wrap) {
     wrap.addEventListener("click", (e) => e.stopPropagation());
