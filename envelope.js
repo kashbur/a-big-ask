@@ -30,8 +30,8 @@ const STYLE = `
 
 /* Front-side hint */
 .note-front-prompt{
-  position:absolute; bottom:6%; left:50%; transform:translateX(-50%) translateY(4px);
-  font:600 14px "Courier New", monospace; letter-spacing:.06em;
+  position:absolute; bottom:3%; left:50%; transform:translateX(-50%) translateY(4px);
+  font:600 12px "Courier New", monospace; letter-spacing:.06em;
   color: rgba(0,0,0,.7); text-shadow:0 1px 2px rgba(255,255,255,.5);
   opacity:0; pointer-events:none; transition:opacity .35s ease, transform .35s ease;
 }
@@ -167,10 +167,15 @@ function mountNote() {
       const linesApprox = Math.round(frontSpan.scrollHeight / (lhCurrent || fs));
       if (linesApprox >= 2) {
         // More breathing room for multi-line names
-        frontSpan.style.lineHeight = (size < 36) ? '1.28' : '1.22';
+        frontSpan.style.lineHeight = (size < 36) ? '1.34' : '1.28';
       } else {
         // Single line: keep it tight and elegant
         frontSpan.style.lineHeight = (size < 40) ? '1.05' : '1.1';
+      }
+      // Re-check after line-height adjustment and shrink if still overflowing height
+      let guard2 = 16;
+      while ((frontSpan.scrollHeight > availH) && size > minPx && guard2-- > 0){
+        size -= 2; frontSpan.style.fontSize = size + 'px';
       }
     }
     let fitScheduled = false;
