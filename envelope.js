@@ -83,14 +83,16 @@ const STYLE = `
   color:#fff; font:600 18px "Courier New", monospace;
   letter-spacing:.05em; text-shadow:0 0 6px rgba(0,0,0,.4);
   opacity:0; pointer-events:none; transition:opacity .28s, transform .28s; transform:translate(-50%,8px);
-  animation:pulseText 1.6s ease-in-out infinite;
 }
 
 @keyframes pulseText {
   0%, 100% { opacity:0.85; }
   50% { opacity:0.35; }
 }
-.note-continue.is-visible{ opacity:1; pointer-events:auto; transform:translate(-50%,0); }
+.note-continue.is-visible{
+  opacity:1; pointer-events:auto; transform:translate(-50%,0);
+  animation:pulseText 1.6s ease-in-out infinite;
+}
 
 @media (prefers-reduced-motion: reduce){
   .note, .note-continue{ transition:none !important; }
