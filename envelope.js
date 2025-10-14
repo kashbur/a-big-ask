@@ -116,7 +116,12 @@ function mountNote() {
   if (p.title) greeting = p.title;
   else if (toName) greeting = toName;
 
-  const body = ((greeting ? greeting + ",\n\n" : "") + (p.body || "you've always been by my side.\nI can't imagine doing the next chapter without you.")).replace(/\\n/g, "\n");
+  let bodyText = p.body || "you've always been by my side.\nI can't imagine doing the next chapter without you.";
+  // Remove duplicate greeting if body already starts with the greeting name
+  if (greeting && bodyText.trim().startsWith(greeting)) {
+    greeting = "";
+  }
+  const body = ((greeting ? greeting + ",\n\n" : "") + bodyText).replace(/\\n/g, "\n");
   const paper = (p.paper && /^#([0-9A-F]{3}){1,2}$/i.test(p.paper)) ? p.paper : DEFAULT_PAPER;
   const continueLabel = (p.continueprompt || "Tap to continue").trim() || DEFAULT_CONTINUE;
 
