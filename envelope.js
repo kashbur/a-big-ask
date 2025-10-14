@@ -92,6 +92,7 @@ function mountNote() {
   const cont = document.getElementById("noteContinue");
   const wrap = document.getElementById("noteWrap");
   let initialNoteH = null;
+  let hasFlipped = false;
 
   // ----- Front text type-in + auto-fit -----
   const frontSpan = overlay.querySelector('.note-front span');
@@ -107,6 +108,9 @@ function mountNote() {
         fi++;
         let d = 70; if (ch === ' ') d = 90; if (/[.,!?]/.test(ch)) d = 220;
         setTimeout(typeFront, d);
+      } else {
+        // Front finished typing – auto-flip after a short beat unless user already flipped
+        setTimeout(() => { if (!hasFlipped) flip(); }, 700);
       }
     }
 
@@ -133,10 +137,17 @@ function mountNote() {
     fitFront();
     window.addEventListener('resize', fitFront);
     setTimeout(typeFront, 180);
+    if (!fullFront) { setTimeout(() => { if (!hasFlipped) flip(); }, 800); }
   }
 
   // ----- Flip handling & prevent overlay dismissal -----
-  const flip = (e) => { if (e){ e.preventDefault(); e.stopPropagation(); } note.classList.toggle('is-flipped'); };
+  const flip = (e) => {
+    if (e){ e.preventDefault(); e.stopPropagation(); }
+    note.classList.toggle('is-flipped');
+    if (note.classList.contains('is-flipped')) {
+      hasFlipped = true; // mark that we've flipped to back (auto or manual)
+    }
+  };
   note.addEventListener('click', flip);
   note.addEventListener('touchstart', (e)=>{ e.preventDefault(); e.stopPropagation(); flip(e); }, { passive:false });
   note.addEventListener('pointerdown', (e)=> e.stopPropagation());
