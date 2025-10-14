@@ -13,7 +13,15 @@ const STYLE = `
 }
 
 .note-wrap{ position:absolute; inset:0; display:grid; place-items:center; z-index:1001; perspective:1000px; }
-.note{ width:min(86vw,360px); aspect-ratio:3/2; position:relative; transform-style:preserve-3d; cursor:pointer; transition:height .35s ease; }
+.note{
+  width: min(86vw, 360px);
+  height: calc(min(86vw, 360px) * 2 / 3); /* explicit initial height to match 3/2 aspect */
+  aspect-ratio: 3 / 2;
+  position: relative;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  transition: height .35s ease;
+}
 .note-pane{ position:absolute; inset:0; border-radius:14px; background: var(--paper, ${DEFAULT_PAPER}); box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06); backface-visibility:hidden; border:1.5px solid #a37b4c; }
 
 /* FRONT */
@@ -22,7 +30,7 @@ const STYLE = `
 
 /* Front-side hint */
 .note-front-prompt{
-  position:absolute; bottom:10%; left:50%; transform:translateX(-50%) translateY(4px);
+  position:absolute; bottom:6%; left:50%; transform:translateX(-50%) translateY(4px);
   font:600 14px "Courier New", monospace; letter-spacing:.06em;
   color: rgba(0,0,0,.7); text-shadow:0 1px 2px rgba(255,255,255,.5);
   opacity:0; pointer-events:none; transition:opacity .35s ease, transform .35s ease;
