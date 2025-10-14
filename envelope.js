@@ -38,22 +38,28 @@ const STYLE = `
 .note-title{ margin:0 0 .4em 0; font-weight:800; font-size:clamp(18px,4vw,24px); }
 .note-body{ margin:0; white-space:pre-wrap; font-size:clamp(16px,3.6vw,20px); line-height:1.25; }
 
-.note-body.typewriter{
-  overflow:hidden;
+.note-body.typewriter {
+  overflow: hidden;
   border-right: .1em solid rgba(0,0,0,0.6);
   white-space: pre-wrap;
-  animation: typing 3s steps(40,end), blink .75s step-end infinite;
-}
-
-@keyframes typing {
-  from { width: 0; }
-  to { width: 100%; }
+  width: 100%;
+  animation: blink .75s step-end infinite, fadeIn .2s ease-in forwards;
 }
 
 @keyframes blink {
   from, to { border-color: transparent; }
   50% { border-color: rgba(0,0,0,0.6); }
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* @keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+} */
 
 .note.is-flipped{ transform:rotateY(180deg); transition:transform .6s cubic-bezier(.22,.61,.36,1); }
 .note:not(.is-flipped){ transition:transform .6s cubic-bezier(.22,.61,.36,1); }
