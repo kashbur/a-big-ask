@@ -49,6 +49,7 @@ const STYLE = `
   display: grid;
   place-items: center;
   z-index: 1001;
+  perspective: 800px;
 }
 .env {
   position: relative;
@@ -59,7 +60,7 @@ const STYLE = `
   font-family: "Courier New", monospace;
   color: #1f1f1f;
   cursor: pointer;
-  box-shadow: 0 0 30px rgba(255, 238, 200, 0.8);
+  box-shadow: 0 8px 24px rgba(120, 85, 50, 0.4), 0 0 15px rgba(150, 100, 60, 0.3);
   /* visual tokens (flat by default) */
   --env-panel-shadow: none;           /* no elevation */
   --env-letter-shadow: none;          /* no inset shading */
@@ -75,7 +76,7 @@ const STYLE = `
   background: var(--env-panel-bg); 
   border-radius: 8px;
   box-shadow: var(--env-panel-shadow);
-  border: var(--env-border);
+  border: 1.5px solid #a37b4c;
 }
 .env-front {
   backface-visibility: hidden;
@@ -110,8 +111,11 @@ const STYLE = `
   line-height: 1.15;
   font-size: clamp(14px, 3.2vw, 18px);
 }
-.env-flap { position: absolute; inset: 0; overflow: hidden; }
-.env-flap::before { content: none; }
+.env-flap { position: absolute; inset: 0; overflow: hidden; backface-visibility: hidden; }
+.env-flap-top    { transform-origin: top center; }
+.env-flap-bottom { transform-origin: bottom center; }
+.env-flap-left   { transform-origin: left center; }
+.env-flap-right  { transform-origin: right center; }
 
 /* New flap geometry using clip-path so edges meet cleanly */
 .env-flap { background: var(--env-panel-bg); }
@@ -127,25 +131,30 @@ const STYLE = `
 .env-flap-bottom { clip-path: polygon(0% 42%, 100% 42%, 50% 100%); }
 .env-flap-left   { clip-path: polygon(0% 50%, 52% 0%, 52% 100%); }
 .env-flap-right  { clip-path: polygon(48% 0%, 100% 50%, 48% 100%); }
-@keyframes env-open {
-  0% { transform: translate3d(0,0,0) rotateY(0); }
-  33% { transform: translate3d(-100%,0,0) rotateY(-180deg); }
-  66% { transform: translate3d(-100%,0,0) rotateY(-180deg); }
-  100% { transform: translate3d(-100%, 65vh, 0) rotateY(-180deg); }
-}
-@keyframes flap-open {
-  0%, 50% { transform: rotateX(0deg); z-index: 5; }
+
+@keyframes flap-top-open {
+  0%   { transform: rotateX(0deg);   z-index: 5; }
   100% { transform: rotateX(-180deg); z-index: -1; }
 }
-@keyframes letter-out {
-  0% { transform: translate3d(0,0,0); }
-  55% { transform: translate3d(0, -42vh, 0); }
-  75% { transform: translate3d(0, -42vh, 0); }
-  100% { transform: translate3d(0, -65vh, 0); }
+@keyframes flap-left-open {
+  0%   { transform: rotateY(0deg); }
+  100% { transform: rotateY(-180deg); }
 }
-.env.is-opening { animation: env-open 2.4s forwards; }
-.env.is-opening .env-flap-top { animation: flap-open 0.9s 0.8s forwards; }
-.env.is-opening .env-letter { animation: letter-out 2.1s 1.6s forwards; }
+@keyframes flap-right-open {
+  0%   { transform: rotateY(0deg); }
+  100% { transform: rotateY(180deg); }
+}
+@keyframes paper-out {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(0, -62vh, 0); }
+}
+
+/* Staged unfold: top flap → paper → side flaps */
+.env.is-opening { /* container stays put; stagger children */ }
+.env.is-opening .env-flap-top  { animation: flap-top-open 0.7s ease-out 0s forwards; }
+.env.is-opening .env-letter    { animation: paper-out     0.9s ease-out 0.55s forwards; }
+.env.is-opening .env-flap-left { animation: flap-left-open 0.7s ease-out 1.2s forwards; }
+.env.is-opening .env-flap-right{ animation: flap-right-open 0.7s ease-out 1.2s forwards; }
 .env:active { transform: scale(.98); }
 .env-continue {
   position: absolute;
