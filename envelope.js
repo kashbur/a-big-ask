@@ -13,22 +13,25 @@ const STYLE = `
 }
 
 .note-wrap{ position:absolute; inset:0; display:grid; place-items:center; z-index:1001; perspective:1000px; }
-.note{ width:min(86vw,360px); aspect-ratio:3/2; position:relative; transform-style:preserve-3d; cursor:pointer; transition:height .35s ease; }
+.note{ width:min(86vw,360px); aspect-ratio:3/2; position:relative; transform-style:preserve-3d; cursor:pointer; transition:height .35s ease, transform .8s cubic-bezier(.22,.61,.36,1), filter .8s ease; will-change: transform,height; filter: drop-shadow(0 12px 24px rgba(0,0,0,.18)); transform-origin:center; }
 .note-pane{ position:absolute; inset:0; border-radius:14px; background: var(--paper, #f2e6d0); box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06); backface-visibility:hidden; border:1.5px solid #a37b4c; }
 
-/* FRONT */
-.note-front, .note-back{ display:flex; align-items:center; justify-content:center; padding:18px; }
-.note-front{ font-family:'Boho', cursive; font-weight:700; font-size: clamp(42px,7vw,64px); line-height:1.1; color:#1f1f1f; letter-spacing:.02em; text-align:center; }
+.note-front, .note-back{ display:flex; align-items:center; justify-content:center; padding:18px; backface-visibility:hidden; transform-style:preserve-3d; transition: opacity .35s ease; }
+.note-front{ font-family:'Boho', cursive; font-weight:700; font-size: clamp(42px,7vw,64px); line-height:1.1; color:#1f1f1f; letter-spacing:.02em; text-align:center; transform: translateZ(1px); }
 .note-front span{ padding:0; border-radius:0; background:none; display:inline-block; will-change:contents; opacity:1; max-width:92%; white-space:normal; word-break:break-word; hyphens:auto; text-align:center; }
 
-/* BACK */
-.note-back{ transform:rotateY(180deg); flex-direction:column; text-align:center; color:#1f1f1f; font-family:"Courier New", monospace; justify-content:center; align-items:center; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+.note-back{ transform:rotateY(180deg) translateZ(1px); flex-direction:column; text-align:center; color:#1f1f1f; font-family:"Courier New", monospace; justify-content:center; align-items:center; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; opacity:0; }
 .note-body{ margin:0; white-space:pre-wrap; font-size:clamp(16px,3.6vw,20px); line-height:1.25; text-align:center; }
 .note-body.typewriter{ overflow:hidden; white-space:pre-wrap; width:100%; animation: fadeIn .2s ease-in forwards; }
 
 /* Flip */
-.note.is-flipped{ transform:rotateY(180deg); transition:transform .6s cubic-bezier(.22,.61,.36,1); }
-.note:not(.is-flipped){ transition:transform .6s cubic-bezier(.22,.61,.36,1); }
+.note.is-flipped{ transform:rotateY(180deg) rotateX(.5deg); filter: drop-shadow(0 18px 36px rgba(0,0,0,.22)); }
+.note:not(.is-flipped){ transform:rotateY(0deg) rotateX(.5deg); filter: drop-shadow(0 12px 24px rgba(0,0,0,.18)); }
+/* Cross-fade faces */
+.note:not(.is-flipped) .note-front{ opacity:1; }
+.note:not(.is-flipped) .note-back{ opacity:0; }
+.note.is-flipped .note-front{ opacity:0; }
+.note.is-flipped .note-back{ opacity:1; }
 
 /* Continue (text only) */
 .note-continue{ position:absolute; bottom:clamp(28px,9vh,72px); left:50%; transform:translateX(-50%); background:none; border:none; box-shadow:none; padding:0; color:#fff; font:600 18px "Courier New", monospace; letter-spacing:.05em; text-shadow:0 0 6px rgba(0,0,0,.4); opacity:0; pointer-events:none; transition:opacity .28s, transform .28s; transform:translate(-50%,8px); }
