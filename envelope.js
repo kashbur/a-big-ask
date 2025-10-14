@@ -40,10 +40,9 @@ const STYLE = `
 
 .note-body.typewriter {
   overflow: hidden;
-  border-right: .1em solid rgba(0,0,0,0.6);
   white-space: pre-wrap;
   width: 100%;
-  animation: blink .75s step-end infinite, fadeIn .2s ease-in forwards;
+  animation: fadeIn .2s ease-in forwards;
 }
 
 @keyframes blink {
