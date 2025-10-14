@@ -41,6 +41,11 @@ const STYLE = `
   display:inline-block;
   will-change: contents;
   opacity:1;
+  max-width: 92%;
+  white-space: normal; /* allow wrapping */
+  word-break: break-word; /* break very long names */
+  hyphens: auto; /* graceful hyphenation when possible */
+  text-align: center;
 }
 .note-back {
   transform: rotateY(180deg);
@@ -164,7 +169,7 @@ function mountNote() {
     frontSpan.textContent = '';
     const fchars = [...fullFront];
     let fi = 0;
-    function typeFront(){
+    let typeFront = function(){
       if (fi < fchars.length){
         frontSpan.textContent += fchars[fi];
         const ch = fchars[fi];
@@ -177,6 +182,37 @@ function mountNote() {
     }
     // small initial stagger for a natural feel
     setTimeout(typeFront, 180);
+
+    // --- Auto-fit front text to card ---
+    const frontBox = overlay.querySelector('.note-front');
+    function fitFront(){
+      if (!frontSpan || !frontBox) return;
+      // Start from a max and reduce until it fits
+      const maxPx = 64; // should match CSS max
+      const minPx = 24; // do not go below this
+      let size = maxPx;
+      frontSpan.style.fontSize = size + 'px';
+      // available width inside the card
+      const available = frontBox.clientWidth * 0.92; // match max-width 92%
+      // Reduce font size while it overflows, with a bounded loop
+      let guard = 20;
+      while (frontSpan.scrollWidth > available && size > minPx && guard-- > 0){
+        size -= 2;
+        frontSpan.style.fontSize = size + 'px';
+      }
+    }
+    // Fit as we type (throttled via rAF)
+    let fitScheduled = false;
+    const scheduleFit = () => {
+      if (fitScheduled) return; fitScheduled = true;
+      requestAnimationFrame(() => { fitScheduled = false; fitFront(); });
+    };
+    // Hook into typing loop
+    const oldTypeFront = typeFront;
+    typeFront = function(){ oldTypeFront(); scheduleFit(); };
+    // Also fit once now and on resize
+    fitFront();
+    window.addEventListener('resize', fitFront);
   }
 
   const note = document.getElementById("note");
