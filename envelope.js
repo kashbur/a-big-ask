@@ -22,7 +22,7 @@ const STYLE = `
 .note-front span{ padding:0; border-radius:0; background:none; display:inline-block; will-change:contents; opacity:1; max-width:92%; white-space:normal; word-break:break-word; hyphens:auto; text-align:center; }
 
 /* BACK */
-.note-back{ transform:rotateY(180deg); flex-direction:column; text-align:center; color:#1f1f1f; font-family:"Courier New", monospace; justify-content:center; align-items:center; }
+.note-back{ transform:rotateY(180deg); flex-direction:column; text-align:center; color:#1f1f1f; font-family:"Courier New", monospace; justify-content:center; align-items:center; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 .note-body{ margin:0; white-space:pre-wrap; font-size:clamp(16px,3.6vw,20px); line-height:1.25; text-align:center; }
 .note-body.typewriter{ overflow:hidden; white-space:pre-wrap; width:100%; animation: fadeIn .2s ease-in forwards; }
 
@@ -91,6 +91,7 @@ function mountNote() {
   const note = document.getElementById("note");
   const cont = document.getElementById("noteContinue");
   const wrap = document.getElementById("noteWrap");
+  let initialNoteH = null;
 
   // ----- Front text type-in + auto-fit -----
   const frontSpan = overlay.querySelector('.note-front span');
@@ -154,6 +155,16 @@ function mountNote() {
     if (i < chars.length){
       bodyEl.textContent += chars[i];
       const ch = chars[i]; i++;
+
+      // Grow the note height progressively up to 80vh
+      requestAnimationFrame(() => {
+        const desired = bodyEl.scrollHeight + 36; // padding 18*2
+        const maxH = Math.floor(window.innerHeight * 0.8);
+        const minH = Math.max(initialNoteH || Math.round(note.clientWidth * 2 / 3), 220);
+        const targetH = Math.max(minH, Math.min(maxH, desired));
+        note.style.height = targetH + 'px';
+      });
+
       let delay = 65; if(/[.,!?]/.test(ch)) delay = 380; else if(/[\n]/.test(ch)) delay = 500;
       setTimeout(typeNext, delay);
     } else {
@@ -162,7 +173,16 @@ function mountNote() {
     }
   }
   // Start typing when flipped to back (only once)
-  note.addEventListener('transitionend', () => { if (note.classList.contains('is-flipped') && !typingStarted) { typingStarted = true; bodyEl.textContent=''; i=0; typeNext(); } });
+  note.addEventListener('transitionend', () => {
+    if (note.classList.contains('is-flipped') && !typingStarted) {
+      typingStarted = true;
+      // Capture the starting height so we grow from the front's size
+      initialNoteH = note.clientHeight || Math.round(note.clientWidth * 2 / 3);
+      bodyEl.textContent = '';
+      i = 0;
+      typeNext();
+    }
+  });
 
   // Continue button dismiss
   cont.addEventListener('click', (e)=>{
