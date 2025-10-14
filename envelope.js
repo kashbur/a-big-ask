@@ -112,7 +112,11 @@ function mountNote() {
   const toName = (p.to || p.name || "").trim();
   const frontText = toName ? `To ${toName}` : "To you";
   // Remove title variable, fold greeting into body
-  const body = ((p.title ? p.title + ",\n" : (toName ? toName + ",\n" : "")) + (p.body || "you've always been by my side.\nI can't imagine doing the next chapter without you.")).replace(/\\n/g,"\n");
+  let greeting = "";
+  if (p.title) greeting = p.title;
+  else if (toName) greeting = toName;
+
+  const body = ((greeting ? greeting + ",\n\n" : "") + (p.body || "you've always been by my side.\nI can't imagine doing the next chapter without you.")).replace(/\\n/g, "\n");
   const paper = (p.paper && /^#([0-9A-F]{3}){1,2}$/i.test(p.paper)) ? p.paper : DEFAULT_PAPER;
   const continueLabel = (p.continueprompt || "Tap to continue").trim() || DEFAULT_CONTINUE;
 
