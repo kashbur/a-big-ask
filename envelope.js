@@ -4,6 +4,7 @@ const DEFAULT_PAPER = "#f2e6d0";
 const DEFAULT_CONTINUE = "Tap to continue";
 
 const STYLE = `
+@import url('https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&display=swap');
 .note-wrap{
   position:absolute; inset:0; display:grid; place-items:center;
   z-index:1001; perspective:1000px;
@@ -21,10 +22,14 @@ const STYLE = `
 }
 .note-front, .note-back{ display:flex; align-items:center; justify-content:center; padding:18px; }
 .note-front{
-  font: 800 clamp(20px,4.5vw,28px)/1.1 "Courier New", monospace;
+  font: italic 600 clamp(28px,5vw,36px)/1.1 "Tangerine", cursive;
   color:#1f1f1f;
 }
-.note-front span{ background:rgba(0,0,0,.06); padding:.25em .5em; border-radius:8px; }
+.note-front span{
+  padding:0;
+  border-radius:0;
+  background:none;
+}
 .note-back{
   transform:rotateY(180deg);
   flex-direction:column; text-align:left; color:#1f1f1f;
