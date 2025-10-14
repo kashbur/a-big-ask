@@ -79,9 +79,9 @@ const STYLE = `
 
 .note-continue{
   position:absolute; bottom:clamp(28px,9vh,72px); left:50%; transform:translateX(-50%);
-  padding:.85rem 2.2rem; border-radius:999px; border:none;
-  background:#1f1f1f; color:#fff; font:600 16px "Courier New", monospace;
-  letter-spacing:.02em; box-shadow:0 10px 24px rgba(0,0,0,.22);
+  padding:.85rem 2.2rem; border-radius:999px; border:1.5px solid #a37b4c;
+  background: var(--paper, #f2e6d0); color:#1f1f1f; font:600 16px "Courier New", monospace;
+  letter-spacing:.02em; box-shadow:0 6px 14px rgba(0,0,0,.18);
   opacity:0; pointer-events:none; transition:opacity .28s, transform .28s; transform:translate(-50%,8px);
 }
 .note-continue.is-visible{ opacity:1; pointer-events:auto; transform:translate(-50%,0); }
