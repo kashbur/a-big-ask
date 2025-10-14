@@ -149,8 +149,13 @@ const STYLE = `
 }
 @keyframes paper-out {
   0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(0, -115%, 0); }
+  100% { transform: translate3d(0, 115%, 0); }
 }
+@keyframes env-dismiss {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-12px) scale(0.98); }
+}
+.env.is-dismissing { animation: env-dismiss 320ms ease forwards; }
 
 /* Staged unfold: top flap → paper → side flaps */
 .env.is-opening { /* container stays put; stagger children */ }
@@ -332,6 +337,10 @@ function mountEnvelope() {
     if (hasDismissed) return;
     hasDismissed = true;
     canDismiss = false;
+    // Play a quick fade/slide on the envelope before removing overlay
+    if (env && env.classList) {
+      env.classList.add("is-dismissing");
+    }
     if (continueButton) {
       continueButton.disabled = true;
       continueButton.classList.remove("is-visible");
