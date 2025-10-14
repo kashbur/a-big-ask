@@ -110,6 +110,13 @@ function mountNote() {
   const wrap = document.getElementById("noteWrap");
   let initialNoteH = null;
 
+  // Base height for the FRONT (3:2) – keep front fixed
+  function baseHeight(){ return Math.round(note.clientWidth * 2 / 3); }
+  function setFrontHeight(){ note.style.height = baseHeight() + 'px'; }
+  // initialize once in case stylesheet hasn't applied yet
+  setFrontHeight();
+  window.addEventListener('resize', () => { if (!note.classList.contains('is-flipped')) setFrontHeight(); });
+
   // Allow continue anywhere after typing completes
   let allowContinue = false;
   function dismiss(e){
@@ -193,6 +200,12 @@ function mountNote() {
     // hide front prompt once flipped
     const fp = document.getElementById('noteFrontPrompt');
     if (fp) fp.classList.remove('is-visible');
+    // if returning to FRONT, reset to fixed base height
+    if (!note.classList.contains('is-flipped')) {
+      allowContinue = false;
+      cont.classList.remove('is-visible');
+      setFrontHeight();
+    }
   };
   note.addEventListener('click', flip);
   note.addEventListener('touchstart', (e)=>{ e.preventDefault(); e.stopPropagation(); flip(e); }, { passive:false });
@@ -241,8 +254,9 @@ function mountNote() {
   note.addEventListener('transitionend', () => {
     if (note.classList.contains('is-flipped') && !typingStarted) {
       typingStarted = true;
-      // Capture initial height to grow from
-      initialNoteH = note.clientHeight;
+      // Start growth from the fixed front base height
+      initialNoteH = baseHeight();
+      note.style.height = initialNoteH + 'px';
       bodyEl.textContent = '';
       i = 0;
       typeNext();
