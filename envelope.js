@@ -17,9 +17,18 @@ const STYLE = `
 .note-pane{ position:absolute; inset:0; border-radius:14px; background: var(--paper, ${DEFAULT_PAPER}); box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06); backface-visibility:hidden; border:1.5px solid #a37b4c; }
 
 /* FRONT */
-.note-front, .note-back{ display:flex; align-items:center; justify-content:center; padding:18px; }
-.note-front{ font-family:'Boho', cursive; font-weight:700; font-size: clamp(42px,7vw,64px); line-height:1.1; color:#1f1f1f; letter-spacing:.02em; text-align:center; }
+.note-front{ position:relative; font-family:'Boho', cursive; font-weight:700; font-size: clamp(42px,7vw,64px); line-height:1.1; color:#1f1f1f; letter-spacing:.02em; text-align:center; }
 .note-front span{ padding:0; border-radius:0; background:none; display:inline-block; will-change:contents; opacity:1; max-width:92%; white-space:normal; word-break:break-word; hyphens:auto; text-align:center; }
+
+/* Front-side hint */
+.note-front-prompt{
+  position:absolute; bottom:10%; left:50%; transform:translateX(-50%) translateY(4px);
+  font:600 14px "Courier New", monospace; letter-spacing:.06em;
+  color: rgba(0,0,0,.7); text-shadow:0 1px 2px rgba(255,255,255,.5);
+  opacity:0; pointer-events:none; transition:opacity .35s ease, transform .35s ease;
+}
+.note-front-prompt.is-visible{ opacity:1; transform:translateX(-50%) translateY(0); animation:pulseHint 1.6s ease-in-out infinite; }
+@keyframes pulseHint{ 0%,100%{opacity:.9} 50%{opacity:.45} }
 
 /* BACK */
 .note-back{ transform:rotateY(180deg); flex-direction:column; text-align:center; color:#1f1f1f; font-family:"Courier New", monospace; justify-content:center; align-items:center; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
@@ -79,7 +88,7 @@ function mountNote() {
   overlay.insertAdjacentHTML("beforeend", `
     <div class="note-wrap" id="noteWrap" style="--paper:${paper}">
       <div class="note" id="note">
-        <div class="note-pane note-front"><span>${frontText}</span></div>
+        <div class="note-pane note-front"><span>${frontText}</span><div class="note-front-prompt" id="noteFrontPrompt">Tap to flip</div></div>
         <div class="note-pane note-back">
           <p class="note-body">${body}</p>
         </div>
@@ -108,6 +117,7 @@ function mountNote() {
 
   // ----- Front text type-in + auto-fit -----
   const frontSpan = overlay.querySelector('.note-front span');
+  const frontPrompt = overlay.querySelector('#noteFrontPrompt');
   if (frontSpan) {
     const fullFront = frontSpan.textContent.trim();
     frontSpan.textContent = '';
@@ -120,6 +130,9 @@ function mountNote() {
         fi++;
         let d = 70; if (ch === ' ') d = 90; if (/[.,!?]/.test(ch)) d = 220;
         setTimeout(typeFront, d);
+      } else {
+        // reveal subtle prompt after a short beat
+        if (frontPrompt) setTimeout(()=> frontPrompt.classList.add('is-visible'), 300);
       }
     };
 
@@ -161,7 +174,13 @@ function mountNote() {
   }
 
   // ----- Flip handling & prevent overlay dismissal -----
-  const flip = (e) => { if (e){ e.preventDefault(); e.stopPropagation(); } note.classList.toggle('is-flipped'); };
+  const flip = (e) => {
+    if (e){ e.preventDefault(); e.stopPropagation(); }
+    note.classList.toggle('is-flipped');
+    // hide front prompt once flipped
+    const fp = document.getElementById('noteFrontPrompt');
+    if (fp) fp.classList.remove('is-visible');
+  };
   note.addEventListener('click', flip);
   note.addEventListener('touchstart', (e)=>{ e.preventDefault(); e.stopPropagation(); flip(e); }, { passive:false });
   note.addEventListener('pointerdown', (e)=> e.stopPropagation());
