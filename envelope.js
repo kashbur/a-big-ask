@@ -139,6 +139,18 @@ function mountNote() {
         frontSpan.style.lineHeight = (size < 40) ? '1.05' : '1.1';
         frontSpan.style.letterSpacing = (size < 36) ? '0.01em' : '0.02em';
       }
+      // After sizing, if the name wraps to multiple lines, open up the line spacing a bit
+      const cs2 = window.getComputedStyle(frontSpan);
+      const fs = parseFloat(cs2.fontSize) || size;
+      const lhCurrent = cs2.lineHeight === 'normal' ? fs * 1.15 : parseFloat(cs2.lineHeight);
+      const linesApprox = Math.round(frontSpan.scrollHeight / (lhCurrent || fs));
+      if (linesApprox >= 2) {
+        // More breathing room for multi-line names
+        frontSpan.style.lineHeight = (size < 36) ? '1.28' : '1.22';
+      } else {
+        // Single line: keep it tight and elegant
+        frontSpan.style.lineHeight = (size < 40) ? '1.05' : '1.1';
+      }
     }
     let fitScheduled = false;
     const scheduleFit = () => { if (fitScheduled) return; fitScheduled = true; requestAnimationFrame(() => { fitScheduled = false; fitFront(); }); };
