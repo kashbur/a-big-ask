@@ -91,6 +91,7 @@ function mountNote() {
   const note = document.getElementById("note");
   const cont = document.getElementById("noteContinue");
   const wrap = document.getElementById("noteWrap");
+  let initialNoteH = null;
 
   // Allow continue anywhere after typing completes
   let allowContinue = false;
@@ -172,6 +173,16 @@ function mountNote() {
     if (i < chars.length){
       bodyEl.textContent += chars[i];
       const ch = chars[i]; i++;
+
+      // Grow the note height progressively up to 80vh
+      requestAnimationFrame(() => {
+        const desired = bodyEl.scrollHeight + 36; // padding 18*2
+        const maxH = Math.floor(window.innerHeight * 0.8);
+        const minH = Math.max(initialNoteH || note.clientHeight, 220);
+        const targetH = Math.max(minH, Math.min(maxH, desired));
+        note.style.height = targetH + 'px';
+      });
+
       let delay = 65; if(/[.,!?]/.test(ch)) delay = 380; else if(/[\n]/.test(ch)) delay = 500;
       setTimeout(typeNext, delay);
     } else {
@@ -186,16 +197,8 @@ function mountNote() {
   note.addEventListener('transitionend', () => {
     if (note.classList.contains('is-flipped') && !typingStarted) {
       typingStarted = true;
-      // Pre-measure full text to grow the card (up to 80vh) before typing
-      const prev = bodyEl.textContent;
-      bodyEl.textContent = fullText; // render full to measure
-      // compute desired height = content height + inner padding (18*2)
-      const desired = bodyEl.scrollHeight + 36;
-      const maxH = Math.floor(window.innerHeight * 0.8);
-      const minH = Math.max(note.clientHeight, 220);
-      const targetH = Math.max(minH, Math.min(maxH, desired));
-      note.style.height = targetH + 'px';
-      // reset and begin typing
+      // Capture initial height to grow from
+      initialNoteH = note.clientHeight;
       bodyEl.textContent = '';
       i = 0;
       typeNext();
