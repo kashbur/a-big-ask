@@ -1,6 +1,6 @@
 // Envelope landing animation integration
 const DEFAULT_LETTER_COLOR = "#f2e6d0";
-const OPEN_DURATION_MS = 2400;
+const OPEN_DURATION_MS = 2000;
 const AUTOCLOSE_OVERLAY = false;
 const DEFAULT_CONTINUE_PROMPT = "Tap to continue";
 
@@ -83,6 +83,8 @@ const STYLE = `
   display: grid;
   place-items: center;
   padding: 16px;
+  z-index: 2;
+  transition: opacity 0.2s ease;
 }
 .env-mailme {
   text-align: center;
@@ -90,7 +92,7 @@ const STYLE = `
   font-weight: 700;
   font-size: clamp(16px, 3.6vw, 28px);
 }
-.env-back { transform: rotateY(180deg) translateZ(1px); }
+.env-back { transform: none; z-index: 1; }
 .env-letter {
   position: absolute;
   top: 6px; left: 10px; right: 10px; bottom: 6px;
@@ -116,6 +118,7 @@ const STYLE = `
 .env-flap-bottom { transform-origin: bottom center; }
 .env-flap-left   { transform-origin: left center; }
 .env-flap-right  { transform-origin: right center; }
+.env-flap-top, .env-flap-bottom, .env-flap-left, .env-flap-right { transform: none; }
 
 /* New flap geometry using clip-path so edges meet cleanly */
 .env-flap { background: var(--env-panel-bg); }
@@ -146,11 +149,12 @@ const STYLE = `
 }
 @keyframes paper-out {
   0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(0, -62vh, 0); }
+  100% { transform: translate3d(0, -115%, 0); }
 }
 
 /* Staged unfold: top flap → paper → side flaps */
 .env.is-opening { /* container stays put; stagger children */ }
+.env.is-opening .env-front { opacity: 0; }
 .env.is-opening .env-flap-top  { animation: flap-top-open 0.7s ease-out 0s forwards; }
 .env.is-opening .env-letter    { animation: paper-out     0.9s ease-out 0.55s forwards; }
 .env.is-opening .env-flap-left { animation: flap-left-open 0.7s ease-out 1.2s forwards; }
