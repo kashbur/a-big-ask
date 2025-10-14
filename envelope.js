@@ -22,8 +22,9 @@ const STYLE = `
 }
 .note-front, .note-back{ display:flex; align-items:center; justify-content:center; padding:18px; }
 .note-front{
-  font: italic 600 clamp(28px,5vw,36px)/1.1 "Tangerine", cursive;
+  font: italic 700 clamp(42px,7vw,64px)/1.1 "Tangerine", cursive;
   color:#1f1f1f;
+  letter-spacing: 0.02em;
 }
 .note-front span{
   padding:0;
