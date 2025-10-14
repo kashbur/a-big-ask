@@ -30,13 +30,23 @@ const STYLE = `
   border-radius:0;
   background:none;
 }
-.note-back{
-  transform:rotateY(180deg);
-  flex-direction:column; text-align:left; color:#1f1f1f;
-  font-family:"Courier New", monospace;
+.note-back {
+  transform: rotateY(180deg);
+  flex-direction: column;
+  text-align: center;
+  color: #1f1f1f;
+  font-family: "Courier New", monospace;
+  justify-content: center;
+  align-items: center;
 }
 .note-title{ margin:0 0 .4em 0; font-weight:800; font-size:clamp(18px,4vw,24px); }
-.note-body{ margin:0; white-space:pre-wrap; font-size:clamp(16px,3.6vw,20px); line-height:1.25; }
+.note-body {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: clamp(16px, 3.6vw, 20px);
+  line-height: 1.25;
+  text-align: center;
+}
 
 .note-body.typewriter {
   overflow: hidden;
