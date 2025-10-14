@@ -94,12 +94,23 @@ function mountNote() {
 
   const note = document.getElementById("note");
   const cont = document.getElementById("noteContinue");
+  const wrap = document.getElementById("noteWrap");
+  if (wrap) {
+    wrap.addEventListener("click", (e) => e.stopPropagation());
+    wrap.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
+    wrap.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
 
-  // flip on click/tap/Enter/Space
-  const flip = () => note.classList.toggle("is-flipped");
+  // flip on click/tap/Enter/Space (cancel bubbling so overlay doesn't dismiss)
+  const flip = (e) => {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    note.classList.toggle("is-flipped");
+  };
   note.addEventListener("click", flip);
-  note.addEventListener("keydown", e => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(); }
+  note.addEventListener("touchstart", (e) => { e.preventDefault(); e.stopPropagation(); flip(e); }, { passive: false });
+  note.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
+  note.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); flip(e); }
   });
   note.tabIndex = 0;
   note.setAttribute("role","button");
@@ -117,10 +128,11 @@ function mountNote() {
   });
 
   // continue → remove overlay
-  cont.addEventListener("click", () => {
+  cont.addEventListener("click", (e) => {
+    e.stopPropagation();
     overlay.style.opacity = "0";
     overlay.style.pointerEvents = "none";
-    setTimeout(()=> overlay.remove(), 420);
+    setTimeout(() => overlay.remove(), 420);
   });
 }
 
