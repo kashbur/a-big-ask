@@ -13,7 +13,7 @@ const STYLE = `
 }
 
 .note-wrap{ position:absolute; inset:0; display:grid; place-items:center; z-index:1001; perspective:1000px; }
-.note{ width:min(86vw,360px); aspect-ratio:3/2; position:relative; transform-style:preserve-3d; cursor:pointer; transition:height .35s ease, transform .8s cubic-bezier(.22,.61,.36,1), filter .8s ease; will-change: transform,height; filter: drop-shadow(0 12px 24px rgba(0,0,0,.18)); transform-origin:center; }
+.note{ width:min(86vw,360px); height: calc(min(86vw,360px) * 2 / 3); aspect-ratio:3/2; position:relative; transform-style:preserve-3d; cursor:pointer; transition:height .35s ease, transform .8s cubic-bezier(.22,.61,.36,1), filter .8s ease; will-change: transform,height; filter: drop-shadow(0 12px 24px rgba(0,0,0,.18)); transform-origin:center; }
 .note-pane{ position:absolute; inset:0; border-radius:14px; background: var(--paper, #f2e6d0); box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06); backface-visibility:hidden; border:1.5px solid #a37b4c; }
 
 .note-front, .note-back{ display:flex; align-items:center; justify-content:center; padding:18px; backface-visibility:hidden; transform-style:preserve-3d; transition: opacity .35s ease; }
@@ -97,6 +97,11 @@ function mountNote() {
   let initialNoteH = null;
   let hasFlipped = false;
 
+  // Ensure a concrete starting height (some browsers with aspect-ratio + transforms can report 0 during flip)
+  function setBaseHeight(){ note.style.height = Math.round(note.clientWidth * 2 / 3) + 'px'; }
+  setBaseHeight();
+  window.addEventListener('resize', () => { if (!note.classList.contains('is-flipped')) setBaseHeight(); });
+
   // ----- Front text type-in + auto-fit -----
   const frontSpan = overlay.querySelector('.note-front span');
   if (frontSpan) {
@@ -170,8 +175,9 @@ function mountNote() {
       bodyEl.textContent += chars[i];
       const ch = chars[i]; i++;
 
-      // Grow the note height progressively up to 80vh
+      // Grow the note height progressively up to 80vh (only when back is showing)
       requestAnimationFrame(() => {
+        if (!note.classList.contains('is-flipped')) return;
         const desired = bodyEl.scrollHeight + 36; // padding 18*2
         const maxH = Math.floor(window.innerHeight * 0.8);
         const minH = Math.max(initialNoteH || Math.round(note.clientWidth * 2 / 3), 220);
@@ -191,7 +197,8 @@ function mountNote() {
     if (note.classList.contains('is-flipped') && !typingStarted) {
       typingStarted = true;
       // Capture the starting height so we grow from the front's size
-      initialNoteH = note.clientHeight || Math.round(note.clientWidth * 2 / 3);
+      initialNoteH = note.clientHeight;
+      if (!initialNoteH || initialNoteH <= 1) { initialNoteH = Math.round(note.clientWidth * 2 / 3); note.style.height = initialNoteH + 'px'; }
       bodyEl.textContent = '';
       i = 0;
       typeNext();
