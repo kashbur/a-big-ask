@@ -45,7 +45,7 @@ const STYLE = `
 
 /* Flip */
 .note.is-flipped{ transform:rotateY(180deg); transition:transform .6s cubic-bezier(.22,.61,.36,1); }
-.note:not(.is-flipped){ transition:transform .6s cubic-bezier(.22,.61,.36,1); }
+.note:not(.is-flipped){ transition:transform .6s cubic-bezier(.22,.61,.36,1); height: calc(min(86vw, 360px) * 2 / 3) !important; }
 
 /* Continue (text only) */
 .note-continue{ position:absolute; bottom:clamp(6px,4vh,56px); left:50%; transform:translateX(-50%); background:none; border:none; box-shadow:none; padding:0; color:#fff; font:600 18px "Courier New", monospace; letter-spacing:.05em; text-shadow:0 0 6px rgba(0,0,0,.4); opacity:0; pointer-events:none; transition:opacity .28s, transform .28s; transform:translate(-50%,8px); }
@@ -204,6 +204,7 @@ function mountNote() {
     if (!note.classList.contains('is-flipped')) {
       allowContinue = false;
       cont.classList.remove('is-visible');
+      note.style.removeProperty('height');
       setFrontHeight();
     }
   };
@@ -231,8 +232,9 @@ function mountNote() {
       bodyEl.textContent += chars[i];
       const ch = chars[i]; i++;
 
-      // Grow the note height progressively up to 80vh
+      // Grow the note height progressively up to 80vh (back side only)
       requestAnimationFrame(() => {
+        if (!note.classList.contains('is-flipped')) return;
         const desired = bodyEl.scrollHeight + 36; // padding 18*2
         const maxH = Math.floor(window.innerHeight * 0.8);
         const minH = Math.max(initialNoteH || note.clientHeight, 220);
