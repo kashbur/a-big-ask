@@ -29,6 +29,9 @@ const STYLE = `
   padding:0;
   border-radius:0;
   background:none;
+  display:inline-block;
+  will-change: contents;
+  opacity:1;
 }
 .note-back {
   transform: rotateY(180deg);
@@ -137,6 +140,28 @@ function mountNote() {
     </div>
   `);
 
+  // --- Front text type-in animation ("To X") ---
+  const frontSpan = overlay.querySelector('.note-front span');
+  if (frontSpan) {
+    const fullFront = frontSpan.textContent.trim();
+    frontSpan.textContent = '';
+    const fchars = [...fullFront];
+    let fi = 0;
+    function typeFront(){
+      if (fi < fchars.length){
+        frontSpan.textContent += fchars[fi];
+        const ch = fchars[fi];
+        fi++;
+        let d = 70;            // base speed for cursive write
+        if (ch === ' ') d = 90; // slight pause on spaces
+        if (/[.,!?]/.test(ch)) d = 220; // linger on punctuation
+        setTimeout(typeFront, d);
+      }
+    }
+    // small initial stagger for a natural feel
+    setTimeout(typeFront, 180);
+  }
+
   const note = document.getElementById("note");
   const cont = document.getElementById("noteContinue");
 
@@ -147,6 +172,8 @@ function mountNote() {
 
   const chars = [...fullText];
   let i = 0;
+  let typingStarted = false;
+  let typingDone = false;
   function typeNext(){
     if (i < chars.length){
       bodyEl.textContent += chars[i];
@@ -156,11 +183,16 @@ function mountNote() {
       if(/[.,!?]/.test(ch)) delay = 300;
       else if(/[\n]/.test(ch)) delay = 400;
       setTimeout(typeNext, delay);
+    } else {
+      typingDone = true;
+      cont.classList.add('is-visible');
+      cont.focus?.();
     }
   }
-  // Start typing when back of note is shown
+  // Start typing when back of note is shown (only once)
   note.addEventListener('transitionend', () => {
-    if(note.classList.contains('is-flipped')){
+    if (note.classList.contains('is-flipped') && !typingStarted) {
+      typingStarted = true;
       bodyEl.textContent = '';
       i = 0;
       typeNext();
@@ -189,16 +221,7 @@ function mountNote() {
   note.setAttribute("role","button");
   note.setAttribute("aria-label","Flip note");
 
-  // after first flip to back, show continue
-  let shown = false;
-  note.addEventListener("transitionend", () => {
-    const onBack = note.classList.contains("is-flipped");
-    if (onBack && !shown) {
-      shown = true;
-      cont.classList.add("is-visible");
-      cont.focus?.();
-    }
-  });
+  // (continue button is now shown after typewriter animation completes)
 
   // continue → remove overlay
   cont.addEventListener("click", (e) => {
