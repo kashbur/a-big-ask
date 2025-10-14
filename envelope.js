@@ -13,7 +13,7 @@ const STYLE = `
 }
 
 .note-wrap{ position:absolute; inset:0; display:grid; place-items:center; z-index:1001; perspective:1000px; }
-.note{ width:min(86vw,360px); aspect-ratio:3/2; position:relative; transform-style:preserve-3d; cursor:pointer; }
+.note{ width:min(86vw,360px); aspect-ratio:3/2; position:relative; transform-style:preserve-3d; cursor:pointer; transition:height .35s ease; }
 .note-pane{ position:absolute; inset:0; border-radius:14px; background: var(--paper, ${DEFAULT_PAPER}); box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06); backface-visibility:hidden; border:1.5px solid #a37b4c; }
 
 /* FRONT */
@@ -22,7 +22,7 @@ const STYLE = `
 .note-front span{ padding:0; border-radius:0; background:none; display:inline-block; will-change:contents; opacity:1; max-width:92%; white-space:normal; word-break:break-word; hyphens:auto; text-align:center; }
 
 /* BACK */
-.note-back{ transform:rotateY(180deg); flex-direction:column; text-align:center; color:#1f1f1f; font-family:"Courier New", monospace; justify-content:center; align-items:center; }
+.note-back{ transform:rotateY(180deg); flex-direction:column; text-align:center; color:#1f1f1f; font-family:"Courier New", monospace; justify-content:center; align-items:center; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 .note-body{ margin:0; white-space:pre-wrap; font-size:clamp(16px,3.6vw,20px); line-height:1.25; text-align:center; }
 .note-body.typewriter{ overflow:hidden; white-space:pre-wrap; width:100%; animation: fadeIn .2s ease-in forwards; }
 
@@ -183,7 +183,24 @@ function mountNote() {
     }
   }
   // Start typing when flipped to back (only once)
-  note.addEventListener('transitionend', () => { if (note.classList.contains('is-flipped') && !typingStarted) { typingStarted = true; bodyEl.textContent=''; i=0; typeNext(); } });
+  note.addEventListener('transitionend', () => {
+    if (note.classList.contains('is-flipped') && !typingStarted) {
+      typingStarted = true;
+      // Pre-measure full text to grow the card (up to 80vh) before typing
+      const prev = bodyEl.textContent;
+      bodyEl.textContent = fullText; // render full to measure
+      // compute desired height = content height + inner padding (18*2)
+      const desired = bodyEl.scrollHeight + 36;
+      const maxH = Math.floor(window.innerHeight * 0.8);
+      const minH = Math.max(note.clientHeight, 220);
+      const targetH = Math.max(minH, Math.min(maxH, desired));
+      note.style.height = targetH + 'px';
+      // reset and begin typing
+      bodyEl.textContent = '';
+      i = 0;
+      typeNext();
+    }
+  });
 
   // Continue button dismiss
   cont.addEventListener('click', tryDismiss);
