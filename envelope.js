@@ -92,6 +92,19 @@ function mountNote() {
   const cont = document.getElementById("noteContinue");
   const wrap = document.getElementById("noteWrap");
 
+  // Allow continue anywhere after typing completes
+  let allowContinue = false;
+  function dismiss(e){
+    if (e) e.stopPropagation();
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    setTimeout(()=> overlay.remove(), 420);
+  }
+  function tryDismiss(e){
+    if (!allowContinue) return; // ignore until typing+delay are done
+    dismiss(e);
+  }
+
   // ----- Front text type-in + auto-fit -----
   const frontSpan = overlay.querySelector('.note-front span');
   if (frontSpan) {
@@ -143,6 +156,11 @@ function mountNote() {
   note.tabIndex = 0; note.setAttribute('role','button'); note.setAttribute('aria-label','Flip note');
   if (wrap){ wrap.addEventListener('click', (e)=> e.stopPropagation()); wrap.addEventListener('touchstart', (e)=> e.stopPropagation(), { passive:true }); wrap.addEventListener('pointerdown', (e)=> e.stopPropagation()); }
 
+  // Once allowed, clicking/tapping anywhere (overlay or outside note) continues
+  overlay.addEventListener('click', tryDismiss);
+  overlay.addEventListener('touchstart', (e)=> { if (allowContinue) { e.preventDefault(); tryDismiss(e); } }, { passive:false });
+  document.addEventListener('keydown', (e)=> { if (allowContinue && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); tryDismiss(e); } });
+
   // ----- Back typewriter -----
   const bodyEl = document.querySelector('.note-body');
   const fullText = bodyEl.textContent.trim();
@@ -158,18 +176,17 @@ function mountNote() {
       setTimeout(typeNext, delay);
     } else {
       typingDone = true;
-      setTimeout(() => { cont.classList.add('is-visible'); cont.focus?.(); }, 1000);
+      setTimeout(() => {
+        allowContinue = true; // enable anywhere-to-continue
+        cont.classList.add('is-visible');
+      }, 1000);
     }
   }
   // Start typing when flipped to back (only once)
   note.addEventListener('transitionend', () => { if (note.classList.contains('is-flipped') && !typingStarted) { typingStarted = true; bodyEl.textContent=''; i=0; typeNext(); } });
 
   // Continue button dismiss
-  cont.addEventListener('click', (e)=>{
-    e.stopPropagation();
-    overlay.style.opacity = '0'; overlay.style.pointerEvents = 'none';
-    setTimeout(()=> overlay.remove(), 420);
-  });
+  cont.addEventListener('click', tryDismiss);
 }
 
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountNote); else mountNote();
