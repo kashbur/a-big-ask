@@ -194,8 +194,11 @@ function mountNote() {
       setTimeout(typeNext, delay);
     } else {
       typingDone = true;
-      cont.classList.add('is-visible');
-      cont.focus?.();
+      // show continue after a short pause
+      setTimeout(() => {
+        cont.classList.add('is-visible');
+        cont.focus?.();
+      }, 1000);
     }
   }
   // Start typing when back of note is shown (only once)
