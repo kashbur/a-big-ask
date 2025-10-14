@@ -5,6 +5,11 @@ const DEFAULT_CONTINUE = "Tap to continue";
 
 const STYLE = `
 @import url('https://fonts.googleapis.com/css2?family=Tangerine:wght@400;700&display=swap');
+@font-face {
+  font-family: 'Boho';
+  src: url('Boho.otf') format('opentype');
+  font-display: swap;
+}
 .note-wrap{
   position:absolute; inset:0; display:grid; place-items:center;
   z-index:1001; perspective:1000px;
@@ -22,7 +27,10 @@ const STYLE = `
 }
 .note-front, .note-back{ display:flex; align-items:center; justify-content:center; padding:18px; }
 .note-front{
-  font: italic 700 clamp(42px,7vw,64px)/1.1 "Tangerine", cursive;
+  font-family: 'Boho', cursive;
+  font-weight: 700;
+  font-size: clamp(42px,7vw,64px);
+  line-height: 1.1;
   color:#1f1f1f;
   letter-spacing: 0.02em;
 }
