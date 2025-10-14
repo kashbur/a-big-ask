@@ -188,9 +188,9 @@ function mountNote() {
       bodyEl.textContent += chars[i];
       const ch = chars[i];
       i++;
-      let delay = 45;
-      if(/[.,!?]/.test(ch)) delay = 300;
-      else if(/[\n]/.test(ch)) delay = 400;
+      let delay = 65;
+      if(/[.,!?]/.test(ch)) delay = 380;
+      else if(/[\n]/.test(ch)) delay = 500;
       setTimeout(typeNext, delay);
     } else {
       typingDone = true;
