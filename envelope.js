@@ -31,7 +31,7 @@ const STYLE = `
 .note:not(.is-flipped){ transition:transform .6s cubic-bezier(.22,.61,.36,1); }
 
 /* Continue (text only) */
-.note-continue{ position:absolute; bottom:clamp(28px,9vh,72px); left:50%; transform:translateX(-50%); background:none; border:none; box-shadow:none; padding:0; color:#fff; font:600 18px "Courier New", monospace; letter-spacing:.05em; text-shadow:0 0 6px rgba(0,0,0,.4); opacity:0; pointer-events:none; transition:opacity .28s, transform .28s; transform:translate(-50%,8px); }
+.note-continue{ position:absolute; bottom:clamp(18px,12vh,96px); left:50%; transform:translateX(-50%); background:none; border:none; box-shadow:none; padding:0; color:#fff; font:600 18px "Courier New", monospace; letter-spacing:.05em; text-shadow:0 0 6px rgba(0,0,0,.4); opacity:0; pointer-events:none; transition:opacity .28s, transform .28s; transform:translate(-50%,8px); }
 .note-continue.is-visible{ opacity:1; pointer-events:auto; transform:translate(-50%,0); animation:pulseText 1.6s ease-in-out infinite; }
 
 @keyframes pulseText { 0%,100%{opacity:.85} 50%{opacity:.35} }
