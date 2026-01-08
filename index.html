@@ -481,59 +481,15 @@
         return params;
       }
 
-      const isValidHex = (str) => /^#([0-9A-F]{3}){1,2}$/i.test(str);
-
-      function sanitizeColor(value, fallback) {
-        if (!value) return fallback;
-        value = value.trim();
-        if (isValidHex(value)) return value;
-        const test = new Option().style;
-        test.color = value;
-        return test.color ? value : fallback;
-      }
 
       function getRevealLinesFromParams(params) {
-        // Defaults
         const lines = [];
-        let photo = params.photo ? decodeURIComponent(params.photo) : "";
-        // Only allow http:, https: or data:image/ URLs for images
-        if (photo && !/^(https?:|data:image\/)/i.test(photo)) {
-          photo = "";
-        }
-        const main =
-          params.message || params.main || "Will you be my bridesmaid?";
-        const sub = params.sub || "";
-        const date = params.date || "";
-        const from = params.from || "";
+        const main = params.reveal || "Will you be my bridesmaid?";
         if (main) lines.push({ type: "main", content: main });
-        if (sub) lines.push({ type: "sub", content: sub });
-        if (date) lines.push({ type: "date", content: date });
-        if (photo) lines.push({ type: "photo", content: photo });
-        if (from) lines.push({ type: "from", content: from });
         return lines;
       }
       function getColorOverlay(params) {
-        // Pink, blue, yellow, green, purple, gold, white, none
-        const input = params.color ? params.color.trim() : "";
-        // Allow custom CSS colors
-        if (isValidHex(input)) return input;
-        const test = new Option().style;
-        test.color = input;
-        if (test.color) return input;
-
-        const color = (input || "beige").toLowerCase();
-        const overlays = {
-          beige: "#f3ddbbcc",
-          pink: "#fcc0c5cc",
-          blue: "#add4fdcc",
-          yellow: "#fef3c7cc",
-          green: "#cbf7d0cc",
-          purple: "#d2c5fccc",
-          gold: "#ffdf9acc",
-          white: "#ffffffcc",
-          none: "transparent",
-        };
-        return overlays[color] || overlays.beige;
+        return "#f3ddbbcc"; // Default beige
       }
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -634,28 +590,8 @@
         );
         const params = getParams();
         const landingOverlay = document.getElementById("landingOverlay");
-        const landingMessageKeys = ["landingmessage", "landingtext"];
-        let landingMessageParam = "";
-        for (const key of landingMessageKeys) {
-          if (params[key]) {
-            landingMessageParam = params[key];
-            break;
-          }
-        }
-        if (landingMessageParam) {
-          try {
-            landingMessageParam = decodeURIComponent(landingMessageParam);
-          } catch (error) {
-            landingMessageParam = landingMessageParam;
-          }
-        }
         const defaultLandingMessage = "Tap to spin and reveal your surprise!";
-        let preparedLandingMessage = landingMessageParam
-          ? landingMessageParam.replace(/\r/g, "")
-          : defaultLandingMessage;
-        preparedLandingMessage = preparedLandingMessage.trim()
-          ? preparedLandingMessage.trim()
-          : defaultLandingMessage;
+        let preparedLandingMessage = defaultLandingMessage;
         const landingCharacters = Array.from(preparedLandingMessage);
         const maxLandingCharacters = 240;
         const displayCharacters =
@@ -719,96 +655,20 @@
           });
         }
 
-        const finalIconMap = {
-          ringflower: "img/ringflower.png",
-          "ringflower.png": "img/ringflower.png",
-          teambride: "img/teambride.png",
-          "teambride.png": "img/teambride.png",
-          girls: "img/girls.png",
-          "girls.png": "img/girls.png",
-        };
-        const safeTextColor = sanitizeColor(params.textcolor, "#ffffff");
-        const safeOutlineColor = sanitizeColor(params.outlinecolor, "#7e5e4f");
+        const finalIcon = "img/ringflower.png";
+        const safeTextColor = "#ffffff";
+        const safeOutlineColor = "#7e5e4f";
 
         const lineColors = {
           main: {
-            text: sanitizeColor(params.maintextcolor, safeTextColor),
-            outline: sanitizeColor(params.mainoutlinecolor, safeOutlineColor),
-          },
-          sub: {
-            text: sanitizeColor(params.subtextcolor, safeTextColor),
-            outline: sanitizeColor(params.suboutlinecolor, safeOutlineColor),
-          },
-          date: {
-            text: sanitizeColor(params.datetextcolor, safeTextColor),
-            outline: sanitizeColor(params.dateoutlinecolor, safeOutlineColor),
-          },
-          from: {
-            text: sanitizeColor(params.fromtextcolor, safeTextColor),
-            outline: sanitizeColor(params.fromoutlinecolor, safeOutlineColor),
+            text: safeTextColor,
+            outline: safeOutlineColor,
           },
         };
         const audioContext = new (window.AudioContext ||
           window.webkitAudioContext)();
 
-        // --------- Font loading logic ---------
-        function loadGoogleFont(familyParam) {
-          if (!familyParam) return Promise.resolve(null);
-          const familyName = familyParam.replace(/\+/g, " ");
-          const link = document.createElement("link");
-          link.href = `https://fonts.googleapis.com/css2?family=${familyParam}&display=swap`;
-          link.rel = "stylesheet";
-          document.head.appendChild(link);
-          return document.fonts
-            .load(`1em ${familyName}`)
-            .then(() => `${familyName}`)
-            .catch(() => `${familyName}`);
-        }
-
-        const fonts = {
-          main: null,
-          sub: null,
-          date: null,
-          from: null,
-        };
-        const fontPromises = [];
-
-        // Global font applied via CSS variable
-        if (params.font) {
-          fontPromises.push(
-            loadGoogleFont(params.font).then((ff) => {
-              if (ff) {
-                document.documentElement.style.setProperty("--font-family", ff);
-                fonts.main = fonts.sub = fonts.date = fonts.from = ff;
-              }
-            }),
-          );
-        }
-
-        fontPromises.push(
-          loadGoogleFont(params.fontmain).then((ff) => {
-            if (ff) fonts.main = ff;
-          }),
-        );
-        fontPromises.push(
-          loadGoogleFont(params.fontsub).then((ff) => {
-            if (ff) fonts.sub = ff;
-          }),
-        );
-        fontPromises.push(
-          loadGoogleFont(params.fontdate).then((ff) => {
-            if (ff) fonts.date = ff;
-          }),
-        );
-        fontPromises.push(
-          loadGoogleFont(params.fontfrom).then((ff) => {
-            if (ff) fonts.from = ff;
-          }),
-        );
-
-        Promise.all(fontPromises).then(() =>
-          document.fonts.ready.then(refitAllLines),
-        );
+        const fonts = { main: null };
 
         // Set overlay color on reveal
         colorOverlay.style.background = "transparent";
@@ -893,9 +753,6 @@
           const spinDuration = 1200;
           const delayStep = 600;
           if (spinCount === 4) {
-            const finalIcon =
-              finalIconMap[(params.finalicon || "").toLowerCase()] ||
-              "img/ringflower.png";
             reels.forEach((reel, i) => {
               const delay = i * delayStep;
               const callback =

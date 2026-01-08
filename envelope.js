@@ -65,18 +65,14 @@ function mountNote() {
   }
 
   const p = params();
-  const toName = (p.to || p.name || "").trim();
+  const toName = (p.name || "").trim();
   const frontText = toName ? `To ${toName}` : "To you";
 
-  // Greeting handling (optional). If body already starts with greeting, don't duplicate.
-  let greeting = "";
-  if (p.title) greeting = p.title; else if (toName) greeting = toName;
-  let bodyText = p.body || "you've always been by my side.\nI can't imagine doing the next chapter without you.";
-  if (greeting && bodyText.trim().startsWith(greeting)) greeting = "";
-  const body = ((greeting ? greeting + ",\n\n" : "") + bodyText).replace(/\\n/g, "\n");
+  const bodyText = p.message || "you've always been by my side.\nI can't imagine doing the next chapter without you.";
+  const body = bodyText.replace(/\\n/g, "\n");
 
-  const paper = (p.paper && /^#([0-9A-F]{3}){1,2}$/i.test(p.paper)) ? p.paper : DEFAULT_PAPER;
-  const continueLabel = (p.continueprompt || DEFAULT_CONTINUE).trim() || DEFAULT_CONTINUE;
+  const paper = DEFAULT_PAPER;
+  const continueLabel = DEFAULT_CONTINUE;
 
   overlay.insertAdjacentHTML("beforeend", `
     <div class="note-wrap" id="noteWrap" style="--paper:${paper}">
