@@ -1,7 +1,8 @@
-// envelope.js – 3D envelope with flap mechanics
+// note-card.js – complete replacement (reverted stable version)
 
 // ---------------- Config ----------------
 const DEFAULT_PAPER = "#f2e6d0";
+const DEFAULT_CONTINUE = "Tap to continue";
 
 // ---------------- Styles ----------------
 const STYLE = `
@@ -11,288 +12,34 @@ const STYLE = `
   font-display: swap;
 }
 
-.envelope-scene {
-  position: absolute;
-  left: 11.5%;
-  top: 15.719%;
-  width: 78.5%;
-  height: 67.297%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1001;
-  perspective: 1200px;
-  cursor: pointer;
-}
+.note-wrap{ position:absolute; inset:0; display:grid; place-items:center; z-index:1001; perspective:1000px; }
+.note{ width:min(86vw,360px); height: calc(min(86vw,360px) * 2 / 3); aspect-ratio:3/2; position:relative; transform-style:preserve-3d; cursor:pointer; transition:height .35s ease, transform .6s cubic-bezier(.22,.61,.36,1); transform-origin:center; }
+.note-pane{ position:absolute; inset:0; border-radius:14px; background: var(--paper, #f2e6d0); box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06); backface-visibility:hidden; border:1.5px solid #a37b4c; }
 
-.envelope-3d {
-  width: 90%;
-  max-width: 360px;
-  aspect-ratio: 3 / 2;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.8s cubic-bezier(.22,.61,.36,1);
-  box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06);
-}
+.note-front, .note-back{ display:flex; align-items:center; justify-content:center; padding:18px; backface-visibility:hidden; transform-style:preserve-3d; }
+.note-front{ font-family:'Boho', cursive; font-weight:700; font-size: clamp(42px,7vw,64px); line-height:1.1; color:#1f1f1f; letter-spacing:.02em; text-align:center; }
+.note-front span{ padding:0; border-radius:0; background:none; display:inline-block; will-change:contents; opacity:1; max-width:92%; white-space:normal; word-break:break-word; hyphens:auto; text-align:center; }
 
-.envelope-3d.is-flipped {
-  transform: rotateY(180deg);
-}
+.note-back{ transform:rotateY(180deg); flex-direction:column; text-align:center; color:#1f1f1f; font-family:"Courier New", monospace; justify-content:center; align-items:center; overflow:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
+.note-body{ margin:0; white-space:pre-wrap; font-size:clamp(16px,3.6vw,20px); line-height:1.25; text-align:center; }
+.note-body.typewriter{ overflow:hidden; white-space:pre-wrap; width:100%; animation: fadeIn .2s ease-in forwards; }
 
-/* Common Face Styles */
-.envelope-face {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  backface-visibility: hidden;
-  border-radius: 14px;
-  overflow: hidden;
-}
+/* Flip */
+.note.is-flipped{ transform:rotateY(180deg); transition:transform .6s cubic-bezier(.22,.61,.36,1); }
+.note:not(.is-flipped){ transition:transform .6s cubic-bezier(.22,.61,.36,1); }
 
-/* FRONT OF ENVELOPE */
-.envelope-front {
-  background: white;
-  background-image: radial-gradient(#fdfbf7, #f4f1ea);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  border: 1.5px solid #a37b4c;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
-  padding: 18px;
-}
-
-.envelope-front-text {
-  font-family: 'Boho', cursive;
-  font-weight: 700;
-  font-size: clamp(42px, 7vw, 64px);
-  line-height: 1.1;
-  color: #1f1f1f;
-  letter-spacing: 0.02em;
-  text-align: center;
-  max-width: 92%;
-  white-space: normal;
-  word-break: break-word;
-  hyphens: auto;
-}
-
-.stamp {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 50px;
-  height: 60px;
-  background-color: #e74c3c;
-  border: 3px double white;
-  box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  transform: rotate(5deg);
-}
-
-.stamp::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(transparent 40%, rgba(0,0,0,0.1) 40%);
-  background-size: 4px 4px;
-}
-
-/* BACK OF ENVELOPE */
-.envelope-back {
-  transform: rotateY(180deg);
-  background-color: #dcdcdc;
-  z-index: 1;
-  transform-style: preserve-3d;
-  overflow: visible;
-  border-radius: 14px;
-  border: 1.5px solid #a37b4c;
-}
-
-/* The Flaps (triangular shapes using borders) */
-.flap {
-  position: absolute;
-  width: 0;
-  height: 0;
-  z-index: 10;
-}
-
-/* Left flap - half width of envelope */
-.flap.left {
-  border-left: 180px solid #f4f1ea;
-  border-top: 120px solid transparent;
-  border-bottom: 120px solid transparent;
-  top: 0;
-  left: 0;
-  filter: drop-shadow(1px 0 1px rgba(0,0,0,0.05));
-}
-
-/* Right flap - half width of envelope */
-.flap.right {
-  border-right: 180px solid #f4f1ea;
-  border-top: 120px solid transparent;
-  border-bottom: 120px solid transparent;
-  top: 0;
-  right: 0;
-  filter: drop-shadow(-1px 0 1px rgba(0,0,0,0.05));
-}
-
-/* Bottom flap */
-.flap.bottom {
-  border-bottom: 132px solid #f4f1ea;
-  border-left: 180px solid transparent;
-  border-right: 180px solid transparent;
-  bottom: 0;
-  left: 0;
-  z-index: 11;
-  filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.1));
-}
-
-/* Moving Top Flap */
-.flap.top {
-  border-top: 132px solid #fdfbf7;
-  border-left: 180px solid transparent;
-  border-right: 180px solid transparent;
-  top: 0;
-  left: 0;
-  transform-origin: top center;
-  transition: transform 0.6s 0.2s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.4s;
-  z-index: 12;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
-}
-
-.envelope-3d.is-open .flap.top {
-  transform: rotateX(180deg);
-  z-index: 1;
-  transition-delay: 0s;
-}
-
-/* Wax Seal */
-.wax-seal {
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50px;
-  height: 50px;
-  background: #c0392b;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 -2px 4px rgba(0,0,0,0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #e74c3c;
-  font-size: 28px;
-  font-weight: bold;
-  z-index: 13;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.envelope-3d.is-open .wax-seal {
-  transform: translateX(-50%) scale(0.5);
-  opacity: 0;
-}
-
-/* THE LETTER */
-.letter {
-  position: absolute;
-  background: white;
-  width: 90%;
-  min-height: 90%;
-  left: 5%;
-  bottom: 5px;
-  z-index: 5;
-  padding: 20px;
-  box-sizing: border-box;
-  box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-  transition: transform 1.2s ease-in-out, height 0.3s ease;
-  border-radius: 2px;
-  overflow: visible;
-}
-
-.envelope-3d.is-open .letter.is-out {
-  transform: translateY(-120px);
-  transition-delay: 0.1s;
-}
-
-.letter-content {
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-family: "Courier New", monospace;
-  font-size: clamp(16px, 3.6vw, 20px);
-  line-height: 1.25;
-  color: #1f1f1f;
-  white-space: pre-wrap;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.envelope-3d.is-open .letter.is-out .letter-content {
-  opacity: 1;
-  transition-delay: 0.6s;
-}
-
-/* Continue Button */
-.envelope-continue {
-  position: absolute;
-  bottom: clamp(28px, 9vh, 72px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: none;
-  border: none;
-  box-shadow: none;
-  padding: 0;
-  color: #fff;
-  font: 600 18px "Courier New", monospace;
-  letter-spacing: 0.05em;
-  text-shadow: 0 0 6px rgba(0,0,0,0.4);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.28s, transform 0.28s;
-  transform: translate(-50%, 8px);
-  outline: none;
-  cursor: pointer;
-}
-
-.envelope-continue:focus,
-.envelope-continue:focus-visible {
+/* Continue (text only) */
+.note-continue{ position:absolute; bottom:clamp(28px,9vh,72px); left:50%; transform:translateX(-50%); background:none; border:none; box-shadow:none; padding:0; color:#fff; font:600 18px "Courier New", monospace; letter-spacing:.05em; text-shadow:0 0 6px rgba(0,0,0,.4); opacity:0; pointer-events:none; transition:opacity .28s, transform .28s; transform:translate(-50%,8px); outline: none; }
+.note-continue:focus, .note-continue:focus-visible {
   outline: none !important;
   box-shadow: none !important;
 }
+.note-continue.is-visible{ opacity:1; pointer-events:auto; transform:translate(-50%,0); animation:pulseText 1.6s ease-in-out infinite; }
 
-.envelope-continue.is-visible {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translate(-50%, 0);
-  animation: pulseText 1.6s ease-in-out infinite;
-}
+@keyframes pulseText { 0%,100%{opacity:.85} 50%{opacity:.35} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-@keyframes pulseText {
-  0%, 100% { opacity: 0.85; }
-  50% { opacity: 0.35; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .envelope-3d, .envelope-continue, .flap, .letter {
-    transition: none !important;
-    animation: none !important;
-  }
-}
+@media (prefers-reduced-motion: reduce){ .note, .note-continue{ transition:none !important; animation:none !important; } }
 `;
 
 // ---------------- Utils ----------------
@@ -304,20 +51,17 @@ function params() {
 }
 
 // ---------------- Mount ----------------
-function mountEnvelope() {
+function mountNote() {
   const overlay = document.getElementById("landingOverlay") || document.querySelector(".landing-overlay");
   if (!overlay) return;
 
-  // Hide original landing text
+  // hide original landing text
   const msg = overlay.querySelector(".landing-message-container");
   if (msg) msg.style.display = "none";
 
-  // Inject styles
-  if (!document.getElementById("envelope-style")) {
-    const s = document.createElement("style");
-    s.id = "envelope-style";
-    s.textContent = STYLE;
-    document.head.appendChild(s);
+  // inject styles
+  if (!document.getElementById("note-style")) {
+    const s = document.createElement("style"); s.id = "note-style"; s.textContent = STYLE; document.head.appendChild(s);
   }
 
   const p = params();
@@ -327,120 +71,141 @@ function mountEnvelope() {
   const bodyText = p.message || "you've always been by my side.\nI can't imagine doing the next chapter without you.";
   const body = bodyText.replace(/\\n/g, "\n");
 
+  const paper = DEFAULT_PAPER;
+  const continueLabel = DEFAULT_CONTINUE;
+
   overlay.insertAdjacentHTML("beforeend", `
-    <div class="envelope-scene" id="envelopeScene">
-      <div class="envelope-3d" id="envelope">
-        <!-- Front Face -->
-        <div class="envelope-face envelope-front">
-          <div class="stamp">♥</div>
-          <span class="envelope-front-text">${frontText}</span>
-        </div>
-
-        <!-- Back Face -->
-        <div class="envelope-face envelope-back">
-          <!-- Static Flaps -->
-          <div class="flap left"></div>
-          <div class="flap right"></div>
-
-          <!-- The Letter -->
-          <div class="letter" id="letter">
-            <div class="letter-content">${body}</div>
-          </div>
-
-          <!-- Bottom Flap -->
-          <div class="flap bottom"></div>
-
-          <!-- Moving Top Flap -->
-          <div class="flap top">
-            <div class="wax-seal">♥</div>
-          </div>
+    <div class="note-wrap" id="noteWrap" style="--paper:${paper}">
+      <div class="note" id="note">
+        <div class="note-pane note-front"><span>${frontText}</span></div>
+        <div class="note-pane note-back">
+          <p class="note-body">${body}</p>
         </div>
       </div>
-      <button class="envelope-continue" id="envelopeContinue" type="button">Tap to continue</button>
+      <button class="note-continue" id="noteContinue" type="button">${continueLabel}</button>
     </div>
   `);
 
-  const envelope = document.getElementById("envelope");
-  const letter = document.getElementById("letter");
-  const cont = document.getElementById("envelopeContinue");
-  const scene = document.getElementById("envelopeScene");
+  const note = document.getElementById("note");
+  const cont = document.getElementById("noteContinue");
+  const wrap = document.getElementById("noteWrap");
+  let initialNoteH = null;
+  let hasFlipped = false;
 
-  let state = 'closed'; // closed, flipped, open
+  // Ensure a concrete starting height (some browsers with aspect-ratio + transforms can report 0 during flip)
+  function setBaseHeight(){ note.style.height = Math.round(note.clientWidth * 2 / 3) + 'px'; }
+  setBaseHeight();
+  window.addEventListener('resize', () => { if (!note.classList.contains('is-flipped')) setBaseHeight(); });
 
-  scene.addEventListener('click', (e) => {
-    if (state === 'closed') {
-      e.preventDefault();
-      e.stopPropagation();
-
-      // Step 1: Flip
-      envelope.classList.add('is-flipped');
-      state = 'flipped';
-
-      // Step 2: Open Flap (Wait for flip)
-      setTimeout(() => {
-        envelope.classList.add('is-open');
-
-        // Step 3: Slide Letter Out (Wait for flap)
-        setTimeout(() => {
-          letter.classList.add('is-out');
-          state = 'open';
-
-          // Step 4: Grow letter based on content
-          setTimeout(() => {
-            adjustLetterHeight();
-
-            // Show continue button after letter has grown
-            setTimeout(() => {
-              cont.classList.add('is-visible');
-            }, 400);
-          }, 100);
-        }, 500);
-      }, 800);
+  // ----- Front text type-in + auto-fit -----
+  const frontSpan = overlay.querySelector('.note-front span');
+  if (frontSpan) {
+    const fullFront = frontSpan.textContent.trim();
+    frontSpan.textContent = '';
+    const fchars = [...fullFront];
+    let fi = 0;
+    function typeFront(){
+      if (fi < fchars.length){
+        frontSpan.textContent += fchars[fi];
+        const ch = fchars[fi];
+        fi++;
+        let d = 70; if (ch === ' ') d = 90; if (/[.,!?]/.test(ch)) d = 220;
+        setTimeout(typeFront, d);
+      } else {
+        // Front finished typing – auto-flip after a short beat unless user already flipped
+        setTimeout(() => { if (!hasFlipped) flip(); }, 700);
+      }
     }
-  });
 
-  // Function to adjust letter height based on content
-  function adjustLetterHeight() {
-    const letterContent = letter.querySelector('.letter-content');
-    if (!letterContent) return;
-
-    // Get the natural height of the content
-    const contentHeight = letterContent.scrollHeight + 40; // +40 for padding
-
-    // Calculate max height (80% of viewport height)
-    const maxH = Math.floor(window.innerHeight * 0.8);
-
-    // Calculate min height (original envelope height * 0.9)
-    const envelopeHeight = envelope.offsetHeight;
-    const minH = Math.floor(envelopeHeight * 0.9);
-
-    // Set the height, clamped between min and max
-    const targetHeight = Math.max(minH, Math.min(maxH, contentHeight));
-    letter.style.height = targetHeight + 'px';
+    const frontBox = overlay.querySelector('.note-front');
+    function fitFront(){
+      if (!frontSpan || !frontBox) return;
+      const maxPx = 64; const minPx = 18; let size = maxPx;
+      frontSpan.style.fontSize = size + 'px';
+      const cs = window.getComputedStyle(frontBox);
+      const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+      const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      const availW = (frontBox.clientWidth - padX) * 0.92;
+      const availH = frontBox.clientHeight - padY;
+      let guard = 48;
+      while ((frontSpan.scrollWidth > availW || frontSpan.scrollHeight > availH) && size > minPx && guard-- > 0){
+        size -= 2; frontSpan.style.fontSize = size + 'px';
+        frontSpan.style.lineHeight = (size < 40) ? '1.05' : '1.1';
+        frontSpan.style.letterSpacing = (size < 36) ? '0.01em' : '0.02em';
+      }
+    }
+    let fitScheduled = false;
+    const scheduleFit = () => { if (fitScheduled) return; fitScheduled = true; requestAnimationFrame(() => { fitScheduled = false; fitFront(); }); };
+    const oldTypeFront = typeFront; typeFront = function(){ oldTypeFront(); scheduleFit(); };
+    fitFront();
+    window.addEventListener('resize', fitFront);
+    setTimeout(typeFront, 180);
+    if (!fullFront) { setTimeout(() => { if (!hasFlipped) flip(); }, 800); }
   }
 
-  // Re-adjust on window resize
-  window.addEventListener('resize', () => {
-    if (state === 'open') {
-      adjustLetterHeight();
+  // ----- Flip handling & prevent overlay dismissal -----
+  const flip = (e) => {
+    if (e){ e.preventDefault(); e.stopPropagation(); }
+    note.classList.toggle('is-flipped');
+    if (note.classList.contains('is-flipped')) {
+      hasFlipped = true; // mark that we've flipped to back (auto or manual)
+    }
+  };
+  note.addEventListener('click', flip);
+  note.addEventListener('touchstart', (e)=>{ e.preventDefault(); e.stopPropagation(); flip(e); }, { passive:false });
+  note.addEventListener('pointerdown', (e)=> e.stopPropagation());
+  note.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); flip(e); } });
+  note.tabIndex = 0; note.setAttribute('role','button'); note.setAttribute('aria-label','Flip note');
+  if (wrap){ wrap.addEventListener('click', (e)=> e.stopPropagation()); wrap.addEventListener('touchstart', (e)=> e.stopPropagation(), { passive:true }); wrap.addEventListener('pointerdown', (e)=> e.stopPropagation()); }
+
+  // ----- Back typewriter -----
+  const bodyEl = document.querySelector('.note-body');
+  const fullText = bodyEl.textContent.trim();
+  bodyEl.textContent = '';
+  bodyEl.classList.add('typewriter');
+  const chars = [...fullText];
+  let i = 0; let typingStarted = false; let typingDone = false;
+  function typeNext(){
+    if (i < chars.length){
+      bodyEl.textContent += chars[i];
+      const ch = chars[i]; i++;
+
+      // Grow the note height progressively up to 80vh (only when back is showing)
+      requestAnimationFrame(() => {
+        if (!note.classList.contains('is-flipped')) return;
+        const desired = bodyEl.scrollHeight + 36; // padding 18*2
+        const maxH = Math.floor(window.innerHeight * 0.8);
+        const minH = Math.max(initialNoteH || Math.round(note.clientWidth * 2 / 3), 220);
+        const targetH = Math.max(minH, Math.min(maxH, desired));
+        note.style.height = targetH + 'px';
+      });
+
+      let delay = 65; if(/[.,!?]/.test(ch)) delay = 380; else if(/[\n]/.test(ch)) delay = 500;
+      setTimeout(typeNext, delay);
+    } else {
+      typingDone = true;
+      setTimeout(() => { cont.classList.add('is-visible'); cont.focus?.(); }, 1000);
+    }
+  }
+  // Start typing when flipped to back (only once)
+  note.addEventListener('transitionend', () => {
+    if (note.classList.contains('is-flipped') && !typingStarted) {
+      typingStarted = true;
+      // Capture the starting height so we grow from the front's size
+      initialNoteH = note.clientHeight;
+      if (!initialNoteH || initialNoteH <= 1) { initialNoteH = Math.round(note.clientWidth * 2 / 3); note.style.height = initialNoteH + 'px'; }
+      bodyEl.textContent = '';
+      i = 0;
+      typeNext();
     }
   });
 
-  scene.addEventListener('touchstart', (e) => {
-    if (state === 'closed') {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }, { passive: false });
-
   // Continue button dismiss
-  cont.addEventListener('click', (e) => {
+  cont.addEventListener('click', (e)=>{
     e.stopPropagation();
-    overlay.style.opacity = '0';
-    overlay.style.pointerEvents = 'none';
-    setTimeout(() => overlay.remove(), 420);
+    overlay.style.opacity = '0'; overlay.style.pointerEvents = 'none';
+    setTimeout(()=> overlay.remove(), 420);
   });
 }
 
-if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountEnvelope);
-else mountEnvelope();
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mountNote); else mountNote();
