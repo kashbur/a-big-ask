@@ -118,51 +118,46 @@ const STYLE = `
   z-index: 10;
 }
 
+/* Left flap - half width of envelope */
 .flap.left {
-  border-left: 50% solid #f4f1ea;
-  border-top: 50% solid transparent;
-  border-bottom: 50% solid transparent;
+  border-left: calc(min(86vw, 360px) / 2) solid #f4f1ea;
+  border-top: calc((min(86vw, 360px) * 2 / 3) / 2) solid transparent;
+  border-bottom: calc((min(86vw, 360px) * 2 / 3) / 2) solid transparent;
   top: 0;
   left: 0;
-  width: 0;
-  height: 0;
   filter: drop-shadow(1px 0 1px rgba(0,0,0,0.05));
 }
 
+/* Right flap - half width of envelope */
 .flap.right {
-  border-right: 50% solid #f4f1ea;
-  border-top: 50% solid transparent;
-  border-bottom: 50% solid transparent;
+  border-right: calc(min(86vw, 360px) / 2) solid #f4f1ea;
+  border-top: calc((min(86vw, 360px) * 2 / 3) / 2) solid transparent;
+  border-bottom: calc((min(86vw, 360px) * 2 / 3) / 2) solid transparent;
   top: 0;
   right: 0;
-  width: 0;
-  height: 0;
   filter: drop-shadow(-1px 0 1px rgba(0,0,0,0.05));
 }
 
+/* Bottom flap */
 .flap.bottom {
-  border-bottom: 55% solid #f4f1ea;
-  border-left: 50% solid transparent;
-  border-right: 50% solid transparent;
+  border-bottom: calc((min(86vw, 360px) * 2 / 3) * 0.55) solid #f4f1ea;
+  border-left: calc(min(86vw, 360px) / 2) solid transparent;
+  border-right: calc(min(86vw, 360px) / 2) solid transparent;
   bottom: 0;
   left: 0;
-  width: 0;
-  height: 0;
   z-index: 11;
   filter: drop-shadow(0 -2px 3px rgba(0,0,0,0.1));
 }
 
 /* Moving Top Flap */
 .flap.top {
-  border-top: 55% solid #fdfbf7;
-  border-left: 50% solid transparent;
-  border-right: 50% solid transparent;
+  border-top: calc((min(86vw, 360px) * 2 / 3) * 0.55) solid #fdfbf7;
+  border-left: calc(min(86vw, 360px) / 2) solid transparent;
+  border-right: calc(min(86vw, 360px) / 2) solid transparent;
   top: 0;
   left: 0;
-  width: 0;
-  height: 0;
-  transform-origin: top;
-  transition: transform 0.6s 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top center;
+  transition: transform 0.6s 0.2s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.4s;
   z-index: 12;
   filter: drop-shadow(0 2px 3px rgba(0,0,0,0.1));
 }
