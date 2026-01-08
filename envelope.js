@@ -14,8 +14,9 @@ const STYLE = `
 .envelope-scene {
   position: absolute;
   inset: 0;
-  display: grid;
-  place-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   z-index: 1001;
   perspective: 1200px;
   cursor: pointer;
@@ -29,9 +30,6 @@ const STYLE = `
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(.22,.61,.36,1);
   box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06);
-  margin: 0 auto;
-  left: 0;
-  right: 0;
 }
 
 .envelope-3d.is-flipped {
