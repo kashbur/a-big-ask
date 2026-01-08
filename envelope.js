@@ -26,8 +26,8 @@ const STYLE = `
 }
 
 .envelope-3d {
-  width: min(86vw, 360px);
-  height: calc(min(86vw, 360px) * 2 / 3);
+  width: 90%;
+  max-width: 360px;
   aspect-ratio: 3 / 2;
   position: relative;
   transform-style: preserve-3d;
@@ -125,9 +125,9 @@ const STYLE = `
 
 /* Left flap - half width of envelope */
 .flap.left {
-  border-left: calc(min(86vw, 360px) / 2) solid #f4f1ea;
-  border-top: calc((min(86vw, 360px) * 2 / 3) / 2) solid transparent;
-  border-bottom: calc((min(86vw, 360px) * 2 / 3) / 2) solid transparent;
+  border-left: 180px solid #f4f1ea;
+  border-top: 120px solid transparent;
+  border-bottom: 120px solid transparent;
   top: 0;
   left: 0;
   filter: drop-shadow(1px 0 1px rgba(0,0,0,0.05));
@@ -135,9 +135,9 @@ const STYLE = `
 
 /* Right flap - half width of envelope */
 .flap.right {
-  border-right: calc(min(86vw, 360px) / 2) solid #f4f1ea;
-  border-top: calc((min(86vw, 360px) * 2 / 3) / 2) solid transparent;
-  border-bottom: calc((min(86vw, 360px) * 2 / 3) / 2) solid transparent;
+  border-right: 180px solid #f4f1ea;
+  border-top: 120px solid transparent;
+  border-bottom: 120px solid transparent;
   top: 0;
   right: 0;
   filter: drop-shadow(-1px 0 1px rgba(0,0,0,0.05));
@@ -145,9 +145,9 @@ const STYLE = `
 
 /* Bottom flap */
 .flap.bottom {
-  border-bottom: calc((min(86vw, 360px) * 2 / 3) * 0.55) solid #f4f1ea;
-  border-left: calc(min(86vw, 360px) / 2) solid transparent;
-  border-right: calc(min(86vw, 360px) / 2) solid transparent;
+  border-bottom: 132px solid #f4f1ea;
+  border-left: 180px solid transparent;
+  border-right: 180px solid transparent;
   bottom: 0;
   left: 0;
   z-index: 11;
@@ -156,9 +156,9 @@ const STYLE = `
 
 /* Moving Top Flap */
 .flap.top {
-  border-top: calc((min(86vw, 360px) * 2 / 3) * 0.55) solid #fdfbf7;
-  border-left: calc(min(86vw, 360px) / 2) solid transparent;
-  border-right: calc(min(86vw, 360px) / 2) solid transparent;
+  border-top: 132px solid #fdfbf7;
+  border-left: 180px solid transparent;
+  border-right: 180px solid transparent;
   top: 0;
   left: 0;
   transform-origin: top center;
