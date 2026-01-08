@@ -139,8 +139,8 @@ function mountNote() {
     const oldTypeFront = typeFront; typeFront = function(){ oldTypeFront(); scheduleFit(); };
     fitFront();
     window.addEventListener('resize', fitFront);
-    setTimeout(typeFront, 180);
-    if (!fullFront) { setTimeout(() => { if (!hasFlipped) flip(); }, 800); }
+    setTimeout(typeFront, 1000); // 1 second delay before typing starts
+    if (!fullFront) { setTimeout(() => { if (!hasFlipped) flip(); }, 1800); }
   }
 
   // ----- Flip handling & prevent overlay dismissal -----
