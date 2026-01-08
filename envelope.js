@@ -29,6 +29,9 @@ const STYLE = `
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(.22,.61,.36,1);
   box-shadow: 0 10px 28px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.06);
+  margin: 0 auto;
+  left: 0;
+  right: 0;
 }
 
 .envelope-3d.is-flipped {
@@ -199,17 +202,16 @@ const STYLE = `
   position: absolute;
   background: white;
   width: 90%;
-  height: 90%;
+  min-height: 90%;
   left: 5%;
   bottom: 5px;
   z-index: 5;
   padding: 20px;
   box-sizing: border-box;
   box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
-  transition: transform 1.2s ease-in-out;
+  transition: transform 1.2s ease-in-out, height 0.3s ease;
   border-radius: 2px;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: visible;
 }
 
 .envelope-3d.is-open .letter.is-out {
@@ -381,12 +383,44 @@ function mountEnvelope() {
           letter.classList.add('is-out');
           state = 'open';
 
-          // Show continue button
+          // Step 4: Grow letter based on content
           setTimeout(() => {
-            cont.classList.add('is-visible');
-          }, 800);
+            adjustLetterHeight();
+
+            // Show continue button after letter has grown
+            setTimeout(() => {
+              cont.classList.add('is-visible');
+            }, 400);
+          }, 100);
         }, 500);
       }, 800);
+    }
+  });
+
+  // Function to adjust letter height based on content
+  function adjustLetterHeight() {
+    const letterContent = letter.querySelector('.letter-content');
+    if (!letterContent) return;
+
+    // Get the natural height of the content
+    const contentHeight = letterContent.scrollHeight + 40; // +40 for padding
+
+    // Calculate max height (80% of viewport height)
+    const maxH = Math.floor(window.innerHeight * 0.8);
+
+    // Calculate min height (original envelope height * 0.9)
+    const envelopeHeight = envelope.offsetHeight;
+    const minH = Math.floor(envelopeHeight * 0.9);
+
+    // Set the height, clamped between min and max
+    const targetHeight = Math.max(minH, Math.min(maxH, contentHeight));
+    letter.style.height = targetHeight + 'px';
+  }
+
+  // Re-adjust on window resize
+  window.addEventListener('resize', () => {
+    if (state === 'open') {
+      adjustLetterHeight();
     }
   });
 
