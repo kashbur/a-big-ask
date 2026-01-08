@@ -13,7 +13,10 @@ const STYLE = `
 
 .envelope-scene {
   position: absolute;
-  inset: 0;
+  left: 11.5%;
+  top: 15.719%;
+  width: 78.5%;
+  height: 67.297%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -109,6 +112,7 @@ const STYLE = `
   transform-style: preserve-3d;
   overflow: visible;
   border-radius: 14px;
+  border: 1.5px solid #a37b4c;
 }
 
 /* The Flaps (triangular shapes using borders) */
