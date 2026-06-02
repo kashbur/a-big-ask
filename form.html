@@ -744,6 +744,7 @@
         "matron of honor": "Matron of Honor",
         "flower girl": "Flower Girl",
       };
+      const ENABLE_TINYURL_SHORT_LINKS = false;
 
       let members = [];
       let nextId = 1;
@@ -831,11 +832,13 @@
           const longUrl = buildUrl(member);
           let url = longUrl;
           let shortened = false;
-          try {
-            url = await shortenUrl(longUrl);
-            shortened = true;
-          } catch (error) {
-            console.warn("TinyURL shortening failed", error);
+          if (ENABLE_TINYURL_SHORT_LINKS) {
+            try {
+              url = await shortenUrl(longUrl);
+              shortened = true;
+            } catch (error) {
+              console.warn("TinyURL shortening failed", error);
+            }
           }
           links.push({
             member,
