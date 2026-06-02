@@ -138,7 +138,11 @@ function mountNote() {
     const scheduleFit = () => { if (fitScheduled) return; fitScheduled = true; requestAnimationFrame(() => { fitScheduled = false; fitFront(); }); };
     const oldTypeFront = typeFront; typeFront = function(){ oldTypeFront(); scheduleFit(); };
     fitFront();
-    window.addEventListener('resize', fitFront);
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(fitFront, 150);
+    });
     setTimeout(typeFront, 1000); // 1 second delay before typing starts
     if (!fullFront) { setTimeout(() => { if (!hasFlipped) flip(); }, 1800); }
   }
