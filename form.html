@@ -516,23 +516,84 @@
       }
 
       @media (max-width: 760px) {
-        .stepper,
+        .builder {
+          margin: 16px auto;
+          width: calc(100% - 24px);
+        }
+
+        .stepper {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
         .form-grid,
-        .quick-add,
-        .member,
-        .walk-layout,
-        .link-card {
+        .walk-layout {
           grid-template-columns: 1fr;
+        }
+
+        .quick-add {
+          grid-template-columns: 1fr auto;
         }
 
         .span-2 {
           grid-column: auto;
         }
 
+        .member {
+          grid-template-columns: auto 1fr auto;
+        }
+
+        .member .seat {
+          grid-column: 1;
+          grid-row: 1;
+        }
+
+        .member .name-input {
+          grid-column: 2 / span 2;
+          grid-row: 1;
+        }
+
+        .member .role-select {
+          grid-column: 1 / span 2;
+          grid-row: 2;
+        }
+
+        .member [data-action="remove"] {
+          grid-column: 3;
+          grid-row: 2;
+          width: auto;
+        }
+
+        .walk-rail {
+          display: flex;
+          flex-direction: row;
+          overflow-x: auto;
+          gap: 8px;
+          padding-bottom: 4px;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+
+        .walk-rail::-webkit-scrollbar {
+          display: none;
+        }
+
+        .walk-chip {
+          flex: 0 0 auto;
+        }
+
+        .link-card {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
+        .link-actions {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+
         .wizard-nav,
         .actions,
-        .row-actions,
-        .link-actions {
+        .row-actions {
           display: grid;
           grid-template-columns: 1fr;
         }
