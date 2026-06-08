@@ -65,11 +65,22 @@ function mountNote() {
   }
 
   const p = params();
+  const escapeHtml = (value) =>
+    String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
   const toName = (p.name || "").trim();
   const frontText = toName ? `To ${toName}` : "To you";
 
   const bodyText = p.message || "you've always been by my side.\nI can't imagine doing the next chapter without you.";
-  const body = bodyText.replace(/\\n/g, "\n");
+  const noteSignature = (p.signature || p.notesignature || "").trim();
+  const body = [
+    bodyText.replace(/\\n/g, "\n"),
+    noteSignature ? noteSignature.replace(/\\n/g, "\n") : "",
+  ].filter(Boolean).join("\n\n");
 
   const paper = DEFAULT_PAPER;
   const continueLabel = DEFAULT_CONTINUE;
@@ -77,9 +88,9 @@ function mountNote() {
   overlay.insertAdjacentHTML("beforeend", `
     <div class="note-wrap" id="noteWrap" style="--paper:${paper}">
       <div class="note" id="note">
-        <div class="note-pane note-front"><span>${frontText}</span></div>
+        <div class="note-pane note-front"><span>${escapeHtml(frontText)}</span></div>
         <div class="note-pane note-back">
-          <p class="note-body">${body}</p>
+          <p class="note-body">${escapeHtml(body)}</p>
         </div>
       </div>
       <button class="note-continue" id="noteContinue" type="button">${continueLabel}</button>

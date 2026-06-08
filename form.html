@@ -3,920 +3,623 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bridal Party Proposal Link Builder</title>
-    <meta
-      name="description"
-      content="Create custom bridal party proposal slot reveal links."
-    />
+    <title>Bridal Party Proposal — Link Builder</title>
+    <meta name="description" content="Create custom bridal party proposal reveal links to text to each person." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&family=Playfair+Display:wght@500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
         color-scheme: light;
-        --rose: #9b635b;
-        --rose-dark: #704742;
-        --rose-soft: #f3dddb;
-        --ink: #3d332f;
-        --muted: #786760;
-        --paper: #fffdf9;
-        --panel: rgba(255, 253, 249, 0.82);
-        --line: rgba(139, 93, 85, 0.2);
-        --shadow: rgba(95, 70, 56, 0.13);
-        --font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
-        --display-font: "Playfair Display", Georgia, serif;
+        --serif: "Cormorant Garamond", Georgia, serif;
+        --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+        --cream: oklch(0.975 0.008 60);
+        --paper: oklch(0.99 0.005 70);
+        --ink: oklch(0.32 0.02 40);
+        --muted: oklch(0.56 0.02 45);
+        --faint: oklch(0.7 0.015 50);
+
+        --rose: oklch(0.52 0.072 32);
+        --rose-deep: oklch(0.44 0.07 30);
+        --rose-soft: oklch(0.6 0.06 32);
+        --gold: oklch(0.74 0.066 78);
+
+        --line: oklch(0.86 0.012 55);
+        --line-soft: oklch(0.91 0.01 55);
+        --tint: oklch(0.95 0.018 40);
+        --tint-strong: oklch(0.92 0.03 36);
+
+        --radius: 16px;
+        --radius-sm: 11px;
+        --shadow: 0 18px 50px -28px oklch(0.4 0.05 40 / 0.5);
+        --shadow-sm: 0 8px 24px -16px oklch(0.4 0.05 40 / 0.45);
       }
 
       *,
       *::before,
-      *::after {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        margin: 0;
-        min-height: 100%;
-      }
+      *::after { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
 
       body {
         background:
-          radial-gradient(circle at 15% 8%, rgba(245, 206, 205, 0.58), transparent 30%),
-          radial-gradient(circle at 88% 16%, rgba(194, 164, 110, 0.28), transparent 32%),
-          linear-gradient(135deg, #fff7f4 0%, #f6eadf 52%, #efe4d4 100%);
+          radial-gradient(1100px 520px at 12% -8%, oklch(0.93 0.04 28 / 0.55), transparent 60%),
+          radial-gradient(900px 480px at 105% 4%, oklch(0.92 0.035 78 / 0.45), transparent 55%),
+          var(--cream);
+        background-attachment: fixed;
         color: var(--ink);
-        font-family: var(--font-family);
+        font-family: var(--sans);
+        font-size: 17.5px;
+        line-height: 1.58;
+        -webkit-font-smoothing: antialiased;
       }
 
-      .builder {
-        width: min(1120px, calc(100% - 32px));
-        margin: 32px auto;
-        display: grid;
-        gap: 20px;
-      }
-
-      .hero {
-        text-align: center;
-      }
-
-      .hero h1 {
-        margin: 0;
-        color: var(--rose);
-        font-family: var(--display-font);
-        font-size: clamp(2.45rem, 7vw, 4.95rem);
-        font-weight: 500;
-        line-height: 0.96;
-      }
-
-      .hero p {
-        margin: 0.72rem auto 0;
-        max-width: 720px;
-        color: var(--muted);
-        font-family: var(--font-family);
-        font-size: clamp(0.95rem, 2vw, 1.08rem);
-        line-height: 1.5;
-      }
-
-      .stepper {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .step-chip {
-        min-height: 54px;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        background: rgba(255, 250, 245, 0.75);
-        color: var(--muted);
-        cursor: pointer;
-        padding: 0.65rem 0.8rem;
-        text-align: left;
-        font: 800 0.76rem/1.2 var(--font-family);
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-      }
-
-      .step-chip span {
-        display: block;
-        margin-top: 3px;
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.01em;
-        text-transform: none;
-      }
-
-      .step-chip.active {
-        border-color: rgba(155, 99, 91, 0.58);
-        background: var(--rose-soft);
-        color: var(--rose-dark);
-        box-shadow: 0 0 0 3px rgba(185, 130, 120, 0.12);
-      }
-
-      .card {
-        border: 1px solid rgba(136, 97, 82, 0.18);
-        border-radius: 12px;
-        background: var(--panel);
-        box-shadow: 0 18px 48px var(--shadow);
-        padding: clamp(18px, 3vw, 28px);
-      }
-
-      .step-view {
-        display: none;
-      }
-
-      .step-view.active {
-        display: grid;
-        gap: 18px;
-      }
-
-      .step-head {
-        display: grid;
-        gap: 6px;
-      }
-
-      .step-kicker {
-        margin: 0;
-        color: var(--rose);
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      h2 {
-        margin: 0;
-        color: var(--rose-dark);
-        font-family: var(--display-font);
-        font-size: clamp(1.45rem, 3vw, 2.1rem);
-        font-weight: 600;
-        line-height: 1.05;
-      }
-
-      .step-head p,
-      .helper {
-        margin: 0;
-        color: var(--muted);
-        font-family: var(--font-family);
-        line-height: 1.45;
-      }
-
-      .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
-      }
-
-      .defaults-layout {
-        display: grid;
-        gap: 16px;
-      }
-
-      .message-choice-layout {
-        display: grid;
-        grid-template-columns: minmax(260px, 0.46fr) minmax(300px, 1fr);
-        gap: 14px;
-        align-items: stretch;
-      }
-
-      .choice-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
-        align-content: start;
-      }
-
-      .choice-card {
-        position: relative;
-        min-width: 0;
-      }
-
-      .choice-card input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-      }
-
-      .choice-card span {
-        display: grid;
-        gap: 6px;
-        min-height: 116px;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        background: rgba(255, 250, 245, 0.78);
-        color: var(--muted);
-        cursor: pointer;
-        padding: 1rem;
-      }
-
-      .choice-card strong {
-        color: var(--rose-dark);
-        font-size: 1rem;
-        text-transform: none;
-      }
-
-      .choice-card small {
-        font-size: 0.88rem;
-        line-height: 1.4;
-        font-weight: 500;
-        text-transform: none;
-      }
-
-      .choice-card input:checked + span {
-        border-color: rgba(155, 99, 91, 0.58);
-        background: var(--rose-soft);
-        box-shadow: 0 0 0 3px rgba(185, 130, 120, 0.12);
-      }
-
-      .message-reference {
-        display: grid;
-        gap: 10px;
-        padding: 14px;
-        border: 1px solid rgba(139, 93, 85, 0.16);
-        border-radius: 10px;
-        background: rgba(255, 250, 245, 0.72);
-      }
-
-      .message-reference-head {
-        display: grid;
-        gap: 4px;
-      }
-
-      .message-reference-head strong {
-        color: var(--rose-dark);
-        font-size: 0.96rem;
-        font-weight: 700;
-      }
-
-      .message-reference-head span {
-        color: var(--muted);
-        font-size: 0.9rem;
-        line-height: 1.45;
-      }
-
-      .message-reference-image {
-        display: block;
-        width: min(100%, 300px);
+      .wrap {
+        width: min(760px, calc(100% - 36px));
         margin: 0 auto;
-        border: 1px solid rgba(139, 93, 85, 0.18);
-        border-radius: 10px;
-        box-shadow: 0 12px 26px rgba(95, 70, 56, 0.12);
+        padding: clamp(26px, 5vw, 48px) 0 96px;
       }
 
-      .optional-strip {
-        display: grid;
-        grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr);
-        gap: 14px;
-        padding-top: 4px;
+      /* ---------- Header ---------- */
+      .masthead { text-align: center; margin-bottom: clamp(20px, 3vw, 28px); }
+      .eyebrow {
+        font-size: 0.72rem; font-weight: 600; letter-spacing: 0.32em;
+        text-transform: uppercase; color: var(--gold); margin: 0 0 0.45rem;
+      }
+      .masthead h1 {
+        font-family: var(--serif); font-weight: 600;
+        font-size: clamp(2.3rem, 6vw, 3.6rem); line-height: 0.98;
+        letter-spacing: 0.005em; color: var(--rose); margin: 0;
+      }
+      .masthead h1 em { font-style: italic; color: var(--rose-soft); }
+
+      /* ---------- Stepper ---------- */
+      .progress-track {
+        position: relative; height: 6px; width: min(460px, 78%);
+        margin: 2px auto clamp(16px, 2.4vw, 22px);
+        background: var(--line-soft); border-radius: 999px; overflow: hidden;
+      }
+      .progress-fill {
+        position: absolute; top: 0; bottom: 0; left: 0; width: 25%;
+        background: linear-gradient(90deg, var(--rose-soft), var(--rose));
+        border-radius: 999px; transition: width 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+      }
+      .stepper {
+        display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+        margin: clamp(18px, 3vw, 26px) 0 clamp(9px, 1.5vw, 13px);
+      }
+      .step-chip {
+        display: inline-flex; align-items: center; gap: 9px;
+        padding: 9px 17px 9px 10px; border-radius: 999px;
+        border: 1.5px solid var(--line-soft); background: var(--paper);
+        color: var(--faint); font-size: 0.88rem; font-weight: 600;
+        cursor: not-allowed; white-space: nowrap;
+        transition: transform 0.14s, box-shadow 0.15s;
+      }
+      .step-chip .n {
+        width: 25px; height: 25px; border-radius: 50%; display: grid; place-items: center;
+        background: var(--tint-strong); color: var(--rose-deep);
+        font-size: 0.78rem; font-weight: 700; font-variant-numeric: tabular-nums;
+        transition: background 0.15s, color 0.15s;
+      }
+      .step-chip.active {
+        border-color: var(--rose); color: var(--rose-deep); box-shadow: var(--shadow-sm);
+        background: var(--paper); cursor: default;
+      }
+      .step-chip.active .n { background: var(--rose); color: oklch(0.98 0.01 60); }
+      .step-chip.done { cursor: pointer; color: var(--rose-deep); border-color: var(--line); background: oklch(0.96 0.014 45 / 0.7); }
+      .step-chip.done:hover { border-color: var(--rose-soft); background: var(--tint-strong); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+      .step-chip.done:active { transform: translateY(0); }
+      .step-chip.done .n { background: var(--gold); color: oklch(0.28 0.03 60); }
+      .step-chip.done .n::before { content: "✓"; }
+      .step-chip.done .n .lbl { display: none; }
+
+      /* ---------- Card / step views ---------- */
+      .card {
+        background: var(--paper); border: 1px solid var(--line-soft);
+        border-radius: var(--radius); box-shadow: var(--shadow);
+        padding: clamp(26px, 4vw, 44px);
+      }
+      .step-view { display: none; }
+      /* Visible end-state is the BASE style. The entrance animates only TRANSFORM,
+         never opacity, so a card can never get stuck invisible if the animation
+         clock is paused (background tab, print/export, frozen harness). */
+      .step-view.active { display: block; opacity: 1; transform: none; }
+      @media (prefers-reduced-motion: no-preference) {
+        .step-view.active { animation: rise 0.34s cubic-bezier(0.22, 0.61, 0.36, 1); }
+      }
+      @keyframes rise { from { transform: translateY(10px); } to { transform: none; } }
+
+      .step-head { margin: 0 0 26px; }
+      .step-kicker {
+        font-size: 0.74rem; font-weight: 600; letter-spacing: 0.2em;
+        text-transform: uppercase; color: var(--gold); margin: 0 0 0.4rem;
+      }
+      .step-head h2 {
+        font-family: var(--serif); font-weight: 600;
+        font-size: clamp(1.85rem, 3.8vw, 2.5rem); line-height: 1.04;
+        color: var(--ink); margin: 0;
+      }
+      .step-head p { margin: 0.6rem 0 0; color: var(--muted); font-size: 1.08rem; line-height: 1.55; max-width: 50ch; }
+
+      /* ---------- Fields ---------- */
+      .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+      .field { display: grid; gap: 10px; min-width: 0; }
+      .field.full { grid-column: 1 / -1; }
+      label {
+        font-size: 0.95rem; font-weight: 600; letter-spacing: 0.01em; color: var(--rose-deep);
+      }
+      label .hint { font-weight: 400; color: var(--muted); letter-spacing: 0; }
+      input, textarea, select {
+        width: 100%; font-family: var(--sans); font-size: 1.05rem; font-weight: 500;
+        color: var(--ink); background: var(--paper); border: 1.5px solid var(--line);
+        border-radius: var(--radius-sm); padding: 0.85rem 1rem; min-height: 54px;
+        transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+      }
+      textarea { min-height: 88px; line-height: 1.5; resize: vertical; }
+      input::placeholder, textarea::placeholder { color: var(--faint); font-weight: 400; }
+      input:hover, textarea:hover, select:hover { border-color: var(--faint); }
+      input:focus, textarea:focus, select:focus {
+        outline: none; border-color: var(--rose-soft);
+        box-shadow: 0 0 0 4px oklch(0.6 0.06 32 / 0.13);
       }
 
-      .field {
-        display: grid;
-        gap: 8px;
-      }
+      /* ---------- Step 1: default message + optional toggles ---------- */
+      .basics-block { margin-bottom: 26px; }
+      .basics-block:last-of-type { margin-bottom: 0; }
+      .block-label-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 0 14px; }
+      .block-label { font-size: 1rem; font-weight: 600; color: var(--rose-deep); }
+      .block-sub { font-size: 0.92rem; color: var(--muted); }
 
-      .field[hidden],
-      .date-field[hidden] {
-        display: none;
+      .preset-list { display: grid; gap: 10px; }
+      .preset-option {
+        display: flex; align-items: flex-start; gap: 13px; width: 100%; text-align: left;
+        padding: 15px 17px; border: 1.5px solid var(--line); border-radius: var(--radius-sm);
+        background: var(--paper); cursor: pointer; font-family: var(--sans);
+        transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
       }
-
-      .check-row {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        min-height: 46px;
-        color: #8b5d55;
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+      .preset-option:hover { border-color: var(--rose-soft); background: var(--tint); }
+      .preset-option.selected { border-color: var(--rose); background: var(--tint); box-shadow: var(--shadow-sm); }
+      .preset-check {
+        flex: none; width: 22px; height: 22px; margin-top: 1px; border-radius: 50%;
+        border: 1.5px solid var(--line); background: var(--paper);
+        display: grid; place-items: center;
       }
-
-      .check-row input {
-        width: 18px;
-        min-height: 18px;
-        height: 18px;
-        accent-color: var(--rose);
+      .preset-option.selected .preset-check { border-color: var(--rose); background: var(--rose); }
+      .preset-option.selected .preset-check::after {
+        content: "✓"; color: oklch(0.98 0.01 60); font-size: 0.78rem; font-weight: 700; line-height: 1;
       }
+      .preset-text { font-size: 1.04rem; line-height: 1.45; color: var(--ink); font-weight: 500; display: grid; gap: 2px; min-width: 0; }
+      .preset-own .preset-text strong { font-weight: 600; }
+      .preset-own-sub { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
 
-      .helper.small {
-        font-size: 0.88rem;
+      .own-textarea { margin-top: 10px; }
+      .own-textarea[hidden] { display: none; }
+
+      .personalize-note { margin: 14px 2px 0; font-size: 0.94rem; color: var(--muted); line-height: 1.5; }
+      .personalize-note b { color: var(--rose-deep); font-weight: 600; }
+
+      .optional-block { border-top: 1px solid var(--line-soft); padding-top: 24px; }
+      .opt-row { padding: 2px 0; }
+      .opt-row + .opt-row { margin-top: 12px; }
+      .opt-head { display: flex; align-items: center; gap: 14px; }
+      .opt-text { display: grid; gap: 1px; }
+      .opt-text strong { font-size: 1.02rem; font-weight: 600; color: var(--ink); }
+      .opt-text span { font-size: 0.9rem; color: var(--muted); }
+      .opt-input { margin-top: 12px; }
+      .opt-input[hidden] { display: none; }
+
+      .switch { position: relative; flex: none; display: inline-block; cursor: pointer; line-height: 0; }
+      .switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+      .switch .track {
+        display: block; width: 46px; height: 28px; border-radius: 999px;
+        background: var(--line); position: relative;
       }
-
-      .span-2 {
-        grid-column: 1 / -1;
+      .switch .thumb {
+        position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%;
+        background: var(--paper); box-shadow: var(--shadow-sm);
       }
+      .switch input:checked + .track { background: var(--rose); }
+      .switch input:checked + .track .thumb { transform: translateX(18px); }
+      .switch input:focus-visible + .track { box-shadow: 0 0 0 4px oklch(0.6 0.06 32 / 0.18); }
 
-      label,
-      .field-label {
-        color: #8b5d55;
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-      }
-
-      input,
-      textarea,
-      select {
-        width: 100%;
-        min-height: 46px;
-        border: 1px solid rgba(139, 93, 85, 0.24);
-        border-radius: 8px;
-        background: var(--paper);
-        color: var(--ink);
-        font: 600 1rem/1.4 var(--font-family);
-        padding: 0.78rem 0.9rem;
-      }
-
-      textarea {
-        min-height: 96px;
-        resize: vertical;
-      }
-
-      input:focus,
-      textarea:focus,
-      select:focus {
-        border-color: #b98278;
-        box-shadow: 0 0 0 3px rgba(185, 130, 120, 0.18);
-        outline: none;
-      }
-
+      /* ---------- Buttons ---------- */
       .btn {
-        min-height: 44px;
-        border: 0;
-        border-radius: 8px;
-        padding: 0 1rem;
-        background: var(--rose);
-        color: #fffaf5;
-        cursor: pointer;
-        font: 800 0.82rem/1 var(--font-family);
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
+        font-family: var(--sans); font-weight: 600; font-size: 0.96rem; letter-spacing: 0.01em;
+        border-radius: var(--radius-sm); border: 1.5px solid transparent; padding: 0 1.35rem;
+        min-height: 52px; display: inline-flex; align-items: center; justify-content: center;
+        gap: 0.5rem; cursor: pointer; white-space: nowrap;
+        transition: transform 0.12s, background 0.15s, box-shadow 0.15s, border-color 0.15s, color 0.15s;
       }
-
-      .btn.secondary {
-        border: 1px solid rgba(139, 93, 85, 0.28);
-        background: #fffaf5;
-        color: #7d514a;
+      .btn:active { transform: translateY(1px); }
+      .btn-primary { background: var(--rose); color: oklch(0.98 0.01 60); box-shadow: var(--shadow-sm); }
+      .btn-primary:hover { background: var(--rose-deep); transform: translateY(-1px); box-shadow: var(--shadow); }
+      .btn-primary:active { transform: translateY(0); }
+      .btn-ghost { background: transparent; color: var(--rose-deep); border-color: var(--line); }
+      .btn-ghost:hover { background: var(--tint); border-color: var(--rose-soft); transform: translateY(-1px); }
+      .btn-ghost:active { transform: translateY(0); }
+      .btn-quiet {
+        background: transparent; color: var(--rose-deep); border-color: transparent; padding: 0 0.7rem;
+        text-decoration: underline; text-decoration-color: var(--rose-soft);
+        text-decoration-thickness: 1.5px; text-underline-offset: 4px;
       }
+      .btn-quiet:hover { background: var(--tint); text-decoration-color: var(--rose-deep); }
+      .btn:disabled { opacity: 0.42; cursor: not-allowed; }
+      .btn:disabled:hover { transform: none; box-shadow: var(--shadow-sm); }
 
-      .btn.subtle {
-        min-height: 38px;
-        border: 1px solid rgba(139, 93, 85, 0.22);
-        background: transparent;
-        color: #7d514a;
-        font-size: 0.74rem;
+      .icon-btn {
+        flex: none; width: 38px; height: 38px; padding: 0; border-radius: 9px;
+        border: 1.5px solid transparent; background: transparent; color: var(--faint);
+        display: grid; place-items: center; cursor: pointer; transition: background 0.15s, color 0.15s;
       }
+      .icon-btn:hover { background: var(--tint); color: var(--rose-deep); }
+      .icon-btn svg { width: 18px; height: 18px; }
 
-      .btn:disabled {
-        cursor: not-allowed;
-        opacity: 0.55;
-      }
+      /* ---------- Wizard nav ---------- */
+      .wizard-nav { display: flex; align-items: center; gap: 10px; margin-top: 32px; padding-top: 22px; border-top: 1px solid var(--line-soft); }
+      .wizard-nav .spacer { flex: 1; }
 
-      .actions,
-      .row-actions,
-      .link-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
+      /* ---------- Step 2: party ---------- */
+      .quick-add { display: flex; gap: 10px; align-items: stretch; }
+      .quick-add input { flex: 1; }
+      .quick-add .btn { flex: none; padding: 0 1.5rem; }
+      .quick-hint { margin: 12px 2px 0; font-size: 0.92rem; color: var(--muted); }
 
-      .wizard-nav {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .wizard-nav .spacer {
-        flex: 1;
-      }
-
-      .quick-add {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 10px;
-      }
-
-      .roster {
-        display: grid;
-        gap: 10px;
-        padding: 0;
-        margin: 0;
-        list-style: none;
-      }
-
+      .roster { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 11px; }
+      .roster:empty { display: none; }
       .member {
-        display: grid;
-        grid-template-columns: auto minmax(120px, 1fr) minmax(150px, 0.7fr) auto;
-        gap: 10px;
-        align-items: center;
-        padding: 10px;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        background: rgba(255, 250, 245, 0.78);
+        display: flex; align-items: center; gap: 10px; padding: 9px 9px 9px 13px;
+        border: 1.5px solid var(--line-soft); border-radius: var(--radius-sm); background: var(--paper);
+        transition: border-color 0.15s, box-shadow 0.15s;
       }
-
+      .member:hover { border-color: var(--line); box-shadow: var(--shadow-sm); }
       .seat {
-        display: grid;
-        place-items: center;
-        width: 34px;
-        height: 34px;
-        border-radius: 999px;
-        background: var(--rose-soft);
-        color: var(--rose-dark);
-        font-weight: 800;
+        flex: none; width: 30px; height: 30px; border-radius: 50%;
+        background: var(--tint-strong); color: var(--rose-deep);
+        font-family: var(--serif); font-weight: 700; font-size: 1rem;
+        display: grid; place-items: center; font-variant-numeric: tabular-nums;
       }
-
-      .walk-layout {
-        display: grid;
-        grid-template-columns: minmax(150px, 0.34fr) minmax(260px, 1fr);
-        gap: 16px;
+      .name-input {
+        flex: 1 1 40%; min-width: 80px; border: 1.5px solid var(--line-soft); background: var(--paper);
+        font-weight: 600; font-size: 1.05rem; min-height: 44px; padding: 0.4rem 0.7rem; border-radius: 9px;
+        transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
       }
-
-      .walk-rail {
-        display: grid;
-        align-content: start;
-        gap: 8px;
+      .name-input:hover { border-color: var(--faint); }
+      .name-input:focus { background: var(--paper); border-color: var(--rose-soft); box-shadow: 0 0 0 3px oklch(0.6 0.06 32 / 0.12); }
+      .role-select {
+        flex: none; width: auto; min-height: 40px; padding: 0.35rem 2rem 0.35rem 0.8rem;
+        font-size: 0.85rem; font-weight: 600; color: var(--rose-deep);
+        background-color: var(--tint); border: 1.5px solid transparent; border-radius: 999px;
+        cursor: pointer; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237d514a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 0.6rem center; background-size: 14px;
       }
+      .role-select:focus { box-shadow: 0 0 0 3px oklch(0.6 0.06 32 / 0.12); border-color: var(--rose-soft); }
 
+      .empty { text-align: center; padding: 28px 10px 8px; color: var(--faint); font-size: 0.96rem; }
+      .empty[hidden] { display: none; }
+      .count-pill { margin: 18px 2px 0; font-size: 0.95rem; font-weight: 600; color: var(--muted); }
+      .count-pill b { color: var(--rose-deep); }
+
+      /* ---------- Step 3: walkthrough ---------- */
+      .walk-rail { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+      .walk-rail-label { font-size: 0.88rem; font-weight: 600; color: var(--muted); margin: 0 0 10px; }
+      .walk-rail-label[hidden] { display: none; }
       .walk-chip {
-        min-height: 46px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: rgba(255, 250, 245, 0.78);
-        color: var(--rose-dark);
-        cursor: pointer;
-        padding: 0.6rem 0.75rem;
-        text-align: left;
-        font: 800 0.82rem/1.2 var(--font-family);
+        display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px;
+        border-radius: 999px; border: 1.5px solid var(--line); background: var(--paper);
+        color: var(--rose-deep); font-size: 0.88rem; font-weight: 600; cursor: pointer;
+        transition: transform 0.14s, border-color 0.15s, background 0.15s, box-shadow 0.15s; max-width: 180px;
       }
+      .walk-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .walk-chip:hover { border-color: var(--rose-soft); background: var(--tint); transform: translateY(-1px); }
+      .walk-chip:active { transform: translateY(0); }
+      .walk-chip.active { border-color: var(--rose); background: var(--tint-strong); color: var(--rose-deep); box-shadow: var(--shadow-sm); }
+      .walk-chip .star { color: var(--rose); font-size: 0.8rem; }
+      .walk-chip .star[hidden] { display: none; }
 
-      .walk-chip.active {
-        border-color: rgba(155, 99, 91, 0.58);
-        background: var(--rose-soft);
+      .walk-head {
+        display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+        padding-bottom: 16px; margin-bottom: 22px; border-bottom: 1px solid var(--line-soft); flex-wrap: wrap;
       }
-
-      .personalize-panel {
-        display: grid;
-        gap: 14px;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        background: rgba(255, 250, 245, 0.78);
-        padding: 14px;
+      .walk-who { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+      .walk-who strong {
+        font-family: var(--serif); font-weight: 600; font-size: clamp(1.7rem, 4vw, 2.4rem);
+        line-height: 1; color: var(--ink);
       }
-
-      .person-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
+      .role-tag {
+        font-size: 0.74rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+        color: var(--gold); background: var(--tint-strong); border-radius: 999px; padding: 0.25rem 0.7rem;
       }
+      .walk-progress { font-size: 0.84rem; font-weight: 600; color: var(--faint); font-variant-numeric: tabular-nums; }
 
-      .person-title strong {
-        color: var(--rose-dark);
-        font-size: 1.08rem;
-      }
-
-      .person-title span {
-        color: var(--muted);
-        font-family: var(--font-family);
-      }
-
+      .pers-block { display: grid; gap: 10px; margin-bottom: 24px; }
+      .pers-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+      .pers-head label { margin: 0; }
       .seg {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
+        display: inline-flex; background: var(--tint); border: 1px solid var(--line-soft);
+        border-radius: 999px; padding: 3px; gap: 2px;
       }
-
       .seg button {
-        min-height: 40px;
-        border: 1px solid rgba(139, 93, 85, 0.22);
-        border-radius: 8px;
-        background: #fffaf5;
-        color: #7d514a;
-        cursor: pointer;
-        font: 800 0.76rem/1 var(--font-family);
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
+        border: 0; background: transparent; font-family: var(--sans); font-size: 0.82rem;
+        font-weight: 600; color: var(--muted); padding: 0.45rem 1.1rem; min-height: 34px;
+        border-radius: 999px; cursor: pointer; transition: background 0.15s, color 0.15s, box-shadow 0.15s;
       }
-
-      .seg button.active {
-        border-color: var(--rose);
-        background: var(--rose-soft);
-        color: var(--rose-dark);
-      }
+      .seg button:hover { color: var(--rose-deep); }
+      .seg button.is-active { background: var(--paper); color: var(--rose-deep); box-shadow: var(--shadow-sm); }
 
       .default-preview {
-        margin: 0;
-        min-height: 54px;
-        border: 1px solid rgba(139, 93, 85, 0.16);
-        border-radius: 8px;
-        background: #fffdf9;
-        color: var(--muted);
-        padding: 0.85rem;
-        font-family: var(--font-family);
-        white-space: pre-wrap;
+        margin: 0; font-family: var(--serif); font-size: 1.2rem; font-style: italic;
+        line-height: 1.4; color: var(--muted); background: oklch(0.97 0.012 45 / 0.7);
+        border: 1px dashed var(--line); border-radius: var(--radius-sm); padding: 0.85rem 1rem;
       }
-
-      .reveal-reference {
-        display: grid;
-        gap: 8px;
-        max-width: 260px;
+      .default-preview::before {
+        content: "They'll see your default — "; font-family: var(--sans); font-style: normal;
+        font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+        color: var(--gold); display: block; margin-bottom: 4px;
       }
+      .default-preview[hidden], .pers-block textarea[hidden] { display: none; }
 
-      .reveal-reference strong {
-        color: var(--rose-dark);
-        font-size: 0.9rem;
-      }
-
-      .reveal-reference img {
-        display: block;
-        width: 100%;
-        border: 1px solid rgba(139, 93, 85, 0.18);
-        border-radius: 10px;
-        box-shadow: 0 12px 26px rgba(95, 70, 56, 0.12);
-      }
-
-      .results {
-        display: grid;
-        gap: 12px;
-      }
-
+      /* ---------- Step 4: results ---------- */
+      .results { display: grid; gap: 12px; }
       .link-card {
-        display: grid;
-        grid-template-columns: minmax(160px, 0.52fr) minmax(220px, 1fr) auto;
-        gap: 10px;
-        align-items: center;
-        padding: 12px;
-        border: 1px solid var(--line);
-        border-radius: 10px;
-        background: var(--paper);
+        display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px 16px;
+        padding: 18px 20px; border: 1.5px solid var(--line-soft); border-radius: var(--radius-sm); background: var(--paper);
+        transition: border-color 0.15s, box-shadow 0.15s;
       }
-
-      .link-who {
-        display: grid;
-        gap: 2px;
-        min-width: 0;
+      .link-card:hover { border-color: var(--line); box-shadow: var(--shadow-sm); }
+      .link-who { min-width: 0; }
+      .link-who strong {
+        font-family: var(--serif); font-size: 1.45rem; font-weight: 600; color: var(--ink);
+        line-height: 1.1; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       }
-
-      .link-who strong,
+      .link-who .role-tag { background: transparent; padding: 0; }
       .link-url {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        grid-column: 1 / -1; font-size: 0.86rem; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+        color: var(--muted); background: var(--tint); border: 1px solid var(--line-soft);
+        border-radius: 8px; padding: 0.6rem 0.75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
       }
+      .link-actions { display: flex; gap: 8px; flex: none; }
+      .copy-btn { min-width: 150px; }
+      .copy-btn.copied { background: var(--gold); border-color: var(--gold); color: oklch(0.28 0.03 60); }
 
-      .role-tag {
-        color: var(--muted);
-        font-family: var(--font-family);
-        font-size: 0.86rem;
-      }
-
-      .link-url {
-        color: var(--muted);
-        font-family: var(--font-family);
-        font-size: 0.82rem;
-      }
-
-      .modal {
-        position: fixed;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        background: rgba(61, 51, 47, 0.52);
-        z-index: 100;
-      }
-
-      .modal.open {
-        display: flex;
-      }
-
-      .modal-panel {
-        width: min(430px, 96vw);
-        border-radius: 14px;
-        overflow: hidden;
-        background: var(--paper);
-        box-shadow: 0 24px 70px rgba(61, 51, 47, 0.28);
-      }
-
-      .modal-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 14px;
-        color: var(--rose-dark);
-        border-bottom: 1px solid var(--line);
-      }
-
-      .modal iframe {
-        display: block;
-        width: 100%;
-        height: min(760px, 78vh);
-        border: 0;
+      .done-banner { text-align: center; margin-bottom: 22px; }
+      .done-banner .ring {
+        width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 50%;
+        display: grid; place-items: center; background: var(--tint-strong); color: var(--rose); font-size: 1.5rem;
       }
 
       .toast {
-        position: fixed;
-        left: 50%;
-        bottom: 20px;
-        transform: translateX(-50%) translateY(16px);
-        opacity: 0;
-        pointer-events: none;
-        border-radius: 999px;
-        background: var(--rose-dark);
-        color: #fffaf5;
-        padding: 0.72rem 1rem;
-        font-weight: 700;
-        transition: opacity 160ms ease, transform 160ms ease;
-        z-index: 120;
+        position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
+        background: var(--rose-deep); color: oklch(0.98 0.01 60); font-weight: 600; font-size: 0.92rem;
+        padding: 0.7rem 1.2rem; border-radius: 999px; box-shadow: var(--shadow);
+        opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; z-index: 60;
       }
+      .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-      .toast.show {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
+      /* ---------- Preview modal ---------- */
+      .modal {
+        position: fixed; inset: 0; background: oklch(0.3 0.03 40 / 0.42); backdrop-filter: blur(3px);
+        display: none; place-items: center; z-index: 80; padding: 20px;
       }
+      .modal.open { display: grid; }
+      .modal-panel {
+        width: min(420px, 100%); background: var(--paper); border-radius: 22px; overflow: hidden;
+        box-shadow: 0 40px 90px -30px oklch(0.3 0.05 40 / 0.7); display: flex; flex-direction: column;
+        max-height: min(860px, 92vh);
+      }
+      .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--line-soft); }
+      .modal-head strong { font-family: var(--serif); font-size: 1.25rem; color: var(--rose); }
+      .modal iframe { width: 100%; height: 640px; border: 0; background: oklch(0.95 0.005 60); }
+      .modal-note { padding: 12px 16px; font-size: 0.8rem; color: var(--faint); text-align: center; border-top: 1px solid var(--line-soft); }
 
-      @media (max-width: 760px) {
-        .builder {
-          margin: 16px auto;
-          width: calc(100% - 24px);
-        }
-
-        .stepper {
-          grid-template-columns: repeat(2, 1fr);
-        }
-
-        .form-grid,
-        .message-choice-layout,
-        .optional-strip,
-        .walk-layout {
-          grid-template-columns: 1fr;
-        }
-
-        .quick-add {
-          grid-template-columns: 1fr auto;
-        }
-
-        .span-2 {
-          grid-column: auto;
-        }
-
-        .member {
-          grid-template-columns: auto 1fr auto;
-        }
-
-        .member .seat {
-          grid-column: 1;
-          grid-row: 1;
-        }
-
-        .member .name-input {
-          grid-column: 2 / span 2;
-          grid-row: 1;
-        }
-
-        .member .role-select {
-          grid-column: 1 / span 2;
-          grid-row: 2;
-        }
-
-        .member [data-action="remove"] {
-          grid-column: 3;
-          grid-row: 2;
-          width: auto;
-        }
-
-        .walk-rail {
-          display: flex;
-          flex-direction: row;
-          overflow-x: auto;
-          gap: 8px;
-          padding-bottom: 4px;
-          -webkit-overflow-scrolling: touch;
-          scrollbar-width: none;
-        }
-
-        .walk-rail::-webkit-scrollbar {
-          display: none;
-        }
-
-        .walk-chip {
-          flex: 0 0 auto;
-        }
-
-        .link-card {
-          grid-template-columns: 1fr;
-          gap: 12px;
-        }
-
-        .link-actions {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-        }
-
-        .wizard-nav,
-        .actions,
-        .row-actions {
-          display: grid;
-          grid-template-columns: 1fr;
-        }
-
-        .wizard-nav .spacer {
-          display: none;
-        }
+      @media (max-width: 560px) {
+        .field-grid { grid-template-columns: 1fr; }
+        .quick-add { flex-direction: column; }
+        .link-card { grid-template-columns: 1fr; }
+        .link-actions { width: 100%; }
+        .copy-btn { flex: 1; }
+        .step-chip { padding: 7px 12px 7px 8px; font-size: 0.8rem; }
+        .step-chip .lbl { display: none; }
+        .wizard-nav { flex-wrap: wrap; }
+        .wizard-nav .btn { flex: 1; }
+        .wizard-nav .spacer { display: none; }
       }
     </style>
   </head>
   <body>
-    <main class="builder">
-      <header class="hero">
-        <h1>Bridal Party Proposal</h1>
-        <p>Create the details, add your people, personalize each one, then copy every link.</p>
+    <template id="__bundler_thumbnail" data-bg-color="#f8f4ef">
+      <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+        <g fill="none" stroke="#9b5f57" stroke-width="22" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="600" cy="470" r="118" />
+          <path d="M600 352 l-46 -78 h92 z" fill="#c8a96e" stroke="#c8a96e" />
+        </g>
+      </svg>
+    </template>
+    <main class="wrap">
+      <header class="masthead">
+        <p class="eyebrow">Will you be my bridesmaid?</p>
+        <h1>Your Bridal <em>Party</em></h1>
       </header>
 
-      <nav class="stepper" id="stepper" aria-label="Builder steps">
-        <button class="step-chip active" type="button" data-go="1">Step 1<span>Details</span></button>
-        <button class="step-chip" type="button" data-go="2">Step 2<span>Party</span></button>
-        <button class="step-chip" type="button" data-go="3">Step 3<span>Personalize</span></button>
-        <button class="step-chip" type="button" data-go="4">Step 4<span>Links</span></button>
+      <nav class="stepper" id="stepper" aria-label="Progress">
+        <button class="step-chip" type="button" data-go="1"><span class="n"><span class="lbl">1</span></span><span class="t">Basics</span></button>
+        <button class="step-chip" type="button" data-go="2"><span class="n"><span class="lbl">2</span></span><span class="t">Your party</span></button>
+        <button class="step-chip" type="button" data-go="3"><span class="n"><span class="lbl">3</span></span><span class="t">Personalize</span></button>
+        <button class="step-chip" type="button" data-go="4"><span class="n"><span class="lbl">4</span></span><span class="t">Share</span></button>
       </nav>
+      <div class="progress-track" aria-hidden="true"><span class="progress-fill" id="progressFill"></span></div>
 
-      <section class="step-view card active" data-step="1">
+      <!-- STEP 1 -->
+      <section class="step-view card" data-step="1">
         <div class="step-head">
           <p class="step-kicker">Step 1 of 4</p>
-          <h2>Set your defaults</h2>
-          <p>Choose how you want to write the envelope messages.</p>
+          <h2>The basics</h2>
+          <p>Pick the message everyone gets to start with — then add any optional touches. You can still personalize anyone individually in Step 3.</p>
         </div>
-        <div class="defaults-layout">
-          <div class="message-choice-layout">
-            <div class="message-reference" aria-label="Envelope message reference">
-              <div class="message-reference-head">
-                <strong>Envelope message reference</strong>
-                <span>This is the text on the envelope before the spin starts. The question itself appears later on the reveal screen.</span>
+
+        <div class="basics-block">
+          <div class="block-label-row">
+            <span class="block-label">Default opening message</span>
+            <span class="block-sub">The first thing each person reads</span>
+          </div>
+          <div class="preset-list" id="presetList"></div>
+          <textarea id="dIntro" class="own-textarea" rows="3" placeholder="Write your own opening message…" hidden></textarea>
+          <p class="personalize-note">This is just everyone's <b>starting</b> message — you can give anyone their own in <b>Step 3</b>.</p>
+        </div>
+
+        <div class="basics-block optional-block">
+          <div class="block-label-row">
+            <span class="block-label">Optional finishing touches</span>
+            <span class="block-sub">Add only if you want them — both can be left out</span>
+          </div>
+
+          <div class="opt-row">
+            <div class="opt-head">
+              <label class="switch" aria-label="Include a sign-off">
+                <input type="checkbox" id="useFrom" />
+                <span class="track"><span class="thumb"></span></span>
+              </label>
+              <div class="opt-text">
+                <strong>Sign-off</strong>
+                <span>A “love, …” at the bottom of the envelope note</span>
               </div>
-              <img
-                class="message-reference-image"
-                src="img/envelope-message-reference.png"
-                alt="Example of the envelope back showing a typed message before the spin starts"
-              />
             </div>
-
-            <div class="choice-grid" role="radiogroup" aria-label="Envelope message style">
-              <label class="choice-card">
-                <input type="radio" name="messagePlan" value="default" />
-                <span>
-                  <strong>Use one message</strong>
-                  <small>Write one envelope message for everyone. You can still customize individual people later.</small>
-                </span>
-              </label>
-              <label class="choice-card">
-                <input type="radio" name="messagePlan" value="personalized" />
-                <span>
-                  <strong>Personalize each message</strong>
-                  <small>Start each person with their own custom envelope message.</small>
-                </span>
-              </label>
-            </div>
+            <input id="dFrom" class="opt-input" placeholder="Love, Emma" hidden />
           </div>
 
-          <div class="field" id="defaultMessageField" hidden>
-            <label for="dIntro">Default Envelope Message</label>
-            <textarea id="dIntro">You mean so much to me. I cannot imagine this next chapter without you, so I have one very special question.</textarea>
-            <p class="helper small">Shown on the back of the envelope before the slot game starts.</p>
-          </div>
-          <div class="optional-strip">
-            <div class="field">
-              <label for="dFrom">Signature</label>
-              <input id="dFrom" placeholder="Love, Emma" />
-            </div>
-            <div class="field">
-              <label class="check-row" for="includeDate">
-                <input id="includeDate" type="checkbox" />
-                Include wedding date
+          <div class="opt-row">
+            <div class="opt-head">
+              <label class="switch" aria-label="Include a wedding detail">
+                <input type="checkbox" id="useDetail" />
+                <span class="track"><span class="thumb"></span></span>
               </label>
-              <p class="helper small">Shows as an extra line on the final reveal screen.</p>
+              <div class="opt-text">
+                <strong>Wedding detail</strong>
+                <span>A date or place to tease</span>
+              </div>
             </div>
-            <div class="field date-field" id="dateField" hidden>
-              <label for="dDetail">Wedding Date Text</label>
-              <input id="dDetail" placeholder="Wedding day: June 14, 2027" />
-            </div>
+            <input id="dDetail" class="opt-input" placeholder="June 14, 2027" hidden />
           </div>
         </div>
         <div class="wizard-nav">
-          <span class="spacer"></span>
-          <button class="btn" type="button" data-next="2">Next: Add People</button>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" type="button" data-next="2">Next: add your party →</button>
         </div>
       </section>
 
+      <!-- STEP 2 -->
       <section class="step-view card" data-step="2">
         <div class="step-head">
           <p class="step-kicker">Step 2 of 4</p>
-          <h2>Add your bridal party</h2>
-          <p>Add one name at a time, or paste a list separated by commas or new lines.</p>
+          <h2>Your party</h2>
+          <p>Type a name and press Enter. Pasting a whole list works too — it splits into rows.</p>
         </div>
         <div class="quick-add">
-          <input id="quickAdd" placeholder="Maddie, Lauren, Sofia" autocomplete="off" />
-          <button class="btn" type="button" id="quickAddBtn">Add</button>
+          <input id="quickAdd" placeholder="Add a name…" autocomplete="off" aria-label="Add a name" />
+          <button class="btn btn-primary" type="button" id="quickAddBtn">Add</button>
         </div>
+        <p class="quick-hint">Tip: separate names with commas or new lines to add several at once.</p>
+        <p class="empty" id="emptyState">No one yet — add your first bridesmaid above ✿</p>
         <ul class="roster" id="roster"></ul>
-        <p class="helper" id="emptyState">No recipients yet.</p>
+        <p class="count-pill" id="countPill"></p>
         <div class="wizard-nav">
-          <button class="btn secondary" type="button" data-next="1">Previous</button>
-          <span class="spacer"></span>
-          <button class="btn" type="button" id="toPersonalize" disabled>Personalize</button>
+          <button class="btn btn-ghost" type="button" data-next="1">← Back</button>
+          <div class="spacer"></div>
+          <button class="btn btn-primary" type="button" id="toPersonalize" disabled>Next: personalize →</button>
         </div>
       </section>
 
+      <!-- STEP 3 -->
       <section class="step-view card" data-step="3">
         <div class="step-head">
           <p class="step-kicker">Step 3 of 4</p>
-          <h2>Personalize each recipient</h2>
-          <p>Choose default or custom messages for the current person, then move to the next.</p>
+          <h2>Make it personal</h2>
+          <p>Everyone's set to your default message. Flip anyone to <b>Custom</b> to write them something of their own — or skip ahead if the default's perfect.</p>
         </div>
-        <div class="walk-layout">
-          <nav class="walk-rail" id="walkRail" aria-label="Recipients"></nav>
-          <div class="personalize-panel">
-            <div class="person-title">
-              <div>
-                <strong id="walkName">Recipient</strong>
-                <span id="walkRole">Bridesmaid</span>
-              </div>
-              <span id="walkProgress">1 of 1</span>
-            </div>
 
-            <div class="field" id="introField">
-              <span class="field-label">Envelope Message</span>
-              <div class="seg" id="segIntro">
-                <button type="button" data-mode="default">Default</button>
-                <button type="button" data-mode="custom">Custom</button>
-              </div>
-              <p class="default-preview" id="prevIntro"></p>
-              <button class="btn subtle" type="button" id="introOverride">Customize this person's envelope message</button>
-              <textarea id="taIntro" rows="3" placeholder="Write this person's envelope message" hidden></textarea>
-            </div>
+        <p class="walk-rail-label" id="walkRailLabel">Tap a name to jump to that person · ✦ marks a custom message</p>
+        <div class="walk-rail" id="walkRail"></div>
 
-            <div class="field">
-              <span class="field-label">Reveal Message</span>
-              <div class="reveal-reference" aria-label="Default ask reference">
-                <strong>Default ask reference</strong>
-                <img
-                  src="img/reveal-message-reference.png"
-                  alt="Example of the final reveal screen asking will you be my bridesmaid"
-                />
-              </div>
-              <div class="seg" id="segReveal">
-                <button type="button" data-mode="default">Default</button>
-                <button type="button" data-mode="custom">Custom</button>
-              </div>
-              <p class="default-preview" id="prevReveal"></p>
-              <textarea id="taReveal" rows="3" placeholder="Write this person's reveal message" hidden></textarea>
-            </div>
+        <div class="walk-head">
+          <div class="walk-who">
+            <strong id="walkName">Name</strong>
+            <span class="role-tag" id="walkRole">Bridesmaid</span>
+          </div>
+          <span class="walk-progress" id="walkProgress">1 of 1</span>
+        </div>
 
-            <div class="actions">
-              <button class="btn secondary" type="button" id="walkPreview">Preview what they'll see</button>
+        <div class="pers-block">
+          <div class="pers-head">
+            <label>Opening message <span class="hint">— what they see first</span></label>
+            <div class="seg" id="segIntro" role="group" aria-label="Opening message mode">
+              <button type="button" data-mode="default">Default</button>
+              <button type="button" data-mode="custom">Custom</button>
             </div>
           </div>
+          <p class="default-preview" id="prevIntro"></p>
+          <textarea id="taIntro" rows="3" placeholder="Write this person's opening message…" hidden></textarea>
         </div>
+
+        <div class="pers-block">
+          <div class="pers-head">
+            <label>The big reveal <span class="hint">— the question they spin to</span></label>
+            <div class="seg" id="segReveal" role="group" aria-label="Reveal message mode">
+              <button type="button" data-mode="default">Default</button>
+              <button type="button" data-mode="custom">Custom</button>
+            </div>
+          </div>
+          <p class="default-preview" id="prevReveal"></p>
+          <textarea id="taReveal" rows="3" placeholder="Write this person's reveal…" hidden></textarea>
+        </div>
+
+        <button class="btn btn-quiet" type="button" id="walkPreview" style="margin-top:-8px">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          Preview what they'll see
+        </button>
+
         <div class="wizard-nav">
-          <button class="btn secondary" type="button" id="walkPrev">Previous</button>
-          <span class="spacer"></span>
-          <button class="btn secondary" type="button" id="walkSkip">Skip to Links</button>
-          <button class="btn" type="button" id="walkNext">Next Person</button>
+          <button class="btn btn-ghost" type="button" id="walkPrev">← Previous</button>
+          <div class="spacer"></div>
+          <button class="btn btn-quiet" type="button" id="walkSkip">Skip to links</button>
+          <button class="btn btn-primary" type="button" id="walkNext">Next person →</button>
         </div>
       </section>
 
+      <!-- STEP 4 -->
       <section class="step-view card" data-step="4">
-        <div class="step-head">
+        <div class="step-head done-banner">
+          <div class="ring">♡</div>
           <p class="step-kicker">Step 4 of 4</p>
           <h2>Share the links</h2>
-          <p>One private short link per person. Copy and text each link directly to them.</p>
+          <p style="margin-inline:auto">One private link per person. Copy it and text it straight to them.</p>
         </div>
         <div class="results" id="results"></div>
         <div class="wizard-nav">
-          <button class="btn secondary" type="button" data-next="3">Back to Personalize</button>
-          <span class="spacer"></span>
-          <button class="btn secondary" type="button" id="copyAllBtn">Copy All as List</button>
+          <button class="btn btn-ghost" type="button" data-next="3">← Back to personalize</button>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" type="button" id="copyAllBtn">Copy all as a list</button>
         </div>
       </section>
     </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <div class="modal" id="modal" aria-hidden="true">
       <div class="modal-panel">
         <div class="modal-head">
           <strong id="modalName">Preview</strong>
-          <button class="btn subtle" type="button" id="modalClose">Close</button>
+          <button class="icon-btn" type="button" id="modalClose" aria-label="Close preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
         </div>
         <iframe id="modalFrame" title="Proposal preview"></iframe>
+        <p class="modal-note">This is exactly what this person sees when they open their link.</p>
       </div>
     </div>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <template id="rowTpl">
       <li class="member">
@@ -928,506 +631,363 @@
           <option value="matron of honor">Matron of Honor</option>
           <option value="flower girl">Flower Girl</option>
         </select>
-        <button class="btn subtle" type="button" data-action="remove">Remove</button>
+        <button class="icon-btn" type="button" data-action="remove" title="Remove" aria-label="Remove">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+        </button>
       </li>
     </template>
 
     <script>
+      "use strict";
       const $ = (id) => document.getElementById(id);
-      const dFrom = $("dFrom");
-      const dDetail = $("dDetail");
-      const includeDate = $("includeDate");
-      const dateField = $("dateField");
-      const dIntro = $("dIntro");
-      const defaultMessageField = $("defaultMessageField");
-      const messagePlanInputs = [...document.querySelectorAll('input[name="messagePlan"]')];
-      const quickAdd = $("quickAdd");
-      const quickAddBtn = $("quickAddBtn");
-      const roster = $("roster");
-      const emptyState = $("emptyState");
-      const toPersonalize = $("toPersonalize");
-      const rowTpl = $("rowTpl");
-      const stepper = $("stepper");
-      const stepViews = [...document.querySelectorAll(".step-view")];
-      const walkRail = $("walkRail");
-      const walkName = $("walkName");
-      const walkRole = $("walkRole");
-      const walkProgress = $("walkProgress");
-      const introField = $("introField");
-      const segIntro = $("segIntro");
-      const segReveal = $("segReveal");
-      const prevIntro = $("prevIntro");
-      const prevReveal = $("prevReveal");
-      const introOverride = $("introOverride");
-      const taIntro = $("taIntro");
-      const taReveal = $("taReveal");
-      const walkPrev = $("walkPrev");
-      const walkNext = $("walkNext");
-      const walkSkip = $("walkSkip");
-      const walkPreview = $("walkPreview");
-      const results = $("results");
-      const copyAllBtn = $("copyAllBtn");
-      const modal = $("modal");
-      const modalFrame = $("modalFrame");
-      const modalName = $("modalName");
-      const modalClose = $("modalClose");
+
+      const dFrom = $("dFrom"), dDetail = $("dDetail"), dIntro = $("dIntro");
+      const presetList = $("presetList"), useFrom = $("useFrom"), useDetail = $("useDetail");
+      const quickAdd = $("quickAdd"), quickAddBtn = $("quickAddBtn");
+      const roster = $("roster"), emptyState = $("emptyState"), countPill = $("countPill");
+      const rowTpl = $("rowTpl"), toPersonalize = $("toPersonalize");
+      const stepper = $("stepper"), stepViews = [...document.querySelectorAll(".step-view")];
+
+      const walkRail = $("walkRail"), walkName = $("walkName"), walkRole = $("walkRole"), walkProgress = $("walkProgress");
+      const segIntro = $("segIntro"), segReveal = $("segReveal");
+      const prevIntro = $("prevIntro"), prevReveal = $("prevReveal");
+      const taIntro = $("taIntro"), taReveal = $("taReveal");
+      const walkPrev = $("walkPrev"), walkNext = $("walkNext"), walkSkip = $("walkSkip"), walkPreview = $("walkPreview");
+
+      const results = $("results"), copyAllBtn = $("copyAllBtn");
       const toast = $("toast");
+      const modal = $("modal"), modalFrame = $("modalFrame"), modalName = $("modalName"), modalClose = $("modalClose");
 
       const ROLE_LABELS = {
-        bridesmaid: "Bridesmaid",
-        "maid of honor": "Maid of Honor",
-        "matron of honor": "Matron of Honor",
-        "flower girl": "Flower Girl",
+        "bridesmaid": "Bridesmaid", "maid of honor": "Maid of Honor",
+        "matron of honor": "Matron of Honor", "flower girl": "Flower Girl",
       };
-      const ENABLE_TINYURL_SHORT_LINKS = false;
+      const roleLabel = (r) => ROLE_LABELS[r] || r;
 
       let members = [];
       let nextId = 1;
+      let currentStep = 1;
       let walkIndex = 0;
       let previewVersion = 0;
       let toastTimer = null;
-      let generatedLinks = [];
 
-      const selectedMessagePlan = () =>
-        document.querySelector('input[name="messagePlan"]:checked')?.value || null;
-
-      const syncMessagePlan = () => {
-        defaultMessageField.hidden = selectedMessagePlan() !== "default";
+      const defaultReveal = (m) => {
+        const name = (m.name || "").trim();
+        return `${name ? name + ", " : ""}will you be my ${m.role}?`;
       };
+      const fallbackName = (m, i) => (m.name || "").trim() || `Bridesmaid ${i + 1}`;
+      const firstName = (m, i) => fallbackName(m, i).split(" ")[0];
 
-      const roleLabel = (role) => ROLE_LABELS[role] || role;
-      const defaultReveal = (member) => {
-        const name = member.name.trim();
-        return `${name ? `${name}, ` : ""}will you be my ${member.role}?`;
-      };
-      const fallbackName = (member, index) =>
-        member.name.trim() || `Recipient ${index + 1}`;
-      const firstName = (member, index) => fallbackName(member, index).split(" ")[0];
+      /* ---------- no draft persistence ---------- */
+      const save = () => {};
 
-      const showToast = (message) => {
-        toast.textContent = message;
-        toast.classList.add("show");
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      const showToast = (msg) => {
+        toast.textContent = msg; toast.classList.add("show");
+        clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 1900);
       };
 
       const copyText = async (text) => {
-        try {
-          await navigator.clipboard.writeText(text);
-          return true;
-        } catch (error) {
-          const textarea = document.createElement("textarea");
-          textarea.value = text;
-          textarea.style.position = "fixed";
-          textarea.style.opacity = "0";
-          document.body.appendChild(textarea);
-          textarea.select();
-          const ok = document.execCommand("copy");
-          textarea.remove();
-          return ok;
+        try { await navigator.clipboard.writeText(text); return true; }
+        catch (e) {
+          try {
+            const ta = document.createElement("textarea");
+            ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+            document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); return true;
+          } catch (_) { return false; }
         }
       };
 
-      const buildUrl = (member, { preview = false } = {}) => {
+      /* ---------- URL builder ---------- */
+      const buildUrl = (m, { preview = false } = {}) => {
         const url = new URL("index.html", window.location.href);
-        const reveal =
-          member.revealMode === "custom"
-            ? member.reveal.trim() || defaultReveal(member)
-            : defaultReveal(member);
-        const intro =
-          member.introMode === "custom"
-            ? member.intro.trim() || dIntro.value.trim()
-            : dIntro.value.trim();
+        const reveal = m.revealMode === "custom" ? ((m.reveal || "").trim() || defaultReveal(m)) : defaultReveal(m);
+        const intro = m.introMode === "custom" ? ((m.intro || "").trim() || dIntro.value.trim()) : dIntro.value.trim();
+        const detail = useDetail.checked ? dDetail.value.trim() : "";
+        const signature = useFrom.checked ? dFrom.value.trim() : "";
 
         url.searchParams.set("reveal", reveal);
-        if (member.name.trim()) url.searchParams.set("name", member.name.trim());
-        if (includeDate.checked && dDetail.value.trim()) {
-          url.searchParams.set("date", dDetail.value.trim());
-        }
-        if (dFrom.value.trim()) url.searchParams.set("from", dFrom.value.trim());
-        if (intro) {
-          url.searchParams.set("message", intro);
-          url.searchParams.set("landingMessage", intro);
-        }
+        if ((m.name || "").trim()) url.searchParams.set("name", m.name.trim());
+        if (detail) url.searchParams.set("date", detail);
+        if (signature) url.searchParams.set("signature", signature);
+        if (intro) { url.searchParams.set("message", intro); url.searchParams.set("landingMessage", intro); }
         url.searchParams.set("finalIcon", "ringflower.png");
         if (preview) url.searchParams.set("preview", String(++previewVersion));
         return url.toString();
       };
 
-      const shortenUrl = async (longUrl) => {
-        const response = await fetch("/.netlify/functions/shorten-url", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: longUrl }),
+      /* ---------- Step 1: default message + optional touches ---------- */
+      const INTRO_PRESETS = [
+        "You mean so much to me. I cannot imagine this next chapter without you, so I have one very special question.",
+        "You have been such an important part of my life, and I would love to have you by my side for what comes next.",
+        "This next chapter would not feel the same without you. Tap to open a little surprise.",
+      ];
+      let introChoice = 0;     // 0..n-1 = preset index, or "custom"
+      let lastCustom = "";
+
+      const renderPresets = () => {
+        presetList.innerHTML = "";
+        INTRO_PRESETS.forEach((text, i) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "preset-option" + (introChoice === i ? " selected" : "");
+          b.setAttribute("aria-pressed", String(introChoice === i));
+          b.innerHTML = '<span class="preset-check" aria-hidden="true"></span><span class="preset-text"></span>';
+          b.querySelector(".preset-text").textContent = text;
+          b.addEventListener("click", () => selectIntro(i));
+          presetList.appendChild(b);
         });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok || !data.shortUrl) {
-          throw new Error(data.error || "Unable to shorten URL");
-        }
-        return data.shortUrl;
+        const c = document.createElement("button");
+        c.type = "button";
+        c.className = "preset-option preset-own" + (introChoice === "custom" ? " selected" : "");
+        c.setAttribute("aria-pressed", String(introChoice === "custom"));
+        c.innerHTML = '<span class="preset-check" aria-hidden="true"></span><span class="preset-text"><strong>Write my own message</strong><span class="preset-own-sub">Type something personal for everyone</span></span>';
+        c.addEventListener("click", () => selectIntro("custom"));
+        presetList.appendChild(c);
       };
 
-      const buildGeneratedLinks = async () => {
-        const links = [];
-        for (let index = 0; index < members.length; index += 1) {
-          const member = members[index];
-          const longUrl = buildUrl(member);
-          let url = longUrl;
-          let shortened = false;
-          if (ENABLE_TINYURL_SHORT_LINKS) {
-            try {
-              url = await shortenUrl(longUrl);
-              shortened = true;
-            } catch (error) {
-              console.warn("TinyURL shortening failed", error);
-            }
-          }
-          links.push({
-            member,
-            label: fallbackName(member, index),
-            longUrl,
-            url,
-            shortened,
-          });
+      const selectIntro = (choice) => {
+        introChoice = choice;
+        if (choice === "custom") {
+          dIntro.hidden = false;
+          dIntro.value = (lastCustom || "").trim() || INTRO_PRESETS[0];
+          lastCustom = dIntro.value;
+          renderPresets();
+          dIntro.focus();
+          dIntro.setSelectionRange(dIntro.value.length, dIntro.value.length);
+        } else {
+          dIntro.hidden = true;
+          dIntro.value = INTRO_PRESETS[choice];
+          renderPresets();
         }
-        return links;
+        save();
       };
+      dIntro.addEventListener("input", () => { if (introChoice === "custom") lastCustom = dIntro.value; save(); });
 
+      const applyToggle = (cb, input) => { input.hidden = !cb.checked; };
+      const wireToggle = (cb, input) => {
+        cb.addEventListener("change", () => {
+          applyToggle(cb, input);
+          if (cb.checked) input.focus();
+          save();
+        });
+      };
+      wireToggle(useFrom, dFrom);
+      wireToggle(useDetail, dDetail);
+
+      /* ---------- data ops ---------- */
       const addMember = (seed = {}) => {
-        const member = {
+        const m = {
           id: nextId++,
-          name: seed.name || "",
-          role: seed.role || "bridesmaid",
-          introMode:
-            seed.introMode ||
-            (selectedMessagePlan() === "personalized" ? "custom" : "default"),
+          name: seed.name || "", role: seed.role || "bridesmaid",
+          intro: seed.intro ?? "", reveal: seed.reveal ?? "",
+          introMode: seed.introMode === "custom" ? "custom" : "default",
           revealMode: seed.revealMode === "custom" ? "custom" : "default",
-          intro: seed.intro || "",
-          reveal: seed.reveal || "",
         };
-        members.push(member);
-        return member;
+        members.push(m);
+        return m;
       };
+      const isCustom = (m) => m.introMode === "custom" || m.revealMode === "custom";
 
-      const parseNames = (text) =>
-        text.split(/[\n,]/).map((name) => name.trim()).filter(Boolean);
-
+      /* ---------- Step 2: roster ---------- */
       const renderRoster = () => {
         roster.innerHTML = "";
-        members.forEach((member, index) => {
-          const row = rowTpl.content.cloneNode(true).querySelector(".member");
-          row.querySelector("[data-seat]").textContent = index + 1;
-          const nameInput = row.querySelector('[data-field="name"]');
-          const roleInput = row.querySelector('[data-field="role"]');
-          nameInput.value = member.name;
-          roleInput.value = member.role;
-          nameInput.addEventListener("input", () => {
-            member.name = nameInput.value;
-            refreshPartyState();
+        members.forEach((m, i) => {
+          const li = rowTpl.content.cloneNode(true).querySelector(".member");
+          li.querySelector("[data-seat]").textContent = i + 1;
+          const nameEl = li.querySelector('[data-field="name"]');
+          const roleEl = li.querySelector('[data-field="role"]');
+          nameEl.value = m.name; roleEl.value = m.role;
+          nameEl.addEventListener("input", () => { m.name = nameEl.value; save(); });
+          nameEl.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); quickAdd.focus(); } });
+          roleEl.addEventListener("change", () => { m.role = roleEl.value; save(); });
+          li.querySelector('[data-action="remove"]').addEventListener("click", () => {
+            members = members.filter((x) => x.id !== m.id); renderRoster(); refreshCounts(); save();
           });
-          roleInput.addEventListener("change", () => {
-            member.role = roleInput.value;
-          });
-          row.querySelector('[data-action="remove"]').addEventListener("click", () => {
-            members = members.filter((item) => item.id !== member.id);
-            renderRoster();
-            refreshPartyState();
-          });
-          roster.appendChild(row);
+          roster.appendChild(li);
         });
       };
-
-      const refreshPartyState = () => {
-        emptyState.hidden = members.length > 0;
-        toPersonalize.disabled = members.length === 0;
+      const refreshCounts = () => {
+        const n = members.length;
+        emptyState.hidden = n > 0;
+        countPill.textContent = n ? `${n} ${n === 1 ? "person" : "person"} in your party`.replace("1 person", "1 person") : "";
+        countPill.innerHTML = n ? `<b>${n}</b> ${n === 1 ? "person" : "people"} in your party` : "";
+        toPersonalize.disabled = n === 0;
       };
 
+      const parseNames = (t) => t.split(/[\n,]/).map((s) => s.trim()).filter(Boolean);
       const commitQuickAdd = () => {
         const names = parseNames(quickAdd.value);
-        if (!names.length) {
-          quickAdd.focus();
-          return;
-        }
+        if (!names.length) { quickAdd.focus(); return; }
         names.forEach((name) => addMember({ name }));
-        quickAdd.value = "";
-        renderRoster();
-        refreshPartyState();
-        showToast(names.length === 1 ? "Recipient added" : `${names.length} recipients added`);
+        quickAdd.value = ""; renderRoster(); refreshCounts(); save();
+        if (names.length > 1) showToast(`Added ${names.length} people`);
+        quickAdd.focus();
       };
-
       quickAddBtn.addEventListener("click", commitQuickAdd);
-      quickAdd.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          commitQuickAdd();
-        }
-      });
-      quickAdd.addEventListener("paste", (event) => {
-        const text = event.clipboardData?.getData("text") || "";
-        if (text && /[\n,]/.test(text)) {
-          event.preventDefault();
-          parseNames(text).forEach((name) => addMember({ name }));
-          renderRoster();
-          refreshPartyState();
-          showToast("Recipients added");
-        }
+      quickAdd.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); commitQuickAdd(); } });
+      quickAdd.addEventListener("paste", (e) => {
+        const text = (e.clipboardData || window.clipboardData).getData("text");
+        if (text && /[\n,]/.test(text)) { e.preventDefault(); quickAdd.value = text; commitQuickAdd(); }
       });
 
-      includeDate.addEventListener("change", () => {
-        dateField.hidden = !includeDate.checked;
-        if (includeDate.checked) dDetail.focus();
-      });
+      [dFrom, dDetail].forEach((el) => el.addEventListener("input", save));
 
-      messagePlanInputs.forEach((input) => {
-        input.addEventListener("change", () => {
-          syncMessagePlan();
-          if (selectedMessagePlan() === "personalized") {
-            members.forEach((member) => {
-              if (member.introMode === "default") {
-                member.introMode = "custom";
-                if (!member.intro) member.intro = dIntro.value;
-              }
-            });
-          } else if (selectedMessagePlan() === "default") {
-            members.forEach((member) => {
-              member.introMode = "default";
-              member.intro = "";
-            });
-          }
-        });
-      });
-
+      /* ---------- Step 3: walkthrough ---------- */
       const renderRail = () => {
         walkRail.innerHTML = "";
-        members.forEach((member, index) => {
-          const button = document.createElement("button");
-          button.type = "button";
-          button.className = "walk-chip";
-          button.classList.toggle("active", index === walkIndex);
-          button.textContent = firstName(member, index);
-          button.addEventListener("click", () => {
-            walkIndex = index;
-            renderWalk();
-          });
-          walkRail.appendChild(button);
+        members.forEach((m, i) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          chip.className = "walk-chip" + (i === walkIndex ? " active" : "");
+          chip.innerHTML = `<span>${firstName(m, i)}</span><span class="star">✦</span>`;
+          chip.querySelector(".star").hidden = !isCustom(m);
+          chip.addEventListener("click", () => { walkIndex = i; renderWalk(); });
+          walkRail.appendChild(chip);
         });
       };
 
-      const renderMode = (field) => {
-        const member = members[walkIndex];
-        const isIntro = field === "intro";
-        const mode = isIntro ? member.introMode : member.revealMode;
-        const seg = isIntro ? segIntro : segReveal;
-        const textarea = isIntro ? taIntro : taReveal;
-        const preview = isIntro ? prevIntro : prevReveal;
-        const sharedIntroPlan = isIntro && selectedMessagePlan() === "default";
-        if (sharedIntroPlan) {
-          seg.hidden = true;
-          introOverride.hidden = false;
-          const custom = member.introMode === "custom";
-          preview.hidden = custom;
-          textarea.hidden = !custom;
-          introOverride.textContent = custom
-            ? "Use the default envelope message"
-            : "Customize this person's envelope message";
-          if (!custom) {
-            preview.textContent =
-              dIntro.value.trim() || "No default envelope message set.";
-          }
-          return;
-        }
-        if (isIntro) {
-          seg.hidden = false;
-          introOverride.hidden = true;
-        }
-        seg.querySelectorAll("button").forEach((button) => {
-          button.classList.toggle("active", button.dataset.mode === mode);
-        });
+      const renderModeUI = (field) => {
+        const m = members[walkIndex];
+        const mode = field === "intro" ? m.introMode : m.revealMode;
+        const seg = field === "intro" ? segIntro : segReveal;
+        const ta = field === "intro" ? taIntro : taReveal;
+        const prev = field === "intro" ? prevIntro : prevReveal;
         const custom = mode === "custom";
-        textarea.hidden = !custom;
-        preview.hidden = custom;
+        seg.querySelectorAll("button").forEach((b) => b.classList.toggle("is-active", b.dataset.mode === mode));
+        ta.hidden = !custom; prev.hidden = custom;
         if (!custom) {
-          preview.textContent = isIntro
-            ? dIntro.value.trim() || "No default envelope message set."
-            : defaultReveal(member);
+          prev.textContent = field === "intro" ? (dIntro.value.trim() || "No opening message set") : defaultReveal(m);
         }
       };
 
       const renderWalk = () => {
-        if (!members.length) {
-          goStep(2);
-          return;
-        }
+        if (!members.length) { goStep(2); return; }
         walkIndex = Math.max(0, Math.min(walkIndex, members.length - 1));
-        const member = members[walkIndex];
-        walkName.textContent = fallbackName(member, walkIndex);
-        walkRole.textContent = roleLabel(member.role);
+        const m = members[walkIndex];
+        walkName.textContent = fallbackName(m, walkIndex);
+        walkRole.textContent = roleLabel(m.role);
         walkProgress.textContent = `${walkIndex + 1} of ${members.length}`;
-        taIntro.value = member.intro;
-        taReveal.value = member.reveal;
-        introField.hidden = false;
-        renderMode("intro");
-        renderMode("reveal");
-        walkPrev.textContent = walkIndex === 0 ? "Back to Party" : "Previous";
-        walkNext.textContent =
-          walkIndex === members.length - 1 ? "See Links" : "Next Person";
-        walkSkip.hidden = walkIndex === members.length - 1;
+        taIntro.value = m.intro; taReveal.value = m.reveal;
+        renderModeUI("intro"); renderModeUI("reveal");
+        walkPrev.textContent = walkIndex === 0 ? "← Back to party" : "← Previous";
+        walkNext.textContent = walkIndex === members.length - 1 ? "See the links →" : "Next person →";
+        walkSkip.style.display = walkIndex === members.length - 1 ? "none" : "";
         renderRail();
       };
 
       const setMode = (field, mode) => {
-        const member = members[walkIndex];
-        const textarea = field === "intro" ? taIntro : taReveal;
-        if (field === "intro") member.introMode = mode;
-        if (field === "reveal") member.revealMode = mode;
-        if (mode === "custom" && !textarea.value.trim()) {
-          textarea.value = field === "intro" ? dIntro.value : defaultReveal(member);
-          member[field] = textarea.value;
+        const m = members[walkIndex];
+        const ta = field === "intro" ? taIntro : taReveal;
+        if (field === "intro") m.introMode = mode; else m.revealMode = mode;
+        if (mode === "custom" && !ta.value.trim()) {
+          const seedVal = field === "intro" ? dIntro.value : defaultReveal(m);
+          ta.value = seedVal; m[field] = seedVal;
         }
-        renderMode(field);
-        if (mode === "custom") textarea.focus();
+        renderModeUI(field);
+        if (mode === "custom") ta.focus();
+        renderRail(); save();
       };
+      segIntro.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => setMode("intro", b.dataset.mode)));
+      segReveal.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => setMode("reveal", b.dataset.mode)));
+      taIntro.addEventListener("input", () => { members[walkIndex].intro = taIntro.value; save(); });
+      taReveal.addEventListener("input", () => { members[walkIndex].reveal = taReveal.value; save(); });
 
-      segIntro.querySelectorAll("button").forEach((button) => {
-        button.addEventListener("click", () => setMode("intro", button.dataset.mode));
-      });
-      introOverride.addEventListener("click", () => {
-        const member = members[walkIndex];
-        if (member.introMode === "custom") {
-          member.introMode = "default";
-          member.intro = "";
-          taIntro.value = "";
-          renderMode("intro");
-          return;
-        }
-        setMode("intro", "custom");
-      });
-      segReveal.querySelectorAll("button").forEach((button) => {
-        button.addEventListener("click", () => setMode("reveal", button.dataset.mode));
-      });
-      taIntro.addEventListener("input", () => {
-        members[walkIndex].intro = taIntro.value;
-      });
-      taReveal.addEventListener("input", () => {
-        members[walkIndex].reveal = taReveal.value;
-      });
-
-      const openPreview = (member) => {
-        const index = members.indexOf(member);
-        modalName.textContent = fallbackName(member, index);
-        modalFrame.src = buildUrl(member, { preview: true });
-        modal.classList.add("open");
-        modal.setAttribute("aria-hidden", "false");
-      };
-
-      const closePreview = () => {
-        modal.classList.remove("open");
-        modal.setAttribute("aria-hidden", "true");
-        modalFrame.src = "about:blank";
-      };
-
-      walkPreview.addEventListener("click", () => openPreview(members[walkIndex]));
-      modalClose.addEventListener("click", closePreview);
-      modal.addEventListener("click", (event) => {
-        if (event.target === modal) closePreview();
-      });
-
-      walkPrev.addEventListener("click", () => {
-        if (walkIndex === 0) goStep(2);
-        else {
-          walkIndex -= 1;
-          renderWalk();
-        }
-      });
-      walkNext.addEventListener("click", () => {
-        if (walkIndex === members.length - 1) goStep(4);
-        else {
-          walkIndex += 1;
-          renderWalk();
-        }
-      });
+      walkPrev.addEventListener("click", () => { if (walkIndex === 0) goStep(2); else { walkIndex--; renderWalk(); } });
+      walkNext.addEventListener("click", () => { if (walkIndex === members.length - 1) goStep(4); else { walkIndex++; renderWalk(); } });
       walkSkip.addEventListener("click", () => goStep(4));
+      walkPreview.addEventListener("click", () => openPreview(members[walkIndex]));
 
-      const renderResults = async () => {
+      /* ---------- Step 4: results ---------- */
+      const renderResults = () => {
         results.innerHTML = "";
-        results.innerHTML = `<p class="helper">Creating short links...</p>`;
-        generatedLinks = await buildGeneratedLinks();
-        results.innerHTML = "";
-        generatedLinks.forEach((link) => {
+        members.forEach((m, i) => {
+          const url = buildUrl(m), who = fallbackName(m, i);
           const card = document.createElement("div");
           card.className = "link-card";
           card.innerHTML = `
-            <div class="link-who">
-              <strong></strong>
-              <span class="role-tag"></span>
-            </div>
-            <div class="link-url"></div>
+            <div class="link-who"><strong></strong><span class="role-tag"></span></div>
             <div class="link-actions">
-              <button class="btn subtle" type="button" data-action="preview">Preview</button>
-              <button class="btn" type="button" data-action="copy">Copy</button>
+              <button class="btn btn-ghost" type="button" data-act="preview">Preview</button>
+              <button class="btn btn-primary copy-btn" type="button" data-act="copy"></button>
             </div>
-          `;
-          card.querySelector("strong").textContent = link.label;
-          card.querySelector(".role-tag").textContent = link.shortened
-            ? roleLabel(link.member.role)
-            : `${roleLabel(link.member.role)} - long link fallback`;
-          card.querySelector(".link-url").textContent = link.url;
-          card.querySelector('[data-action="preview"]').addEventListener("click", () => openPreview(link.member));
-          card.querySelector('[data-action="copy"]').addEventListener("click", async () => {
-            await copyText(link.url);
-            showToast(`${link.label} link copied`);
+            <div class="link-url"></div>`;
+          card.querySelector("strong").textContent = who;
+          card.querySelector(".role-tag").textContent = roleLabel(m.role);
+          card.querySelector(".link-url").textContent = url;
+          const copyBtn = card.querySelector('[data-act="copy"]');
+          copyBtn.textContent = `Copy ${firstName(m, i)}'s link`;
+          copyBtn.addEventListener("click", async () => {
+            const ok = await copyText(url);
+            copyBtn.classList.add("copied");
+            const prevTxt = copyBtn.textContent; copyBtn.textContent = "Copied ✓";
+            showToast(ok ? `${who}'s link copied — ready to text` : "Copy the link below");
+            setTimeout(() => { copyBtn.textContent = prevTxt; copyBtn.classList.remove("copied"); }, 1600);
           });
+          card.querySelector('[data-act="preview"]').addEventListener("click", () => openPreview(m));
           results.appendChild(card);
         });
       };
-
       copyAllBtn.addEventListener("click", async () => {
-        if (!generatedLinks.length) generatedLinks = await buildGeneratedLinks();
-        const text = generatedLinks
-          .map((link) => `${link.label}:\n${link.url}`)
-          .join("\n\n");
-        await copyText(text);
-        showToast("All links copied");
+        const text = members.map((m, i) => `${fallbackName(m, i)} — ${roleLabel(m.role)}\n${buildUrl(m)}`).join("\n\n");
+        const ok = await copyText(text);
+        showToast(ok ? "All links copied as a list" : "Could not copy");
       });
 
-      const goStep = (step) => {
-        if ((step === 3 || step === 4) && !members.length) {
-          step = 2;
-          showToast("Add at least one recipient first");
-        }
-        stepViews.forEach((view) => {
-          view.classList.toggle("active", Number(view.dataset.step) === step);
+      /* ---------- preview modal ---------- */
+      const openPreview = (m) => {
+        const i = members.indexOf(m);
+        modalName.textContent = fallbackName(m, i);
+        modalFrame.src = buildUrl(m, { preview: true });
+        modal.classList.add("open"); modal.setAttribute("aria-hidden", "false");
+      };
+      const closePreview = () => { modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true"); modalFrame.src = "about:blank"; };
+      modalClose.addEventListener("click", closePreview);
+      modal.addEventListener("click", (e) => { if (e.target === modal) closePreview(); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modal.classList.contains("open")) closePreview(); });
+
+      /* ---------- step navigation ---------- */
+      const goStep = (n) => {
+        if (n === 3 && !members.length) n = 2;
+        if (n === 4 && !members.length) n = 2;
+        currentStep = n;
+        stepViews.forEach((v) => v.classList.toggle("active", +v.dataset.step === n));
+        const pf = document.getElementById("progressFill");
+        if (pf) pf.style.width = (n / 4) * 100 + "%";
+        [...stepper.children].forEach((chip) => {
+          const cn = +chip.dataset.go;
+          chip.classList.toggle("active", cn === n);
+          chip.classList.toggle("done", cn < n);
+          if (cn === n) chip.setAttribute("aria-current", "step");
+          else chip.removeAttribute("aria-current");
+          chip.title = cn < n ? "Tap to go back and edit this step" : "";
         });
-        stepper.querySelectorAll(".step-chip").forEach((chip) => {
-          chip.classList.toggle("active", Number(chip.dataset.go) === step);
-        });
-        if (step === 2) {
-          renderRoster();
-          refreshPartyState();
-        }
-        if (step === 3) {
-          renderWalk();
-        }
-        if (step === 4) {
-          renderResults();
-        }
+        if (n === 2) { renderRoster(); refreshCounts(); }
+        if (n === 3) { renderWalk(); }
+        if (n === 4) { renderResults(); }
         window.scrollTo({ top: 0, behavior: "smooth" });
+        save();
       };
 
-      document.querySelectorAll("[data-next]").forEach((button) => {
-        button.addEventListener("click", () => goStep(Number(button.dataset.next)));
-      });
-      stepper.addEventListener("click", (event) => {
-        const chip = event.target.closest("[data-go]");
-        if (chip) goStep(Number(chip.dataset.go));
-      });
-      toPersonalize.addEventListener("click", () => {
-        walkIndex = 0;
-        goStep(3);
+      document.querySelectorAll("[data-next]").forEach((b) =>
+        b.addEventListener("click", () => goStep(+b.dataset.next)));
+      toPersonalize.addEventListener("click", () => goStep(3));
+      stepper.addEventListener("click", (e) => {
+        const chip = e.target.closest("[data-go]"); if (!chip) return;
+        const n = +chip.dataset.go;
+        if ((n === 3 || n === 4) && !members.length) { showToast("Add someone to your party first"); return; }
+        goStep(n);
       });
 
-      syncMessagePlan();
-      goStep(1);
+      /* ---------- boot ---------- */
+      (function init() {
+        introChoice = 0;
+        dIntro.value = INTRO_PRESETS[0];
+        dIntro.hidden = introChoice !== "custom";
+        applyToggle(useFrom, dFrom);
+        applyToggle(useDetail, dDetail);
+        renderPresets();
+        goStep(1);
+      })();
     </script>
   </body>
 </html>
