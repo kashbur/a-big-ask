@@ -169,11 +169,115 @@
         gap: 14px;
       }
 
+      .defaults-layout {
+        display: grid;
+        gap: 16px;
+      }
+
+      .message-choice-layout {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.46fr) minmax(300px, 1fr);
+        gap: 14px;
+        align-items: stretch;
+      }
+
+      .choice-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        align-content: start;
+      }
+
+      .choice-card {
+        position: relative;
+        min-width: 0;
+      }
+
+      .choice-card input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .choice-card span {
+        display: grid;
+        gap: 6px;
+        min-height: 116px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: rgba(255, 250, 245, 0.78);
+        color: var(--muted);
+        cursor: pointer;
+        padding: 1rem;
+      }
+
+      .choice-card strong {
+        color: var(--rose-dark);
+        font-size: 1rem;
+        text-transform: none;
+      }
+
+      .choice-card small {
+        font-size: 0.88rem;
+        line-height: 1.4;
+        font-weight: 500;
+        text-transform: none;
+      }
+
+      .choice-card input:checked + span {
+        border-color: rgba(155, 99, 91, 0.58);
+        background: var(--rose-soft);
+        box-shadow: 0 0 0 3px rgba(185, 130, 120, 0.12);
+      }
+
+      .message-reference {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border: 1px solid rgba(139, 93, 85, 0.16);
+        border-radius: 10px;
+        background: rgba(255, 250, 245, 0.72);
+      }
+
+      .message-reference-head {
+        display: grid;
+        gap: 4px;
+      }
+
+      .message-reference-head strong {
+        color: var(--rose-dark);
+        font-size: 0.96rem;
+        font-weight: 700;
+      }
+
+      .message-reference-head span {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.45;
+      }
+
+      .message-reference-image {
+        display: block;
+        width: min(100%, 300px);
+        margin: 0 auto;
+        border: 1px solid rgba(139, 93, 85, 0.18);
+        border-radius: 10px;
+        box-shadow: 0 12px 26px rgba(95, 70, 56, 0.12);
+      }
+
+      .optional-strip {
+        display: grid;
+        grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr);
+        gap: 14px;
+        padding-top: 4px;
+      }
+
       .field {
         display: grid;
         gap: 8px;
       }
 
+      .field[hidden],
       .date-field[hidden] {
         display: none;
       }
@@ -195,6 +299,10 @@
         min-height: 18px;
         height: 18px;
         accent-color: var(--rose);
+      }
+
+      .helper.small {
+        font-size: 0.88rem;
       }
 
       .span-2 {
@@ -413,6 +521,25 @@
         white-space: pre-wrap;
       }
 
+      .reveal-reference {
+        display: grid;
+        gap: 8px;
+        max-width: 260px;
+      }
+
+      .reveal-reference strong {
+        color: var(--rose-dark);
+        font-size: 0.9rem;
+      }
+
+      .reveal-reference img {
+        display: block;
+        width: 100%;
+        border: 1px solid rgba(139, 93, 85, 0.18);
+        border-radius: 10px;
+        box-shadow: 0 12px 26px rgba(95, 70, 56, 0.12);
+      }
+
       .results {
         display: grid;
         gap: 12px;
@@ -526,6 +653,8 @@
         }
 
         .form-grid,
+        .message-choice-layout,
+        .optional-strip,
         .walk-layout {
           grid-template-columns: 1fr;
         }
@@ -622,31 +751,64 @@
         <div class="step-head">
           <p class="step-kicker">Step 1 of 4</p>
           <h2>Set your defaults</h2>
-          <p>These defaults can apply to everyone. You can still customize each recipient later.</p>
+          <p>Choose how you want to write the envelope messages.</p>
         </div>
-        <div class="form-grid">
-          <div class="field">
-            <label for="dFrom">Bride or Couple Name</label>
-            <input id="dFrom" placeholder="Love, Emma" />
+        <div class="defaults-layout">
+          <div class="message-choice-layout">
+            <div class="message-reference" aria-label="Envelope message reference">
+              <div class="message-reference-head">
+                <strong>Envelope message reference</strong>
+                <span>This is the text on the envelope before the spin starts. The question itself appears later on the reveal screen.</span>
+              </div>
+              <img
+                class="message-reference-image"
+                src="img/envelope-message-reference.png"
+                alt="Example of the envelope back showing a typed message before the spin starts"
+              />
+            </div>
+
+            <div class="choice-grid" role="radiogroup" aria-label="Envelope message style">
+              <label class="choice-card">
+                <input type="radio" name="messagePlan" value="default" />
+                <span>
+                  <strong>Use one message</strong>
+                  <small>Write one envelope message for everyone. You can still customize individual people later.</small>
+                </span>
+              </label>
+              <label class="choice-card">
+                <input type="radio" name="messagePlan" value="personalized" />
+                <span>
+                  <strong>Personalize each message</strong>
+                  <small>Start each person with their own custom envelope message.</small>
+                </span>
+              </label>
+            </div>
           </div>
-          <div class="field">
-            <label class="check-row" for="includeDate">
-              <input id="includeDate" type="checkbox" />
-              Include wedding date
-            </label>
-            <p class="helper">Shows as an extra line on the final reveal screen.</p>
-          </div>
-          <div class="field span-2 date-field" id="dateField" hidden>
-            <label for="dDetail">Wedding Date Text</label>
-            <input id="dDetail" placeholder="Wedding day: June 14, 2027" />
-          </div>
-          <div class="field span-2">
+
+          <div class="field" id="defaultMessageField" hidden>
             <label for="dIntro">Default Envelope Message</label>
             <textarea id="dIntro">You mean so much to me. I cannot imagine this next chapter without you, so I have one very special question.</textarea>
+            <p class="helper small">Shown on the back of the envelope before the slot game starts.</p>
+          </div>
+          <div class="optional-strip">
+            <div class="field">
+              <label for="dFrom">Signature</label>
+              <input id="dFrom" placeholder="Love, Emma" />
+            </div>
+            <div class="field">
+              <label class="check-row" for="includeDate">
+                <input id="includeDate" type="checkbox" />
+                Include wedding date
+              </label>
+              <p class="helper small">Shows as an extra line on the final reveal screen.</p>
+            </div>
+            <div class="field date-field" id="dateField" hidden>
+              <label for="dDetail">Wedding Date Text</label>
+              <input id="dDetail" placeholder="Wedding day: June 14, 2027" />
+            </div>
           </div>
         </div>
         <div class="wizard-nav">
-          <span class="helper">This message appears on the back of the envelope.</span>
           <span class="spacer"></span>
           <button class="btn" type="button" data-next="2">Next: Add People</button>
         </div>
@@ -688,18 +850,26 @@
               <span id="walkProgress">1 of 1</span>
             </div>
 
-            <div class="field">
+            <div class="field" id="introField">
               <span class="field-label">Envelope Message</span>
               <div class="seg" id="segIntro">
                 <button type="button" data-mode="default">Default</button>
                 <button type="button" data-mode="custom">Custom</button>
               </div>
               <p class="default-preview" id="prevIntro"></p>
+              <button class="btn subtle" type="button" id="introOverride">Customize this person's envelope message</button>
               <textarea id="taIntro" rows="3" placeholder="Write this person's envelope message" hidden></textarea>
             </div>
 
             <div class="field">
               <span class="field-label">Reveal Message</span>
+              <div class="reveal-reference" aria-label="Default ask reference">
+                <strong>Default ask reference</strong>
+                <img
+                  src="img/reveal-message-reference.png"
+                  alt="Example of the final reveal screen asking will you be my bridesmaid"
+                />
+              </div>
               <div class="seg" id="segReveal">
                 <button type="button" data-mode="default">Default</button>
                 <button type="button" data-mode="custom">Custom</button>
@@ -769,6 +939,8 @@
       const includeDate = $("includeDate");
       const dateField = $("dateField");
       const dIntro = $("dIntro");
+      const defaultMessageField = $("defaultMessageField");
+      const messagePlanInputs = [...document.querySelectorAll('input[name="messagePlan"]')];
       const quickAdd = $("quickAdd");
       const quickAddBtn = $("quickAddBtn");
       const roster = $("roster");
@@ -781,10 +953,12 @@
       const walkName = $("walkName");
       const walkRole = $("walkRole");
       const walkProgress = $("walkProgress");
+      const introField = $("introField");
       const segIntro = $("segIntro");
       const segReveal = $("segReveal");
       const prevIntro = $("prevIntro");
       const prevReveal = $("prevReveal");
+      const introOverride = $("introOverride");
       const taIntro = $("taIntro");
       const taReveal = $("taReveal");
       const walkPrev = $("walkPrev");
@@ -813,6 +987,13 @@
       let previewVersion = 0;
       let toastTimer = null;
       let generatedLinks = [];
+
+      const selectedMessagePlan = () =>
+        document.querySelector('input[name="messagePlan"]:checked')?.value || null;
+
+      const syncMessagePlan = () => {
+        defaultMessageField.hidden = selectedMessagePlan() !== "default";
+      };
 
       const roleLabel = (role) => ROLE_LABELS[role] || role;
       const defaultReveal = (member) => {
@@ -917,7 +1098,9 @@
           id: nextId++,
           name: seed.name || "",
           role: seed.role || "bridesmaid",
-          introMode: seed.introMode === "custom" ? "custom" : "default",
+          introMode:
+            seed.introMode ||
+            (selectedMessagePlan() === "personalized" ? "custom" : "default"),
           revealMode: seed.revealMode === "custom" ? "custom" : "default",
           intro: seed.intro || "",
           reveal: seed.reveal || "",
@@ -995,6 +1178,25 @@
         if (includeDate.checked) dDetail.focus();
       });
 
+      messagePlanInputs.forEach((input) => {
+        input.addEventListener("change", () => {
+          syncMessagePlan();
+          if (selectedMessagePlan() === "personalized") {
+            members.forEach((member) => {
+              if (member.introMode === "default") {
+                member.introMode = "custom";
+                if (!member.intro) member.intro = dIntro.value;
+              }
+            });
+          } else if (selectedMessagePlan() === "default") {
+            members.forEach((member) => {
+              member.introMode = "default";
+              member.intro = "";
+            });
+          }
+        });
+      });
+
       const renderRail = () => {
         walkRail.innerHTML = "";
         members.forEach((member, index) => {
@@ -1018,6 +1220,26 @@
         const seg = isIntro ? segIntro : segReveal;
         const textarea = isIntro ? taIntro : taReveal;
         const preview = isIntro ? prevIntro : prevReveal;
+        const sharedIntroPlan = isIntro && selectedMessagePlan() === "default";
+        if (sharedIntroPlan) {
+          seg.hidden = true;
+          introOverride.hidden = false;
+          const custom = member.introMode === "custom";
+          preview.hidden = custom;
+          textarea.hidden = !custom;
+          introOverride.textContent = custom
+            ? "Use the default envelope message"
+            : "Customize this person's envelope message";
+          if (!custom) {
+            preview.textContent =
+              dIntro.value.trim() || "No default envelope message set.";
+          }
+          return;
+        }
+        if (isIntro) {
+          seg.hidden = false;
+          introOverride.hidden = true;
+        }
         seg.querySelectorAll("button").forEach((button) => {
           button.classList.toggle("active", button.dataset.mode === mode);
         });
@@ -1043,6 +1265,7 @@
         walkProgress.textContent = `${walkIndex + 1} of ${members.length}`;
         taIntro.value = member.intro;
         taReveal.value = member.reveal;
+        introField.hidden = false;
         renderMode("intro");
         renderMode("reveal");
         walkPrev.textContent = walkIndex === 0 ? "Back to Party" : "Previous";
@@ -1067,6 +1290,17 @@
 
       segIntro.querySelectorAll("button").forEach((button) => {
         button.addEventListener("click", () => setMode("intro", button.dataset.mode));
+      });
+      introOverride.addEventListener("click", () => {
+        const member = members[walkIndex];
+        if (member.introMode === "custom") {
+          member.introMode = "default";
+          member.intro = "";
+          taIntro.value = "";
+          renderMode("intro");
+          return;
+        }
+        setMode("intro", "custom");
       });
       segReveal.querySelectorAll("button").forEach((button) => {
         button.addEventListener("click", () => setMode("reveal", button.dataset.mode));
@@ -1192,6 +1426,7 @@
         goStep(3);
       });
 
+      syncMessagePlan();
       goStep(1);
     </script>
   </body>
