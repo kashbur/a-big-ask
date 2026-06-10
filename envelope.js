@@ -64,6 +64,9 @@ const STYLE = `
     0 15px 35px rgba(160, 129, 108, 0.15),
     0 5px 15px rgba(160, 129, 108, 0.1);
   backface-visibility: hidden;
+}
+
+.intro-envelope-front {
   overflow: hidden;
 }
 
@@ -113,6 +116,7 @@ const STYLE = `
 .intro-envelope-back {
   transform: rotateY(180deg);
   background: var(--env-dark-pink);
+  overflow: visible;
 }
 
 .intro-letter-wrapper {
@@ -134,7 +138,7 @@ const STYLE = `
 
 .intro-letter-wrapper.is-out {
   height: var(--letter-height, 90%);
-  transform: translateY(-55%);
+  transform: translateY(-48%);
   z-index: 25;
   transition:
     height 1s cubic-bezier(0.34, 1.3, 0.64, 1),
