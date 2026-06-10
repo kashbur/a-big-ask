@@ -18,13 +18,15 @@
     <link rel="preload" href="img/21.png" as="image" />
     <link rel="preload" href="img/background.png" as="image" />
     <link rel="preload" href="img/taptospin.png" as="image" />
-    <link rel="preload" href="img/ringflower.png" as="image" />
-    <link rel="preload" href="img/cake.png" as="image" />
-    <link rel="preload" href="img/champagnes.png" as="image" />
+    <link rel="preload" href="img/new icons/ringflower.png" as="image" />
+    <link rel="preload" href="img/new icons/cake.png" as="image" />
+    <link rel="preload" href="img/new icons/champagne.png" as="image" />
     <style>
       :root {
         --font-family: "Poppins";
         --typewriter-font: "Courier New", monospace;
+        --slot-box-width: 8.963%;
+        --slot-box-height: 21.649%;
       }
       html,
       body {
@@ -159,8 +161,8 @@
       }
       .reel {
         position: absolute;
-        width: 19.3%;
-        height: 16.4%;
+        width: var(--slot-box-width);
+        height: var(--slot-box-height);
         background: transparent;
         display: flex;
         justify-content: center;
@@ -199,16 +201,16 @@
         align-items: center;
       }
       #reel1 {
-        left: 33.2%;
-        top: 48.8%;
+        left: var(--reel1-x, 34.966%);
+        top: var(--reel1-y, 50.446%);
       }
       #reel2 {
-        left: 44.45%;
-        top: 48.8%;
+        left: var(--reel2-x, 45.86%);
+        top: var(--reel2-y, 50.62%);
       }
       #reel3 {
-        left: 55.7%;
-        top: 48.8%;
+        left: var(--reel3-x, 56.826%);
+        top: var(--reel3-y, 50.48%);
       }
       .reel-item img {
         width: 86.7%;
@@ -227,6 +229,79 @@
       .reel-item img[src$="lipstick.png"] {
         width: 104.04%;
         height: 104.04%;
+      }
+      body.debug-slots .reel {
+        outline: 2px dashed rgba(255, 255, 255, 0.95);
+        outline-offset: -2px;
+        background: rgba(25, 25, 25, 0.08);
+        cursor: move;
+      }
+      body.debug-slots .reel.is-debug-selected {
+        outline-color: #ffdf6d;
+        background: rgba(255, 223, 109, 0.12);
+      }
+      .slot-debug-handle {
+        position: absolute;
+        display: none;
+        width: 14px;
+        height: 14px;
+        border: 2px solid #1b1b1b;
+        border-radius: 50%;
+        background: #ffdf6d;
+        box-sizing: border-box;
+        z-index: 4;
+        pointer-events: auto;
+      }
+      body.debug-slots .slot-debug-handle {
+        display: block;
+      }
+      .slot-debug-handle[data-corner="nw"] {
+        left: -7px;
+        top: -7px;
+        cursor: nwse-resize;
+      }
+      .slot-debug-handle[data-corner="ne"] {
+        right: -7px;
+        top: -7px;
+        cursor: nesw-resize;
+      }
+      .slot-debug-handle[data-corner="sw"] {
+        left: -7px;
+        bottom: -7px;
+        cursor: nesw-resize;
+      }
+      .slot-debug-handle[data-corner="se"] {
+        right: -7px;
+        bottom: -7px;
+        cursor: nwse-resize;
+      }
+      .slot-debug-panel {
+        position: absolute;
+        right: 12px;
+        bottom: 12px;
+        z-index: 9000;
+        width: min(360px, calc(100% - 24px));
+        box-sizing: border-box;
+        padding: 12px;
+        border-radius: 8px;
+        background: rgba(28, 28, 28, 0.9);
+        color: #fff;
+        font: 12px/1.4 "Courier New", monospace;
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+      }
+      .slot-debug-panel[hidden] {
+        display: none;
+      }
+      .slot-debug-panel strong {
+        display: block;
+        margin-bottom: 6px;
+        font-family: var(--font-family), sans-serif;
+        font-size: 13px;
+      }
+      .slot-debug-panel pre {
+        margin: 8px 0 0;
+        white-space: pre-wrap;
+        user-select: all;
       }
       .spin-button {
         position: absolute;
@@ -569,21 +644,29 @@
         <div class="slot-machine blur-background" id="slotMachine"></div>
         <div id="reel1" class="reel blur-background">
           <div class="reel-inner">
-            <img src="img/cake.png" alt="Cake" />
+            <img src="img/new icons/cake.png" alt="Cake" />
           </div>
         </div>
         <div id="reel2" class="reel blur-background">
           <div class="reel-inner">
-            <img src="img/camera.png" alt="Camera" />
+            <img src="img/new icons/camera.png" alt="Camera" />
           </div>
         </div>
         <div id="reel3" class="reel blur-background">
           <div class="reel-inner">
-            <img src="img/champagnes.png" alt="Champagnes" />
+            <img src="img/new icons/champagne.png" alt="Champagne" />
           </div>
         </div>
         <div class="spin-button blur-background" id="spinButton">
           <img src="img/taptospin.png" alt="Spin" />
+        </div>
+        <div class="slot-debug-panel" id="slotDebugPanel" hidden>
+          <strong>Slot Debug</strong>
+          <div>D: close | 1/2/3: select | A: all</div>
+          <div>Arrows: move | Shift: faster</div>
+          <div>+/-: box size | [ ]: width | ; ': height</div>
+          <div>Drag a slot to move it.</div>
+          <pre id="slotDebugOutput"></pre>
         </div>
         <div class="reveal-overlay intro-overlay" id="introOverlay">
           <div class="color-overlay"></div>
@@ -602,9 +685,9 @@
             <h2 class="instructions-title">How to Play</h2>
             <p class="instructions-text">Tap the button to spin.<br>Match all 3 reels<br>to reveal your surprise.</p>
             <div class="instructions-slot-visual">
-              <div class="mini-slot"><img src="img/cake.png" alt="" /></div>
-              <div class="mini-slot"><img src="img/camera.png" alt="" /></div>
-              <div class="mini-slot"><img src="img/champagnes.png" alt="" /></div>
+              <div class="mini-slot"><img src="img/new icons/cake.png" alt="" /></div>
+              <div class="mini-slot"><img src="img/new icons/camera.png" alt="" /></div>
+              <div class="mini-slot"><img src="img/new icons/champagne.png" alt="" /></div>
             </div>
             <button class="instructions-button" onclick="document.getElementById('instructionsOverlay').click()">Start Spinning</button>
           </div>
@@ -649,23 +732,26 @@
 
         document.addEventListener("DOMContentLoaded", function () {
           const params = getParams();
-          const allowedFinalIcons = new Set([
-            "ringflower.png",
-            "teambride.png",
-            "girls.png",
-          ]);
-          const normalizeFinalIcon = (value) => {
-            const fileName = String(value || "").split("/").pop();
-            return allowedFinalIcons.has(fileName) ? fileName : "ringflower.png";
-          };
-
-          const icons = [
-            "img/cake.png",
-            "img/camera.png",
-            "img/champagnes.png",
-            "img/flower.png",
-            "img/gift.png",
+          const slotIconBase = "img/new icons/";
+          const slotIconFiles = [
+            "champagne.png",
+            "camera.png",
+            "discoball.png",
+            "sunglasses.png",
+            "globe.png",
+            "suitcase.png",
+            "lipstick.png",
+            "letter.png",
+            "shopping.png",
+            "books.png",
+            "cake.png",
+            "record.png",
+            "bow.png",
+            "popcorn.png",
           ];
+          const finalIconFile = "ringflower.png";
+
+          const icons = slotIconFiles.map((fileName) => `${slotIconBase}${fileName}`);
 
         function preloadImages(paths) {
           return Promise.all(
@@ -681,9 +767,7 @@
 
         preloadImages([
           ...icons,
-          "img/ringflower.png",
-          "img/teambride.png",
-          "img/girls.png",
+          `${slotIconBase}${finalIconFile}`,
           "img/taptospin.png",
           "img/background.png",
           "img/directions.png",
@@ -716,6 +800,7 @@
 
         let spinCount = 0;
         let currentSymbols = [];
+        const slotContainer = document.getElementById("container");
         const slotMachine = document.getElementById("slotMachine");
         const spinButton = document.getElementById("spinButton");
         const reels = [];
@@ -724,6 +809,308 @@
           reels.push(reel);
           initializeReel(reel);
         }
+        const slotDebugPanel = document.getElementById("slotDebugPanel");
+        const slotDebugOutput = document.getElementById("slotDebugOutput");
+        const rootStyle = document.documentElement.style;
+        const slotDebugState = {
+          active: false,
+          selected: "all",
+          boxWidth: 8.963,
+          boxHeight: 21.649,
+          reels: [
+            { x: 34.966, y: 50.446 },
+            { x: 45.86, y: 50.62 },
+            { x: 56.826, y: 50.48 },
+          ],
+          drag: null,
+          resize: null,
+        };
+        const clampPercent = (value) => Math.max(-20, Math.min(120, value));
+        const formatPercent = (value) =>
+          `${Number(value.toFixed(3)).toString()}%`;
+        function selectedReelIndexes() {
+          if (slotDebugState.selected === "all") return [0, 1, 2];
+          return [Number(slotDebugState.selected) - 1];
+        }
+        function applySlotDebugValues() {
+          slotDebugState.reels.forEach((position, index) => {
+            rootStyle.setProperty(`--reel${index + 1}-x`, formatPercent(position.x));
+            rootStyle.setProperty(`--reel${index + 1}-y`, formatPercent(position.y));
+          });
+          rootStyle.setProperty(
+            "--slot-box-width",
+            formatPercent(slotDebugState.boxWidth),
+          );
+          rootStyle.setProperty(
+            "--slot-box-height",
+            formatPercent(slotDebugState.boxHeight),
+          );
+        }
+        function updateSlotDebugPanel() {
+          reels.forEach((reel, index) => {
+            reel.classList.toggle(
+              "is-debug-selected",
+              slotDebugState.selected === "all" ||
+                slotDebugState.selected === String(index + 1),
+            );
+          });
+          if (!slotDebugOutput) return;
+          const lines = slotDebugState.reels.map((position, index) => {
+            return `reel${index + 1}: x ${formatPercent(position.x)}, y ${formatPercent(position.y)}`;
+          });
+          lines.push(`box-width: ${formatPercent(slotDebugState.boxWidth)}`);
+          lines.push(`box-height: ${formatPercent(slotDebugState.boxHeight)}`);
+          lines.push("");
+          lines.push("Paste back:");
+          lines.push(
+            `--reel1-x: ${formatPercent(slotDebugState.reels[0].x)}; --reel1-y: ${formatPercent(slotDebugState.reels[0].y)};`,
+          );
+          lines.push(
+            `--reel2-x: ${formatPercent(slotDebugState.reels[1].x)}; --reel2-y: ${formatPercent(slotDebugState.reels[1].y)};`,
+          );
+          lines.push(
+            `--reel3-x: ${formatPercent(slotDebugState.reels[2].x)}; --reel3-y: ${formatPercent(slotDebugState.reels[2].y)};`,
+          );
+          lines.push(`--slot-box-width: ${formatPercent(slotDebugState.boxWidth)};`);
+          lines.push(`--slot-box-height: ${formatPercent(slotDebugState.boxHeight)};`);
+          slotDebugOutput.textContent = lines.join("\n");
+        }
+        function setSlotDebugActive(active) {
+          slotDebugState.active = active;
+          document.body.classList.toggle("debug-slots", active);
+          if (slotDebugPanel) slotDebugPanel.hidden = !active;
+          applySlotDebugValues();
+          updateSlotDebugPanel();
+        }
+        function moveSelectedReels(deltaX, deltaY) {
+          selectedReelIndexes().forEach((index) => {
+            slotDebugState.reels[index].x = clampPercent(
+              slotDebugState.reels[index].x + deltaX,
+            );
+            slotDebugState.reels[index].y = clampPercent(
+              slotDebugState.reels[index].y + deltaY,
+            );
+          });
+          applySlotDebugValues();
+          updateSlotDebugPanel();
+        }
+        function resizeSlotBox(deltaWidth, deltaHeight) {
+          slotDebugState.boxWidth = Math.max(
+            4,
+            Math.min(60, slotDebugState.boxWidth + deltaWidth),
+          );
+          slotDebugState.boxHeight = Math.max(
+            4,
+            Math.min(60, slotDebugState.boxHeight + deltaHeight),
+          );
+          applySlotDebugValues();
+          updateSlotDebugPanel();
+        }
+        function resizeSlotBoxFromCorner(resize, event) {
+          const deltaX =
+            ((event.clientX - resize.startX) / resize.containerWidth) * 100;
+          const deltaY =
+            ((event.clientY - resize.startY) / resize.containerHeight) * 100;
+          const minSize = 4;
+          const maxSize = 60;
+          let nextWidth = resize.boxWidth;
+          let nextHeight = resize.boxHeight;
+          let nextX = resize.reelX;
+          let nextY = resize.reelY;
+
+          if (resize.corner.includes("e")) {
+            nextWidth = resize.boxWidth + deltaX;
+          }
+          if (resize.corner.includes("s")) {
+            nextHeight = resize.boxHeight + deltaY;
+          }
+          if (resize.corner.includes("w")) {
+            nextWidth = resize.boxWidth - deltaX;
+            nextX = resize.reelX + deltaX;
+          }
+          if (resize.corner.includes("n")) {
+            nextHeight = resize.boxHeight - deltaY;
+            nextY = resize.reelY + deltaY;
+          }
+
+          if (nextWidth < minSize) {
+            if (resize.corner.includes("w")) {
+              nextX -= minSize - nextWidth;
+            }
+            nextWidth = minSize;
+          }
+          if (nextHeight < minSize) {
+            if (resize.corner.includes("n")) {
+              nextY -= minSize - nextHeight;
+            }
+            nextHeight = minSize;
+          }
+          nextWidth = Math.min(maxSize, nextWidth);
+          nextHeight = Math.min(maxSize, nextHeight);
+
+          slotDebugState.boxWidth = nextWidth;
+          slotDebugState.boxHeight = nextHeight;
+          slotDebugState.reels[resize.index].x = clampPercent(nextX);
+          slotDebugState.reels[resize.index].y = clampPercent(nextY);
+          applySlotDebugValues();
+          updateSlotDebugPanel();
+        }
+        document.addEventListener("keydown", (event) => {
+          const target = event.target;
+          const isTyping =
+            target &&
+            ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+          if (isTyping) return;
+          if (event.key.toLowerCase() === "d") {
+            event.preventDefault();
+            setSlotDebugActive(!slotDebugState.active);
+            return;
+          }
+          if (!slotDebugState.active) return;
+          if (["1", "2", "3"].includes(event.key)) {
+            event.preventDefault();
+            slotDebugState.selected = event.key;
+            updateSlotDebugPanel();
+            return;
+          }
+          if (event.key.toLowerCase() === "a") {
+            event.preventDefault();
+            slotDebugState.selected = "all";
+            updateSlotDebugPanel();
+            return;
+          }
+          const step = event.shiftKey ? 1 : 0.1;
+          const moves = {
+            ArrowLeft: [-step, 0],
+            ArrowRight: [step, 0],
+            ArrowUp: [0, -step],
+            ArrowDown: [0, step],
+          };
+          if (moves[event.key]) {
+            event.preventDefault();
+            moveSelectedReels(moves[event.key][0], moves[event.key][1]);
+            return;
+          }
+          if (event.key === "+" || event.key === "=") {
+            event.preventDefault();
+            resizeSlotBox(step, step);
+          } else if (event.key === "-" || event.key === "_") {
+            event.preventDefault();
+            resizeSlotBox(-step, -step);
+          } else if (event.key === "]") {
+            event.preventDefault();
+            resizeSlotBox(step, 0);
+          } else if (event.key === "[") {
+            event.preventDefault();
+            resizeSlotBox(-step, 0);
+          } else if (event.key === "'" || event.key === '"') {
+            event.preventDefault();
+            resizeSlotBox(0, step);
+          } else if (event.key === ";") {
+            event.preventDefault();
+            resizeSlotBox(0, -step);
+          }
+        });
+        reels.forEach((reel, index) => {
+          ["nw", "ne", "sw", "se"].forEach((corner) => {
+            const handle = document.createElement("div");
+            handle.className = "slot-debug-handle";
+            handle.dataset.corner = corner;
+            handle.addEventListener("pointerdown", (event) => {
+              if (!slotDebugState.active) return;
+              event.preventDefault();
+              event.stopPropagation();
+              slotDebugState.selected = String(index + 1);
+              const containerRect = slotContainer.getBoundingClientRect();
+              slotDebugState.resize = {
+                index,
+                corner,
+                pointerId: event.pointerId,
+                startX: event.clientX,
+                startY: event.clientY,
+                reelX: slotDebugState.reels[index].x,
+                reelY: slotDebugState.reels[index].y,
+                boxWidth: slotDebugState.boxWidth,
+                boxHeight: slotDebugState.boxHeight,
+                containerWidth: containerRect.width,
+                containerHeight: containerRect.height,
+              };
+              handle.setPointerCapture(event.pointerId);
+              updateSlotDebugPanel();
+            });
+            handle.addEventListener("pointermove", (event) => {
+              const resize = slotDebugState.resize;
+              if (
+                !slotDebugState.active ||
+                !resize ||
+                resize.pointerId !== event.pointerId
+              ) {
+                return;
+              }
+              event.preventDefault();
+              resizeSlotBoxFromCorner(resize, event);
+            });
+            handle.addEventListener("pointerup", (event) => {
+              if (
+                slotDebugState.resize &&
+                slotDebugState.resize.pointerId === event.pointerId
+              ) {
+                slotDebugState.resize = null;
+              }
+            });
+            handle.addEventListener("pointercancel", () => {
+              slotDebugState.resize = null;
+            });
+            reel.appendChild(handle);
+          });
+          reel.addEventListener("pointerdown", (event) => {
+            if (!slotDebugState.active) return;
+            event.preventDefault();
+            slotDebugState.selected = String(index + 1);
+            const containerRect = slotContainer.getBoundingClientRect();
+            slotDebugState.drag = {
+              index,
+              pointerId: event.pointerId,
+              startX: event.clientX,
+              startY: event.clientY,
+              reelX: slotDebugState.reels[index].x,
+              reelY: slotDebugState.reels[index].y,
+              containerWidth: containerRect.width,
+              containerHeight: containerRect.height,
+            };
+            reel.setPointerCapture(event.pointerId);
+            updateSlotDebugPanel();
+          });
+          reel.addEventListener("pointermove", (event) => {
+            const drag = slotDebugState.drag;
+            if (
+              !slotDebugState.active ||
+              slotDebugState.resize ||
+              !drag ||
+              drag.pointerId !== event.pointerId
+            ) {
+              return;
+            }
+            const deltaX = ((event.clientX - drag.startX) / drag.containerWidth) * 100;
+            const deltaY = ((event.clientY - drag.startY) / drag.containerHeight) * 100;
+            slotDebugState.reels[drag.index].x = clampPercent(drag.reelX + deltaX);
+            slotDebugState.reels[drag.index].y = clampPercent(drag.reelY + deltaY);
+            applySlotDebugValues();
+            updateSlotDebugPanel();
+          });
+          reel.addEventListener("pointerup", (event) => {
+            if (
+              slotDebugState.drag &&
+              slotDebugState.drag.pointerId === event.pointerId
+            ) {
+              slotDebugState.drag = null;
+            }
+          });
+          reel.addEventListener("pointercancel", () => {
+            slotDebugState.drag = null;
+          });
+        });
+        applySlotDebugValues();
         const blurTargets = [slotMachine, ...reels, spinButton].filter(Boolean);
         function setBlurState(enabled, { immediate = false } = {}) {
           blurTargets.forEach((el) => {
@@ -829,7 +1216,7 @@
           });
         }
 
-        const finalIcon = `img/${normalizeFinalIcon(params.finalicon || params.finalIcon)}`;
+        const finalIcon = `${slotIconBase}${finalIconFile}`;
         const safeTextColor = "#ffffff";
         const safeOutlineColor = "#7e5e4f";
 
