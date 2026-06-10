@@ -24,9 +24,15 @@
     <style>
       :root {
         --font-family: "Poppins";
+        --script-font: "Boho";
         --typewriter-font: "Courier New", monospace;
         --slot-box-width: 8.963%;
         --slot-box-height: 21.649%;
+      }
+      @font-face {
+        font-family: "Boho";
+        src: url("Boho.otf") format("opentype");
+        font-display: swap;
       }
       html,
       body {
@@ -147,14 +153,16 @@
       }
       @media (min-width: 601px) {
         .blur-background,
-        .spin-button.blur-background {
+        .spin-button.blur-background,
+        .text-debug-box.blur-background {
           filter: blur(8px);
         }
       }
 
       @media (max-width: 600px) {
         .blur-background,
-        .spin-button.blur-background {
+        .spin-button.blur-background,
+        .text-debug-box.blur-background {
           filter: none;
           opacity: 0.7;
         }
@@ -274,6 +282,64 @@
         right: -7px;
         bottom: -7px;
         cursor: nwse-resize;
+      }
+      .text-debug-box {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        border: 2px dashed transparent;
+        background: transparent;
+        color: #5f4638;
+        text-align: center;
+        z-index: 4;
+        pointer-events: none;
+        user-select: none;
+      }
+      .text-debug-box.is-debug-selected {
+        border-color: #ffdf6d;
+        background: rgba(255, 223, 109, 0.12);
+      }
+      body.debug-slots .text-debug-box {
+        border-color: rgba(111, 220, 255, 0.95);
+        background: rgba(111, 220, 255, 0.1);
+        cursor: move;
+        pointer-events: auto;
+      }
+      body.debug-slots .text-debug-box.is-debug-selected {
+        border-color: #ffdf6d;
+      }
+      #marqueeDebugBox {
+        left: 34.326%;
+        top: 23.112%;
+        width: 32.551%;
+        height: 14.362%;
+        font-family: var(--script-font), "Brush Script MT", cursive;
+        font-size: 84px;
+        font-weight: 400;
+        line-height: 0.95;
+        color: #6e4a38;
+      }
+      #tapDebugBox {
+        left: 37.4%;
+        top: 83.469%;
+        width: 25.296%;
+        height: 6.291%;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 26px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 0.08em;
+        color: #6e4a38;
+        text-transform: uppercase;
+      }
+      #marqueeText,
+      #tapText {
+        display: block;
+        width: 100%;
+        height: 100%;
+        white-space: nowrap;
       }
       .slot-debug-panel {
         position: absolute;
@@ -416,7 +482,7 @@
         margin-top: 0;
         color: #fff;
       }
-      @media (max-width: 500px) {
+      @media (max-width: 500px), (orientation: portrait) {
         .aspect-container {
           width: 100vw;
           height: 100vh;
@@ -426,7 +492,7 @@
           box-shadow: none;
         }
         .slot-machine-container {
-          width: calc(100vh * 4 / 3);
+          width: max(100vw, calc(100vh * 4 / 3));
           height: 100vh;
           left: 50%;
           transform: translateX(-50%);
@@ -436,7 +502,7 @@
             height: 100svh;
           }
           .slot-machine-container {
-            width: calc(100svh * 4 / 3);
+            width: max(100vw, calc(100svh * 4 / 3));
             height: 100svh;
           }
         }
@@ -640,6 +706,12 @@
           </div>
         </div>
       </div>
+      <div class="text-debug-box" id="marqueeDebugBox" data-debug-box="marquee">
+        <span id="marqueeText">A Big Ask</span>
+      </div>
+      <div class="text-debug-box" id="tapDebugBox" data-debug-box="tap">
+        <span id="tapText">TAP TO SPIN</span>
+      </div>
       <div class="slot-machine-container" id="container">
         <div class="slot-machine blur-background" id="slotMachine"></div>
         <div id="reel1" class="reel blur-background">
@@ -662,7 +734,8 @@
         </div>
         <div class="slot-debug-panel" id="slotDebugPanel" hidden>
           <strong>Slot Debug</strong>
-          <div>D: close | 1/2/3: select | A: all</div>
+          <div>D: close | 1/2/3: select reels | A: all reels</div>
+          <div>M: marquee box | T: tap-to-spin box</div>
           <div>Arrows: move | Shift: faster</div>
           <div>+/-: box size | [ ]: width | ; ': height</div>
           <div>Drag a slot to move it.</div>
@@ -728,6 +801,35 @@
       }
       function getColorOverlay(params) {
         return "#f3ddbbcc"; // Default beige
+      }
+
+      const uiTranslations = {
+        en: { marquee: "A Big Ask", tap: "TAP TO SPIN" },
+        es: { marquee: "Una Gran Pregunta", tap: "TOCA PARA GIRAR" },
+        fr: { marquee: "Une Grande Demande", tap: "TOUCHEZ POUR TOURNER" },
+        it: { marquee: "Una Grande Domanda", tap: "TOCCA PER GIRARE" },
+        de: { marquee: "Eine Grosse Frage", tap: "ZUM DREHEN TIPPEN" },
+        pt: { marquee: "Um Grande Pedido", tap: "TOQUE PARA GIRAR" },
+      };
+      function getUiCopy(params) {
+        const browserLang =
+          typeof navigator === "undefined" ? "en" : navigator.language;
+        const requestedLang = String(params.lang || params.locale || browserLang || "en")
+          .toLowerCase()
+          .split("-")[0];
+        const translated = uiTranslations[requestedLang] || uiTranslations.en;
+        return {
+          marquee:
+            params.marqueetext ||
+            params.marqueeText ||
+            params.marquee ||
+            translated.marquee,
+          tap:
+            params.taptext ||
+            params.tapText ||
+            params.tap ||
+            translated.tap,
+        };
       }
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -803,6 +905,33 @@
         const slotContainer = document.getElementById("container");
         const slotMachine = document.getElementById("slotMachine");
         const spinButton = document.getElementById("spinButton");
+        const marqueeDebugBox = document.getElementById("marqueeDebugBox");
+        const tapDebugBox = document.getElementById("tapDebugBox");
+        const uiCopy = getUiCopy(params);
+        const marqueeText = document.getElementById("marqueeText");
+        const tapText = document.getElementById("tapText");
+        if (marqueeText) marqueeText.textContent = uiCopy.marquee;
+        if (tapText) tapText.textContent = uiCopy.tap;
+        function fitUiText() {
+          if (typeof textFit !== "function") return;
+          if (marqueeText) {
+            textFit(marqueeText, {
+              alignHoriz: true,
+              alignVert: true,
+              multiLine: false,
+              minFontSize: 10,
+              maxFontSize: 120,
+            });
+          }
+          if (!tapText) return;
+          textFit(tapText, {
+            alignHoriz: true,
+            alignVert: true,
+            multiLine: false,
+            minFontSize: 8,
+            maxFontSize: 120,
+          });
+        }
         const reels = [];
         for (let i = 1; i <= 3; i++) {
           const reel = document.getElementById(`reel${i}`);
@@ -815,6 +944,7 @@
         const slotDebugState = {
           active: false,
           selected: "all",
+          selectedType: "reel",
           boxWidth: 8.963,
           boxHeight: 21.649,
           reels: [
@@ -822,13 +952,28 @@
             { x: 45.86, y: 50.62 },
             { x: 56.826, y: 50.48 },
           ],
+          textBoxes: {
+            marquee: { x: 34.326, y: 23.112, width: 32.551, height: 14.362 },
+            tap: { x: 37.4, y: 83.469, width: 25.296, height: 6.291 },
+          },
           drag: null,
           resize: null,
         };
+        const textDebugBoxes = {
+          marquee: marqueeDebugBox,
+          tap: tapDebugBox,
+        };
         const clampPercent = (value) => Math.max(-20, Math.min(120, value));
+        const clampSizePercent = (value) => Math.max(2, Math.min(120, value));
         const formatPercent = (value) =>
           `${Number(value.toFixed(3)).toString()}%`;
+        function selectedTextBoxKey() {
+          return slotDebugState.selectedType === "text"
+            ? slotDebugState.selected
+            : null;
+        }
         function selectedReelIndexes() {
+          if (slotDebugState.selectedType !== "reel") return [];
           if (slotDebugState.selected === "all") return [0, 1, 2];
           return [Number(slotDebugState.selected) - 1];
         }
@@ -845,13 +990,32 @@
             "--slot-box-height",
             formatPercent(slotDebugState.boxHeight),
           );
+          Object.entries(slotDebugState.textBoxes).forEach(([key, box]) => {
+            const element = textDebugBoxes[key];
+            if (!element) return;
+            element.style.left = formatPercent(box.x);
+            element.style.top = formatPercent(box.y);
+            element.style.width = formatPercent(box.width);
+            element.style.height = formatPercent(box.height);
+          });
+          fitUiText();
         }
         function updateSlotDebugPanel() {
           reels.forEach((reel, index) => {
             reel.classList.toggle(
               "is-debug-selected",
-              slotDebugState.selected === "all" ||
-                slotDebugState.selected === String(index + 1),
+              (slotDebugState.selectedType === "reel" &&
+                slotDebugState.selected === "all") ||
+                (slotDebugState.selectedType === "reel" &&
+                  slotDebugState.selected === String(index + 1)),
+            );
+          });
+          Object.entries(textDebugBoxes).forEach(([key, element]) => {
+            if (!element) return;
+            element.classList.toggle(
+              "is-debug-selected",
+              slotDebugState.selectedType === "text" &&
+                slotDebugState.selected === key,
             );
           });
           if (!slotDebugOutput) return;
@@ -860,6 +1024,12 @@
           });
           lines.push(`box-width: ${formatPercent(slotDebugState.boxWidth)}`);
           lines.push(`box-height: ${formatPercent(slotDebugState.boxHeight)}`);
+          lines.push("");
+          Object.entries(slotDebugState.textBoxes).forEach(([key, box]) => {
+            lines.push(
+              `${key}: x ${formatPercent(box.x)}, y ${formatPercent(box.y)}, width ${formatPercent(box.width)}, height ${formatPercent(box.height)}`,
+            );
+          });
           lines.push("");
           lines.push("Paste back:");
           lines.push(
@@ -873,6 +1043,11 @@
           );
           lines.push(`--slot-box-width: ${formatPercent(slotDebugState.boxWidth)};`);
           lines.push(`--slot-box-height: ${formatPercent(slotDebugState.boxHeight)};`);
+          Object.entries(slotDebugState.textBoxes).forEach(([key, box]) => {
+            lines.push(
+              `${key}: x ${formatPercent(box.x)}; y ${formatPercent(box.y)}; width ${formatPercent(box.width)}; height ${formatPercent(box.height)};`,
+            );
+          });
           slotDebugOutput.textContent = lines.join("\n");
         }
         function setSlotDebugActive(active) {
@@ -894,7 +1069,25 @@
           applySlotDebugValues();
           updateSlotDebugPanel();
         }
+        function moveSelectedTextBox(deltaX, deltaY) {
+          const key = selectedTextBoxKey();
+          if (!key) return;
+          const box = slotDebugState.textBoxes[key];
+          box.x = clampPercent(box.x + deltaX);
+          box.y = clampPercent(box.y + deltaY);
+          applySlotDebugValues();
+          updateSlotDebugPanel();
+        }
         function resizeSlotBox(deltaWidth, deltaHeight) {
+          const textBoxKey = selectedTextBoxKey();
+          if (textBoxKey) {
+            const box = slotDebugState.textBoxes[textBoxKey];
+            box.width = clampSizePercent(box.width + deltaWidth);
+            box.height = clampSizePercent(box.height + deltaHeight);
+            applySlotDebugValues();
+            updateSlotDebugPanel();
+            return;
+          }
           slotDebugState.boxWidth = Math.max(
             4,
             Math.min(60, slotDebugState.boxWidth + deltaWidth),
@@ -903,6 +1096,44 @@
             4,
             Math.min(60, slotDebugState.boxHeight + deltaHeight),
           );
+          applySlotDebugValues();
+          updateSlotDebugPanel();
+        }
+        function resizeTextBoxFromCorner(resize, event) {
+          const deltaX =
+            ((event.clientX - resize.startX) / resize.containerWidth) * 100;
+          const deltaY =
+            ((event.clientY - resize.startY) / resize.containerHeight) * 100;
+          const box = slotDebugState.textBoxes[resize.key];
+          let nextWidth = resize.width;
+          let nextHeight = resize.height;
+          let nextX = resize.x;
+          let nextY = resize.y;
+          const minSize = 2;
+
+          if (resize.corner.includes("e")) nextWidth = resize.width + deltaX;
+          if (resize.corner.includes("s")) nextHeight = resize.height + deltaY;
+          if (resize.corner.includes("w")) {
+            nextWidth = resize.width - deltaX;
+            nextX = resize.x + deltaX;
+          }
+          if (resize.corner.includes("n")) {
+            nextHeight = resize.height - deltaY;
+            nextY = resize.y + deltaY;
+          }
+          if (nextWidth < minSize) {
+            if (resize.corner.includes("w")) nextX -= minSize - nextWidth;
+            nextWidth = minSize;
+          }
+          if (nextHeight < minSize) {
+            if (resize.corner.includes("n")) nextY -= minSize - nextHeight;
+            nextHeight = minSize;
+          }
+
+          box.x = clampPercent(nextX);
+          box.y = clampPercent(nextY);
+          box.width = clampSizePercent(nextWidth);
+          box.height = clampSizePercent(nextHeight);
           applySlotDebugValues();
           updateSlotDebugPanel();
         }
@@ -969,13 +1200,29 @@
           if (!slotDebugState.active) return;
           if (["1", "2", "3"].includes(event.key)) {
             event.preventDefault();
+            slotDebugState.selectedType = "reel";
             slotDebugState.selected = event.key;
             updateSlotDebugPanel();
             return;
           }
           if (event.key.toLowerCase() === "a") {
             event.preventDefault();
+            slotDebugState.selectedType = "reel";
             slotDebugState.selected = "all";
+            updateSlotDebugPanel();
+            return;
+          }
+          if (event.key.toLowerCase() === "m") {
+            event.preventDefault();
+            slotDebugState.selectedType = "text";
+            slotDebugState.selected = "marquee";
+            updateSlotDebugPanel();
+            return;
+          }
+          if (event.key.toLowerCase() === "t") {
+            event.preventDefault();
+            slotDebugState.selectedType = "text";
+            slotDebugState.selected = "tap";
             updateSlotDebugPanel();
             return;
           }
@@ -988,7 +1235,11 @@
           };
           if (moves[event.key]) {
             event.preventDefault();
-            moveSelectedReels(moves[event.key][0], moves[event.key][1]);
+            if (slotDebugState.selectedType === "text") {
+              moveSelectedTextBox(moves[event.key][0], moves[event.key][1]);
+            } else {
+              moveSelectedReels(moves[event.key][0], moves[event.key][1]);
+            }
             return;
           }
           if (event.key === "+" || event.key === "=") {
@@ -1023,6 +1274,7 @@
               slotDebugState.selected = String(index + 1);
               const containerRect = slotContainer.getBoundingClientRect();
               slotDebugState.resize = {
+                type: "reel",
                 index,
                 corner,
                 pointerId: event.pointerId,
@@ -1043,6 +1295,7 @@
               if (
                 !slotDebugState.active ||
                 !resize ||
+                resize.type !== "reel" ||
                 resize.pointerId !== event.pointerId
               ) {
                 return;
@@ -1110,8 +1363,128 @@
             slotDebugState.drag = null;
           });
         });
+        Object.entries(textDebugBoxes).forEach(([key, element]) => {
+          if (!element) return;
+          ["nw", "ne", "sw", "se"].forEach((corner) => {
+            const handle = document.createElement("div");
+            handle.className = "slot-debug-handle";
+            handle.dataset.corner = corner;
+            handle.addEventListener("pointerdown", (event) => {
+              if (!slotDebugState.active) return;
+              event.preventDefault();
+              event.stopPropagation();
+              slotDebugState.selectedType = "text";
+              slotDebugState.selected = key;
+              const box = slotDebugState.textBoxes[key];
+              const containerRect =
+                document.querySelector(".aspect-container").getBoundingClientRect();
+              slotDebugState.resize = {
+                type: "text",
+                key,
+                corner,
+                pointerId: event.pointerId,
+                startX: event.clientX,
+                startY: event.clientY,
+                x: box.x,
+                y: box.y,
+                width: box.width,
+                height: box.height,
+                containerWidth: containerRect.width,
+                containerHeight: containerRect.height,
+              };
+              handle.setPointerCapture(event.pointerId);
+              updateSlotDebugPanel();
+            });
+            handle.addEventListener("pointermove", (event) => {
+              const resize = slotDebugState.resize;
+              if (
+                !slotDebugState.active ||
+                !resize ||
+                resize.type !== "text" ||
+                resize.pointerId !== event.pointerId
+              ) {
+                return;
+              }
+              event.preventDefault();
+              resizeTextBoxFromCorner(resize, event);
+            });
+            handle.addEventListener("pointerup", (event) => {
+              if (
+                slotDebugState.resize &&
+                slotDebugState.resize.pointerId === event.pointerId
+              ) {
+                slotDebugState.resize = null;
+              }
+            });
+            handle.addEventListener("pointercancel", () => {
+              slotDebugState.resize = null;
+            });
+            element.appendChild(handle);
+          });
+          element.addEventListener("pointerdown", (event) => {
+            if (!slotDebugState.active) return;
+            event.preventDefault();
+            slotDebugState.selectedType = "text";
+            slotDebugState.selected = key;
+            const box = slotDebugState.textBoxes[key];
+            const containerRect =
+              document.querySelector(".aspect-container").getBoundingClientRect();
+            slotDebugState.drag = {
+              type: "text",
+              key,
+              pointerId: event.pointerId,
+              startX: event.clientX,
+              startY: event.clientY,
+              x: box.x,
+              y: box.y,
+              containerWidth: containerRect.width,
+              containerHeight: containerRect.height,
+            };
+            element.setPointerCapture(event.pointerId);
+            updateSlotDebugPanel();
+          });
+          element.addEventListener("pointermove", (event) => {
+            const drag = slotDebugState.drag;
+            if (
+              !slotDebugState.active ||
+              slotDebugState.resize ||
+              !drag ||
+              drag.type !== "text" ||
+              drag.pointerId !== event.pointerId
+            ) {
+              return;
+            }
+            const deltaX =
+              ((event.clientX - drag.startX) / drag.containerWidth) * 100;
+            const deltaY =
+              ((event.clientY - drag.startY) / drag.containerHeight) * 100;
+            const box = slotDebugState.textBoxes[drag.key];
+            box.x = clampPercent(drag.x + deltaX);
+            box.y = clampPercent(drag.y + deltaY);
+            applySlotDebugValues();
+            updateSlotDebugPanel();
+          });
+          element.addEventListener("pointerup", (event) => {
+            if (
+              slotDebugState.drag &&
+              slotDebugState.drag.pointerId === event.pointerId
+            ) {
+              slotDebugState.drag = null;
+            }
+          });
+          element.addEventListener("pointercancel", () => {
+            slotDebugState.drag = null;
+          });
+        });
         applySlotDebugValues();
-        const blurTargets = [slotMachine, ...reels, spinButton].filter(Boolean);
+        requestAnimationFrame(fitUiText);
+        const blurTargets = [
+          slotMachine,
+          ...reels,
+          spinButton,
+          marqueeDebugBox,
+          tapDebugBox,
+        ].filter(Boolean);
         function setBlurState(enabled, { immediate = false } = {}) {
           blurTargets.forEach((el) => {
             if (!el) return;
@@ -1507,7 +1880,10 @@
           }
         }
 
-        window.addEventListener("resize", refitAllLines);
+        window.addEventListener("resize", () => {
+          refitAllLines();
+          fitUiText();
+        });
       });
     </script>
      <!-- ✉️ Note flip script -->
