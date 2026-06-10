@@ -227,6 +227,7 @@ const STYLE = `
   aspect-ratio: 1;
   transform: translateX(-50%);
   z-index: 50;
+  filter: drop-shadow(-2px 5px 4px rgba(0, 0, 0, 0.14));
 }
 
 .intro-cta {
@@ -245,69 +246,6 @@ const STYLE = `
 @keyframes introPulse {
   0%, 100% { opacity: 0.58; }
   50% { opacity: 1; }
-}
-
-.intro-reading-modal {
-  position: absolute;
-  inset: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  box-sizing: border-box;
-  background: rgba(252, 237, 223, 0.95);
-  backdrop-filter: blur(4px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.6s ease;
-}
-
-.intro-reading-modal.is-open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.intro-reading-card {
-  width: min(88vw, 440px);
-  max-height: 84vh;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 16px;
-  padding: 30px 28px;
-  box-sizing: border-box;
-  border: 2px solid var(--env-outline);
-  border-radius: 12px;
-  background: var(--letter-bg);
-  color: var(--text-dark);
-  text-align: center;
-  box-shadow: 0 18px 45px rgba(120, 85, 62, 0.18);
-  transform: scale(0.75);
-  transition: transform 0.6s ease;
-}
-
-.intro-reading-modal.is-open .intro-reading-card {
-  transform: scale(1);
-}
-
-.intro-reading-message {
-  margin: 0;
-  font-family: "Courier New", monospace;
-  font-size: clamp(18px, 4.8vw, 25px);
-  font-weight: 700;
-  line-height: 1.85;
-  white-space: pre-wrap;
-}
-
-.intro-reading-hint {
-  margin: 10px 0 0;
-  font: 700 10px/1 "Courier New", monospace;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  opacity: 0.6;
 }
 
 @media (max-width: 520px) {
@@ -329,8 +267,6 @@ const STYLE = `
   .intro-envelope-card,
   .intro-top-flap,
   .intro-letter-wrapper,
-  .intro-reading-modal,
-  .intro-reading-card,
   .intro-cta {
     animation: none !important;
     transition: none !important;
@@ -454,14 +390,6 @@ function mountEnvelopeIntro() {
       </div>
 
       <button class="intro-cta" id="introCta" type="button">Tap to flip</button>
-
-      <div class="intro-reading-modal" id="introReadingModal">
-        <div class="intro-reading-card">
-          ${bowSvg("intro-bow")}
-          <p class="intro-reading-message" id="introReadingMessage">${escapeHtml(fullMessage)}</p>
-          <p class="intro-reading-hint">Tap anywhere to continue</p>
-        </div>
-      </div>
     </div>
   `,
   );
@@ -471,7 +399,6 @@ function mountEnvelopeIntro() {
   const letterWrapper = document.getElementById("introLetterWrapper");
   const letter = document.getElementById("introEnvelopeLetter");
   const cta = document.getElementById("introCta");
-  const modal = document.getElementById("introReadingModal");
   let state = 0;
 
   function updateLetterHeight() {
@@ -484,16 +411,6 @@ function mountEnvelopeIntro() {
     overlay.style.opacity = "0";
     overlay.style.pointerEvents = "none";
     setTimeout(() => overlay.remove(), 500);
-  }
-
-  function openReadingModal() {
-    modal.classList.add("is-open");
-    state = 3;
-  }
-
-  function closeReadingModal() {
-    modal.classList.remove("is-open");
-    setTimeout(dismissIntro, 360);
   }
 
   function interact(event) {
@@ -521,7 +438,7 @@ function mountEnvelopeIntro() {
       }, 500);
       return;
     }
-    if (state === 2) openReadingModal();
+    if (state === 2) dismissIntro();
   }
 
   [card, cta].forEach((element) => {
@@ -538,20 +455,6 @@ function mountEnvelopeIntro() {
   card.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") interact(event);
   });
-  modal.addEventListener("click", (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    closeReadingModal();
-  });
-  modal.addEventListener(
-    "touchstart",
-    (event) => {
-      event.preventDefault();
-      closeReadingModal();
-    },
-    { passive: false },
-  );
-
   const stage = document.getElementById("introEnvelopeStage");
   ["click", "pointerdown", "touchstart"].forEach((eventName) => {
     stage.addEventListener(eventName, (event) => event.stopPropagation(), {

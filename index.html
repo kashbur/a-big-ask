@@ -439,9 +439,10 @@
         align-items: center;
         width: 100%;
         height: 100%;
-        gap: 0;
-        padding: 0;
+        gap: clamp(8px, 2vh, 18px);
+        padding: clamp(18px, 3.8vw, 48px);
         box-sizing: border-box;
+        overflow: visible;
       }
 
       .reveal-line {
@@ -469,6 +470,40 @@
         line-height: 1.1;
         font-weight: 900;
         text-transform: uppercase;
+      }
+      .reveal-question {
+        flex: 0 0 min(68vh, 620px);
+        width: min(98%, 1520px);
+        gap: clamp(14px, 2.4vh, 30px);
+        overflow: visible;
+      }
+      .reveal-question .reveal-question-eyebrow {
+        display: block;
+        width: 100%;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(18px, 4.8vw, 54px);
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 0.18em;
+        color: #bd842b;
+        text-transform: uppercase;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+        white-space: nowrap;
+      }
+      .reveal-question .reveal-question-role {
+        display: block;
+        width: 100%;
+        font-family: var(--script-font), "Brush Script MT", cursive;
+        font-size: clamp(58px, 15.4vw, 174px);
+        font-weight: 400;
+        line-height: 0.9;
+        letter-spacing: 0;
+        color: #ea806d;
+        text-transform: none;
+        text-shadow:
+          0 3px 0 rgba(255, 220, 205, 0.72),
+          0 7px 18px rgba(179, 85, 63, 0.12);
+        white-space: nowrap;
       }
       .reveal-line.sub {
         font-weight: 700;
@@ -667,31 +702,61 @@
         50% { transform: translateY(-10px) scale(1.2); opacity: 0.9; }
       }
 
-      .balloon {
+      .petal-particle {
         position: absolute;
-        top: -60%;
         pointer-events: none;
-        transform: translateX(-50%) rotate(var(--rotate));
-        animation: balloonDrop 8s linear forwards,
-          balloonSway 3s ease-in-out infinite;
-        z-index: 4000; /* behind reveal text */
+        top: -15vh;
+        z-index: var(--z, 4000);
+        animation: petalFall var(--fall-duration) var(--fall-delay) linear forwards;
       }
-
-      @keyframes balloonDrop {
-        to {
-          top: 110%;
-        }
+      .petal-sway {
+        animation: petalSway var(--sway-duration) var(--sway-delay) ease-in-out infinite alternate;
       }
-
-      @keyframes balloonSway {
-        0%,
-        100% {
-          transform: translateX(-50%) rotate(var(--rotate));
-        }
+      .petal-shape {
+        width: var(--size);
+        height: var(--size);
+        filter: var(--petal-filter);
+        animation: petalTumble var(--spin-duration) var(--fall-delay) linear infinite;
+      }
+      .sparkle-particle {
+        position: absolute;
+        pointer-events: none;
+        z-index: 4300;
+        width: var(--size);
+        height: var(--size);
+        color: #bd842b;
+        opacity: 0;
+        animation: sparkleTwinkle var(--sparkle-duration) var(--sparkle-delay) ease-in-out forwards;
+      }
+      .sparkle-float {
+        animation: sparkleFloatUp var(--sparkle-duration) var(--sparkle-delay) linear forwards;
+      }
+      @keyframes petalFall {
+        0% { transform: translateY(-15vh); opacity: 0; }
+        10% { opacity: 0.92; }
+        86% { opacity: 0.9; }
+        100% { transform: translateY(115vh); opacity: 0; }
+      }
+      @keyframes petalSway {
+        0% { transform: translateX(-42px); }
+        100% { transform: translateX(42px); }
+      }
+      @keyframes petalTumble {
+        0% { transform: rotate3d(1, 1, 0, 0deg) rotateZ(0deg); }
+        100% { transform: rotate3d(1, 1.5, 0.5, 360deg) rotateZ(180deg); }
+      }
+      @keyframes sparkleTwinkle {
+        0% { opacity: 0; transform: scale(0.2) rotate(0deg); }
         50% {
-          transform: translateX(calc(-50% + var(--sway, 20px)))
-            rotate(calc(var(--rotate) + 10deg));
+          opacity: 0.9;
+          transform: scale(1) rotate(45deg);
+          filter: drop-shadow(0 0 6px rgba(189, 132, 43, 0.55));
         }
+        100% { opacity: 0; transform: scale(0.2) rotate(90deg); }
+      }
+      @keyframes sparkleFloatUp {
+        0% { transform: translateY(0); }
+        100% { transform: translateY(-50px); }
       }
 
     </style>
@@ -707,22 +772,22 @@
           </div>
         </div>
       </div>
-      <div
-        class="text-debug-box blur-background"
-        id="marqueeDebugBox"
-        data-debug-box="marquee"
-      >
-        <span id="marqueeText">A Big Ask</span>
-      </div>
-      <div
-        class="text-debug-box blur-background"
-        id="tapDebugBox"
-        data-debug-box="tap"
-      >
-        <span id="tapText">TAP TO SPIN</span>
-      </div>
       <div class="slot-machine-container" id="container">
         <div class="slot-machine blur-background" id="slotMachine"></div>
+        <div
+          class="text-debug-box blur-background"
+          id="marqueeDebugBox"
+          data-debug-box="marquee"
+        >
+          <span id="marqueeText">A Big Ask</span>
+        </div>
+        <div
+          class="text-debug-box blur-background"
+          id="tapDebugBox"
+          data-debug-box="tap"
+        >
+          <span id="tapText">TAP TO SPIN</span>
+        </div>
         <div id="reel1" class="reel blur-background">
           <div class="reel-inner">
             <img src="img/new icons/cake.png" alt="Cake" />
@@ -1384,8 +1449,7 @@
               slotDebugState.selectedType = "text";
               slotDebugState.selected = key;
               const box = slotDebugState.textBoxes[key];
-              const containerRect =
-                document.querySelector(".aspect-container").getBoundingClientRect();
+              const containerRect = slotContainer.getBoundingClientRect();
               slotDebugState.resize = {
                 type: "text",
                 key,
@@ -1435,8 +1499,7 @@
             slotDebugState.selectedType = "text";
             slotDebugState.selected = key;
             const box = slotDebugState.textBoxes[key];
-            const containerRect =
-              document.querySelector(".aspect-container").getBoundingClientRect();
+            const containerRect = slotContainer.getBoundingClientRect();
             slotDebugState.drag = {
               type: "text",
               key,
@@ -1700,7 +1763,7 @@
               const callback =
                 i === reels.length - 1
                   ? () => {
-                      setTimeout(dropBalloons, 160);
+                      setTimeout(dropPetals, 160);
                       setTimeout(showReveal, 960);
                     }
                   : null;
@@ -1801,6 +1864,19 @@
           }
         }
 
+        function parseRevealQuestion(text) {
+          const match = String(text || "")
+            .trim()
+            .match(/^will\s+you\s+be\s+my\s+(.+?)\??$/i);
+          if (!match) return null;
+          const role = match[1].trim();
+          if (!role) return null;
+          return {
+            eyebrow: "Will you be my",
+            role: `${role.charAt(0).toUpperCase()}${role.slice(1)}?`,
+          };
+        }
+
         // ------------- REVEAL LOGIC -----------------
         function showReveal() {
           const allLines = getRevealLinesFromParams(params);
@@ -1818,6 +1894,16 @@
               };
               img.className = "reveal-photo";
               div.appendChild(img);
+            } else if (line.type === "main" && parseRevealQuestion(line.content)) {
+              const question = parseRevealQuestion(line.content);
+              div.classList.add("reveal-question");
+              const eyebrow = document.createElement("span");
+              eyebrow.className = "reveal-question-eyebrow";
+              eyebrow.textContent = question.eyebrow;
+              const role = document.createElement("span");
+              role.className = "reveal-question-role";
+              role.textContent = question.role;
+              div.append(eyebrow, role);
             } else {
               div.textContent =
                 line.type === "sub"
@@ -1828,15 +1914,19 @@
               text: safeTextColor,
               outline: safeOutlineColor,
             };
-            applyTextStyles(
-              div,
-              colors.text,
-              colors.outline,
-              fonts[line.type],
-            );
+            if (!div.classList.contains("reveal-question")) {
+              applyTextStyles(
+                div,
+                colors.text,
+                colors.outline,
+                fonts[line.type],
+              );
+            }
             div.style.margin = "0";
             revealLinesDiv.appendChild(div);
-            fitRevealLine(div, line.type);
+            if (!div.classList.contains("reveal-question")) {
+              fitRevealLine(div, line.type);
+            }
           }
 
           const order = ["main", "sub", "date", "photo", "from"];
@@ -1850,8 +1940,8 @@
           setBlurState(true, { immediate: true });
           revealOverlay.style.opacity = "1";
           revealOverlay.style.pointerEvents = "auto";
-          // Slightly darker backdrop for readability during the reveal
-          colorOverlay.style.background = "rgba(0, 0, 0, 0.38)"; // was "transparent"
+          colorOverlay.style.background =
+            "linear-gradient(180deg, rgba(255, 249, 240, 0.9), rgba(252, 232, 214, 0.86))";
           refitAllLines();
           setTimeout(() => {
             revealOverlay.style.opacity = "0";
@@ -1859,33 +1949,103 @@
           }, hideDelay);
         }
 
-        // -------- Balloon logic --------
-        function dropBalloons() {
+        function petalSvg(fill, accent, id) {
+          return `
+            <svg viewBox="0 0 30 30" width="100%" height="100%" aria-hidden="true">
+              <defs>
+                <linearGradient id="petal-gradient-${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="${fill}" />
+                  <stop offset="100%" stop-color="${accent}" />
+                </linearGradient>
+                <linearGradient id="petal-inner-${id}" x1="100%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff" stop-opacity="0.42" />
+                  <stop offset="100%" stop-color="${fill}" stop-opacity="0.08" />
+                </linearGradient>
+              </defs>
+              <path d="M15,1 C22,2 29,8 29,15 C29,22 22,28 15,29 C8,28 1,22 1,15 C1,8 8,2 15,1 Z" fill="url(#petal-gradient-${id})"/>
+              <path d="M15,3 C20,4 25,9 25,15 C25,20 20,25 15,26 C10,25 5,20 5,15 C5,9 10,4 15,3 Z" fill="url(#petal-inner-${id})"/>
+              <path d="M15,5 C15,15 15,25 15,25" stroke="${accent}" stroke-width="0.5" fill="none" opacity="0.32"/>
+            </svg>
+          `;
+        }
+
+        function sparkleSvg() {
+          return `
+            <svg viewBox="0 0 20 20" width="100%" height="100%" aria-hidden="true">
+              <path d="M10,0 C10,4 12.5,7.5 17.5,8 C12.5,8.5 10,12 10,16 C10,12 7.5,8.5 2.5,8 C7.5,7.5 10,4 10,0 Z" fill="currentColor"/>
+            </svg>
+          `;
+        }
+
+        function dropPetals() {
           const container = document.getElementById("container");
-          const images = ["img/19.png", "img/20.png", "img/21.png"];
+          const palette = [
+            ["#fce8df", "#e8b9aa"],
+            ["#fbd7c9", "#dfaa9c"],
+            ["#f4bdae", "#d89080"],
+            ["#fff4ec", "#e8c7b4"],
+            ["#ea806d", "#c96f5f"],
+          ];
+          const created = [];
+          const stamp = Date.now();
 
-          for (let i = 0; i < 20; i++) {
-            const balloon = document.createElement("img");
-            balloon.src = images[Math.floor(Math.random() * images.length)];
-            balloon.classList.add("balloon");
+          for (let i = 0; i < 48; i++) {
+            const particle = document.createElement("div");
+            const sway = document.createElement("div");
+            const shape = document.createElement("div");
+            const [fill, accent] = palette[Math.floor(Math.random() * palette.length)];
+            const scale = 0.72 + Math.random() * 1.45;
+            const id = `${stamp}-${i}`;
 
-            const size = 80 + Math.random() * 40;
-            balloon.style.width = size + "px";
-            balloon.style.left = Math.random() * 100 + "%";
-            balloon.style.setProperty("--rotate", (Math.random() * 60 - 30) + "deg");
-            balloon.style.setProperty("--sway", (10 + Math.random() * 20) + "px");
+            particle.className = "petal-particle";
+            sway.className = "petal-sway";
+            shape.className = "petal-shape";
+            shape.innerHTML = petalSvg(fill, accent, id);
 
-            const delay = Math.random() * 2 * 0.8;
-            const dropDuration = (2.5 + Math.random() * 2) * 0.8;
-            const swayDuration = (2 + Math.random() * 2) * 0.8;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.setProperty("--fall-delay", `${Math.random() * 2.4}s`);
+            particle.style.setProperty("--fall-duration", `${6.8 + Math.random() * 5.8}s`);
+            particle.style.setProperty("--sway-delay", `${-(Math.random() * 5)}s`);
+            particle.style.setProperty("--sway-duration", `${2.8 + Math.random() * 3.6}s`);
+            particle.style.setProperty("--spin-duration", `${3.8 + Math.random() * 5.8}s`);
+            particle.style.setProperty("--size", `${20 * scale}px`);
+            particle.style.setProperty("--z", Math.random() > 0.38 ? "4300" : "3900");
+            particle.style.setProperty(
+              "--petal-filter",
+              Math.random() > 0.72
+                ? `blur(${(Math.random() * 1.4).toFixed(2)}px) drop-shadow(0 2px 3px rgba(120, 70, 54, 0.1))`
+                : "drop-shadow(0 2px 3px rgba(120, 70, 54, 0.12))",
+            );
 
-            balloon.style.animation =
-              `balloonDrop ${dropDuration}s linear ${delay}s forwards, ` +
-              `balloonSway ${swayDuration}s ease-in-out ${delay}s infinite`;
-
-            container.appendChild(balloon);
-            balloon.addEventListener("animationend", () => balloon.remove());
+            sway.appendChild(shape);
+            particle.appendChild(sway);
+            container.appendChild(particle);
+            created.push(particle);
+            particle.addEventListener("animationend", () => particle.remove());
           }
+
+          for (let i = 0; i < 32; i++) {
+            const sparkle = document.createElement("div");
+            const float = document.createElement("div");
+            const scale = 0.48 + Math.random() * 1.1;
+
+            sparkle.className = "sparkle-particle";
+            float.className = "sparkle-float";
+            float.innerHTML = sparkleSvg();
+            sparkle.style.left = `${5 + Math.random() * 90}%`;
+            sparkle.style.top = `${10 + Math.random() * 80}%`;
+            sparkle.style.setProperty("--size", `${15 * scale}px`);
+            sparkle.style.setProperty("--sparkle-delay", `${Math.random() * 3.2}s`);
+            sparkle.style.setProperty("--sparkle-duration", `${1.9 + Math.random() * 3.1}s`);
+
+            sparkle.appendChild(float);
+            container.appendChild(sparkle);
+            created.push(sparkle);
+          }
+
+          setTimeout(() => {
+            created.forEach((particle) => particle.remove());
+          }, 15000);
         }
 
         window.addEventListener("resize", () => {
