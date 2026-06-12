@@ -174,6 +174,13 @@
         filter: blur(14px);
         opacity: 0.54;
       }
+      @media (max-width: 600px) {
+        body.reveal-active .blur-background,
+        body.reveal-active .spin-button.blur-background,
+        body.reveal-active .text-debug-box.blur-background {
+          filter: blur(6px);
+        }
+      }
       .reel {
         position: absolute;
         width: var(--slot-box-width);
@@ -303,6 +310,7 @@
         z-index: 4;
         pointer-events: none;
         user-select: none;
+        overflow: hidden;
       }
       .text-debug-box.is-debug-selected {
         border-color: #ffdf6d;
@@ -327,6 +335,7 @@
         font-weight: 400;
         line-height: 0.95;
         color: #6e4a38;
+        padding: 0 2%;
       }
       #tapDebugBox {
         left: 37.4%;
@@ -614,6 +623,7 @@
         }
         .reveal-lines {
           padding-top: env(safe-area-inset-top, 0);
+          padding-bottom: env(safe-area-inset-bottom, 0);
         }
         #revealLines {
           width: 100%;
@@ -967,10 +977,6 @@
         if (from) lines.push({ type: "from", content: from });
         return lines;
       }
-      function getColorOverlay(params) {
-        return "#f3ddbbcc"; // Default beige
-      }
-
       const uiTranslations = {
         en: { marquee: "A Big Ask", tap: "Tap To Spin" },
         es: { marquee: "Una Gran Pregunta", tap: "Toca Para Girar" },
@@ -1081,13 +1087,17 @@
         if (tapText) tapText.textContent = uiCopy.tap;
         function fitUiText() {
           if (typeof textFit !== "function") return;
+          const sceneWidth =
+            slotContainer && slotContainer.getBoundingClientRect
+              ? slotContainer.getBoundingClientRect().width
+              : window.innerWidth;
           if (marqueeText) {
             textFit(marqueeText, {
               alignHoriz: true,
               alignVert: true,
               multiLine: false,
               minFontSize: 10,
-              maxFontSize: 120,
+              maxFontSize: sceneWidth < 520 ? 78 : 120,
             });
           }
           if (!tapText) return;
@@ -1747,28 +1757,13 @@
           landingOverlay.addEventListener("click", () => {
             landingOverlay.style.opacity = "0";
             landingOverlay.style.pointerEvents = "none";
-            setTimeout(() => {
-              if (landingOverlay.parentNode)
-                landingOverlay.parentNode.removeChild(landingOverlay);
-            }, 500);
+            setTimeout(() => landingOverlay.remove(), 500);
           });
         }
 
         const finalIcon = `${slotIconBase}${finalIconFile}`;
         const safeTextColor = "#ffffff";
         const safeOutlineColor = "#7e5e4f";
-
-        const lineColors = {
-          main: {
-            text: safeTextColor,
-            outline: safeOutlineColor,
-          },
-        };
-        const audioContext = new (window.AudioContext ||
-          window.webkitAudioContext)();
-
-        const fonts = { main: null };
-
         // Set overlay color on reveal
         colorOverlay.style.background = "transparent";
         introColorOverlay.style.background = "transparent";
@@ -1794,30 +1789,9 @@
         );
 
         // Spin button interactions
-        function playClickSound() {
-          try {
-            if (audioContext.state === "suspended") {
-              audioContext.resume();
-            }
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.type = "sine";
-            oscillator.frequency.setValueAtTime(210, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.14, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(
-              0.001,
-              audioContext.currentTime + 0.14,
-            );
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.14);
-          } catch (e) {}
-        }
         spinButton.addEventListener("mousedown", function () {
           this.classList.add("pressed");
           if (navigator.vibrate) navigator.vibrate(24);
-          playClickSound();
         });
         spinButton.addEventListener("mouseup", function () {
           this.classList.remove("pressed");
@@ -1831,7 +1805,6 @@
             e.preventDefault();
             this.classList.add("pressed");
             if (navigator.vibrate) navigator.vibrate(24);
-            playClickSound();
           },
           { passive: false },
         );
@@ -1850,7 +1823,6 @@
             if (slotDebugState.active) return;
             spinButton.classList.add("pressed");
             if (navigator.vibrate) navigator.vibrate(24);
-            playClickSound();
           });
           tapDebugBox.addEventListener("mouseup", function () {
             spinButton.classList.remove("pressed");
@@ -1865,7 +1837,6 @@
               e.preventDefault();
               spinButton.classList.add("pressed");
               if (navigator.vibrate) navigator.vibrate(24);
-              playClickSound();
             },
             { passive: false },
           );
@@ -1955,13 +1926,6 @@
           }, delay);
         }
 
-        function readingDelay(text, wps = 110) {
-          const words = text.trim().split(/\s+/).filter(Boolean).length || 1;
-          // (words ÷ wps) seconds  + 0.8 s buffer, clamped 1.6-6 s
-          const ms = Math.round((words / wps) * 1000) + 800;
-          return Math.max(1600, Math.min(ms, 6000));
-        }
-
         function fitRevealLine(el, type) {
           if (type === "photo") return;
           textFit(el, {
@@ -1984,7 +1948,7 @@
           });
         }
 
-        function applyTextStyles(el, color, outlineColor, fontFamily) {
+        function applyTextStyles(el, color, outlineColor) {
           el.style.color = color;
           if (outlineColor === "transparent") {
             el.style.textShadow = "none";
@@ -1992,9 +1956,6 @@
           } else {
             el.style.textShadow = `-1px -1px 0 ${outlineColor}, 1px -1px 0 ${outlineColor}, -1px 1px 0 ${outlineColor}, 1px 1px 0 ${outlineColor}`;
             el.style.webkitTextStroke = `1px ${outlineColor}`;
-          }
-          if (fontFamily) {
-            el.style.fontFamily = `${fontFamily}, sans-serif`;
           }
         }
 
@@ -2025,46 +1986,38 @@
               const img = document.createElement("img");
               img.src = line.content;
               img.alt = "photo";
-              img.onerror = () => {
-                div.style.display = "none";
-              };
+              img.onerror = () => { div.style.display = "none"; };
               img.className = "reveal-photo";
               div.appendChild(img);
-            } else if (line.type === "main" && parseRevealQuestion(line.content)) {
+            } else if (line.type === "main") {
               const question = parseRevealQuestion(line.content);
-              div.classList.add("reveal-question");
-              const eyebrow = document.createElement("span");
-              eyebrow.className = "reveal-question-eyebrow";
-              eyebrow.textContent = question.eyebrow;
-              const role = document.createElement("span");
-              role.className = "reveal-question-role";
-              role.textContent = question.role;
-              const divider = document.createElement("span");
-              divider.className = "reveal-card-divider";
-              divider.setAttribute("aria-hidden", "true");
-              div.append(eyebrow, role, divider);
+              if (question) {
+                div.classList.add("reveal-question");
+                const eyebrow = document.createElement("span");
+                eyebrow.className = "reveal-question-eyebrow";
+                eyebrow.textContent = question.eyebrow;
+                const role = document.createElement("span");
+                role.className = "reveal-question-role";
+                role.textContent = question.role;
+                const divider = document.createElement("span");
+                divider.className = "reveal-card-divider";
+                divider.setAttribute("aria-hidden", "true");
+                div.append(eyebrow, role, divider);
+              } else {
+                div.textContent = line.content;
+              }
             } else {
               div.textContent =
-                line.type === "sub"
-                  ? line.content.toUpperCase()
-                  : line.content;
+                line.type === "sub" ? line.content.toUpperCase() : line.content;
             }
-            const colors = lineColors[line.type] || {
-              text: safeTextColor,
-              outline: safeOutlineColor,
-            };
             if (!div.classList.contains("reveal-question")) {
-              applyTextStyles(
-                div,
-                colors.text,
-                colors.outline,
-                fonts[line.type],
-              );
-            }
-            div.style.margin = "0";
-            revealLinesDiv.appendChild(div);
-            if (!div.classList.contains("reveal-question")) {
+              applyTextStyles(div, safeTextColor, safeOutlineColor);
+              div.style.margin = "0";
+              revealLinesDiv.appendChild(div);
               fitRevealLine(div, line.type);
+            } else {
+              div.style.margin = "0";
+              revealLinesDiv.appendChild(div);
             }
           }
 
@@ -2220,9 +2173,13 @@
           }, 15000);
         }
 
+        let resizeTimer;
         window.addEventListener("resize", () => {
-          refitAllLines();
-          fitUiText();
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            refitAllLines();
+            fitUiText();
+          }, 150);
         });
       });
     </script>

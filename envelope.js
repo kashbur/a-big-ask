@@ -408,6 +408,7 @@ function mountEnvelopeIntro() {
   }
 
   function dismissIntro() {
+    window.removeEventListener("resize", updateLetterHeight);
     overlay.style.opacity = "0";
     overlay.style.pointerEvents = "none";
     setTimeout(() => overlay.remove(), 500);
