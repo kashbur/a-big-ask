@@ -168,6 +168,12 @@
           opacity: 0.7;
         }
       }
+      body.reveal-active .blur-background,
+      body.reveal-active .spin-button.blur-background,
+      body.reveal-active .text-debug-box.blur-background {
+        filter: blur(14px);
+        opacity: 0.54;
+      }
       .reel {
         position: absolute;
         width: var(--slot-box-width);
@@ -333,7 +339,9 @@
         line-height: 1;
         letter-spacing: 0.12em;
         color: #6e4a38;
-        text-transform: uppercase;
+        text-transform: none;
+        cursor: pointer;
+        pointer-events: auto;
       }
       #marqueeText,
       #tapText {
@@ -444,6 +452,33 @@
         box-sizing: border-box;
         overflow: visible;
       }
+      #revealLines {
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        padding: clamp(48px, 8vw, 96px);
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        opacity: 0;
+        transform: scale(0.8);
+        overflow: visible;
+      }
+      #revealOverlay.is-visible #revealLines {
+        animation:
+          revealTextGroupIn 500ms ease-out forwards,
+          revealTextFloat 5.4s ease-in-out 500ms infinite;
+      }
+      #revealOverlay.is-visible .reveal-question-eyebrow {
+        animation: revealLineIn 500ms ease-out 90ms both;
+      }
+      #revealOverlay.is-visible .reveal-question-role {
+        animation: revealLineIn 560ms ease-out 260ms both;
+      }
+      #revealOverlay.is-visible .reveal-card-divider {
+        animation: revealLineIn 480ms ease-out 520ms both;
+      }
 
       .reveal-line {
         flex: 1;
@@ -472,38 +507,63 @@
         text-transform: uppercase;
       }
       .reveal-question {
-        flex: 0 0 min(68vh, 620px);
-        width: min(98%, 1520px);
-        gap: clamp(14px, 2.4vh, 30px);
+        flex: 0 1 auto;
+        width: min(100%, 94vw, 1280px);
+        max-width: 100%;
+        flex-direction: column;
+        gap: clamp(2px, 0.9vh, 10px);
+        filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.55));
         overflow: visible;
       }
       .reveal-question .reveal-question-eyebrow {
         display: block;
         width: 100%;
         font-family: Georgia, "Times New Roman", serif;
-        font-size: clamp(18px, 4.8vw, 54px);
+        font-size: clamp(17px, 3.5vw, 44px);
         font-weight: 700;
         line-height: 1;
-        letter-spacing: 0.18em;
+        letter-spacing: 0.12em;
         color: #bd842b;
         text-transform: uppercase;
         text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
         white-space: nowrap;
+        --reveal-line-offset-y: -26px;
       }
       .reveal-question .reveal-question-role {
         display: block;
         width: 100%;
         font-family: var(--script-font), "Brush Script MT", cursive;
-        font-size: clamp(58px, 15.4vw, 174px);
+        font-size: clamp(68px, 12vw, 168px);
         font-weight: 400;
         line-height: 0.9;
         letter-spacing: 0;
-        color: #ea806d;
+        color: #d97777;
         text-transform: none;
         text-shadow:
-          0 3px 0 rgba(255, 220, 205, 0.72),
-          0 7px 18px rgba(179, 85, 63, 0.12);
+          0 2px 0 rgba(255, 232, 222, 0.72),
+          0 8px 20px rgba(179, 85, 63, 0.1);
         white-space: nowrap;
+      }
+      .reveal-card-divider {
+        display: block;
+        width: auto;
+        height: auto;
+        margin: clamp(8px, 1.6vh, 14px) auto 0;
+        background: transparent;
+        color: rgba(189, 132, 43, 0.72);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(13px, 2.5vw, 20px);
+        line-height: 1;
+      }
+      .reveal-card-divider::before {
+        content: "✦";
+        display: block;
+        width: auto;
+        height: auto;
+        margin: 0;
+        background: transparent;
+        border: 0;
+        transform: none;
       }
       .reveal-line.sub {
         font-weight: 700;
@@ -543,7 +603,7 @@
           }
         }
         .instructions-container {
-          max-width: 96vw;
+          max-width: min(96vw, 360px);
         }
         .reveal-overlay {
           top: 0;
@@ -555,6 +615,22 @@
         .reveal-lines {
           padding-top: env(safe-area-inset-top, 0);
         }
+        #revealLines {
+          width: 100%;
+          height: 100%;
+          padding: clamp(40px, 10vw, 72px) clamp(14px, 5vw, 28px);
+          overflow: hidden;
+        }
+        .reveal-question {
+          width: min(100%, 94vw, 620px);
+        }
+        .reveal-question .reveal-question-eyebrow {
+          font-size: clamp(15px, 4.8vw, 30px);
+          letter-spacing: 0.11em;
+        }
+        .reveal-question .reveal-question-role {
+          font-size: clamp(66px, 18vw, 118px);
+        }
       }
       /* Instructions Overlay */
       .instructions-overlay {
@@ -564,8 +640,8 @@
         width: 100%;
         height: 100%;
         background:
-          radial-gradient(circle at 20% 16%, rgba(255, 247, 242, 0.72), transparent 30%),
-          rgba(145, 104, 92, 0.44);
+          radial-gradient(circle at 22% 18%, rgba(255, 249, 243, 0.74), transparent 34%),
+          linear-gradient(180deg, rgba(247, 239, 228, 0.72), rgba(238, 210, 199, 0.66));
         display: flex;
         justify-content: center;
         align-items: center;
@@ -574,116 +650,108 @@
         transition: opacity 0.4s;
       }
       .instructions-container {
-        width: 82%;
-        max-width: 315px;
-        background:
-          linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(249, 235, 226, 0.96));
-        border-radius: 12px;
-        padding: 24px 22px 22px;
-        box-shadow:
-          0 22px 45px rgba(80, 54, 45, 0.22),
-          inset 0 1px 0 rgba(255, 255, 255, 0.8);
-        border: 1px solid rgba(155, 99, 91, 0.28);
+        width: 90%;
+        max-width: 360px;
+        background: #f7efe4;
+        border: 2px solid #c9a56a;
+        border-radius: 18px;
+        padding: 40px 32px 32px;
+        box-shadow: 0 18px 45px rgba(90, 60, 45, 0.18);
         position: relative;
         overflow: hidden;
       }
-      .instructions-container::before,
       .instructions-container::after {
         content: "";
         position: absolute;
-        width: 96px;
-        height: 96px;
-        background: url("img/gold-floral-bouquet.svg") center/contain no-repeat;
-        opacity: 0.18;
+        inset: 8px;
+        border: 1px solid rgba(201, 165, 106, 0.4);
+        border-radius: 12px;
         pointer-events: none;
       }
-      .instructions-container::before {
-        top: -28px;
-        left: -28px;
-        transform: rotate(-16deg);
+      .instructions-sparkle {
+        position: absolute;
+        top: 22px;
+        width: 18px;
+        height: 18px;
+        color: #c9a56a;
+        pointer-events: none;
       }
-      .instructions-container::after {
-        right: -32px;
-        bottom: -28px;
-        transform: rotate(164deg);
+      .instructions-sparkle::before,
+      .instructions-sparkle::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        background: currentColor;
+        border-radius: 999px;
+        transform: translate(-50%, -50%);
+      }
+      .instructions-sparkle::before {
+        width: 2px;
+        height: 18px;
+      }
+      .instructions-sparkle::after {
+        width: 18px;
+        height: 2px;
+      }
+      .instructions-sparkle--left {
+        left: 24px;
+        transform: rotate(45deg);
+      }
+      .instructions-sparkle--right {
+        right: 24px;
+        transform: rotate(45deg);
       }
       .instructions-title {
         position: relative;
-        font-family: Georgia, serif;
-        font-size: clamp(30px, 7vw, 42px);
-        font-weight: 400;
-        color: #9b635b;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(30px, 7vw, 34px);
+        font-weight: 600;
+        color: #6b5849;
         text-align: center;
-        margin: 0 0 12px;
-        line-height: 1;
+        margin: 0 0 16px;
+        line-height: 1.1;
         text-shadow: 0 1px 0 rgba(255, 255, 255, 0.76);
       }
       .instructions-text {
         position: relative;
-        font-family: "Courier New", monospace;
-        font-size: clamp(14px, 3.4vw, 17px);
-        font-weight: 600;
-        color: #6d5d55;
+        font-family: "Cormorant Garamond", Georgia, serif;
+        font-size: clamp(18px, 4.6vw, 22px);
+        font-weight: 500;
+        color: #7a685a;
         text-align: center;
         line-height: 1.5;
-        margin: 0 0 18px;
-      }
-      .instructions-slot-visual {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        margin: 16px 0 18px;
-      }
-      .mini-slot {
-        width: clamp(48px, 12vw, 58px);
-        height: clamp(48px, 12vw, 58px);
-        background: #fffdf9;
-        border: 1px solid rgba(155, 99, 91, 0.24);
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow:
-          0 6px 14px rgba(95, 70, 56, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.9);
-      }
-      .mini-slot img {
-        width: 78%;
-        height: 78%;
-        object-fit: contain;
-        display: block;
+        margin: 0 0 28px;
       }
       .instructions-button {
         position: relative;
-        background: #9b635b;
-        border: none;
-        border-radius: 8px;
-        min-height: 46px;
-        padding: 0 24px;
+        background: #b8847e;
+        border: 1px solid #9a6a64;
+        border-radius: 12px;
+        min-height: 48px;
+        padding: 0 26px;
         font-family: var(--font-family), sans-serif;
-        font-size: clamp(14px, 3.5vw, 17px);
+        font-size: clamp(12px, 3.1vw, 14px);
         font-weight: 800;
         text-transform: uppercase;
-        color: #fffaf5;
+        color: #fff9f3;
         text-shadow: none;
-        box-shadow: 0 10px 20px rgba(95, 70, 56, 0.18);
+        box-shadow: 0 5px 0 rgba(120, 80, 70, 0.4);
         cursor: pointer;
         display: block;
         margin: 0 auto;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.12em;
         transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
       }
       .instructions-button:hover,
       .instructions-button:focus-visible {
-        background: #8b5a53;
-        box-shadow: 0 12px 24px rgba(95, 70, 56, 0.22);
+        background: #a7746f;
+        box-shadow: 0 5px 0 rgba(120, 80, 70, 0.4);
         outline: none;
       }
       .instructions-button:active {
-        transform: translateY(1px);
-        box-shadow: 0 7px 16px rgba(95, 70, 56, 0.18);
+        transform: translateY(3px);
+        box-shadow: 0 2px 0 rgba(120, 80, 70, 0.4);
       }
       .sparkle {
         position: absolute;
@@ -701,7 +769,36 @@
         0%, 100% { transform: translateY(0) scale(1); opacity: 0.7; }
         50% { transform: translateY(-10px) scale(1.2); opacity: 0.9; }
       }
-
+      @keyframes revealTextGroupIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.92);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes revealTextFloat {
+        0%, 100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: translateY(-3px) scale(1);
+        }
+      }
+      @keyframes revealLineIn {
+        0% {
+          opacity: 0;
+          transform: translateY(calc(var(--reveal-line-offset-y, 0px) + 5px)) scale(0.98);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(var(--reveal-line-offset-y, 0px)) scale(1);
+        }
+      }
       .petal-particle {
         position: absolute;
         pointer-events: none;
@@ -721,7 +818,7 @@
       .sparkle-particle {
         position: absolute;
         pointer-events: none;
-        z-index: 4300;
+        z-index: var(--sparkle-z, 4300);
         width: var(--size);
         height: var(--size);
         color: #bd842b;
@@ -786,7 +883,7 @@
           id="tapDebugBox"
           data-debug-box="tap"
         >
-          <span id="tapText">TAP TO SPIN</span>
+          <span id="tapText">Tap To Spin</span>
         </div>
         <div id="reel1" class="reel blur-background">
           <div class="reel-inner">
@@ -829,14 +926,11 @@
           style="opacity: 1"
         >
           <div class="instructions-container">
-            <h2 class="instructions-title">How to Play</h2>
-            <p class="instructions-text">Tap the button to spin.<br>Match all 3 reels<br>to reveal your surprise.</p>
-            <div class="instructions-slot-visual">
-              <div class="mini-slot"><img src="img/new icons/cake.png" alt="" /></div>
-              <div class="mini-slot"><img src="img/new icons/camera.png" alt="" /></div>
-              <div class="mini-slot"><img src="img/new icons/champagne.png" alt="" /></div>
-            </div>
-            <button class="instructions-button" onclick="document.getElementById('instructionsOverlay').click()">Start Spinning</button>
+            <span class="instructions-sparkle instructions-sparkle--left" aria-hidden="true"></span>
+            <span class="instructions-sparkle instructions-sparkle--right" aria-hidden="true"></span>
+            <h2 class="instructions-title">Before You Spin</h2>
+            <p class="instructions-text">Match 3 symbols to reveal a very special question.</p>
+            <button class="instructions-button" onclick="document.getElementById('instructionsOverlay').click()">START SPINNING</button>
           </div>
         </div>
       </div>
@@ -878,12 +972,12 @@
       }
 
       const uiTranslations = {
-        en: { marquee: "A Big Ask", tap: "TAP TO SPIN" },
-        es: { marquee: "Una Gran Pregunta", tap: "TOCA PARA GIRAR" },
-        fr: { marquee: "Une Grande Demande", tap: "TOUCHEZ POUR TOURNER" },
-        it: { marquee: "Una Grande Domanda", tap: "TOCCA PER GIRARE" },
-        de: { marquee: "Eine Grosse Frage", tap: "ZUM DREHEN TIPPEN" },
-        pt: { marquee: "Um Grande Pedido", tap: "TOQUE PARA GIRAR" },
+        en: { marquee: "A Big Ask", tap: "Tap To Spin" },
+        es: { marquee: "Una Gran Pregunta", tap: "Toca Para Girar" },
+        fr: { marquee: "Une Grande Demande", tap: "Touchez Pour Tourner" },
+        it: { marquee: "Una Grande Domanda", tap: "Tocca Per Girare" },
+        de: { marquee: "Eine Grosse Frage", tap: "Zum Drehen Tippen" },
+        pt: { marquee: "Um Grande Pedido", tap: "Toque Para Girar" },
       };
       function getUiCopy(params) {
         const browserLang =
@@ -1751,8 +1845,48 @@
           { passive: false },
         );
         spinButton.addEventListener("click", handleSpin);
+        if (tapDebugBox) {
+          tapDebugBox.addEventListener("mousedown", function () {
+            if (slotDebugState.active) return;
+            spinButton.classList.add("pressed");
+            if (navigator.vibrate) navigator.vibrate(24);
+            playClickSound();
+          });
+          tapDebugBox.addEventListener("mouseup", function () {
+            spinButton.classList.remove("pressed");
+          });
+          tapDebugBox.addEventListener("mouseleave", function () {
+            spinButton.classList.remove("pressed");
+          });
+          tapDebugBox.addEventListener(
+            "touchstart",
+            function (e) {
+              if (slotDebugState.active) return;
+              e.preventDefault();
+              spinButton.classList.add("pressed");
+              if (navigator.vibrate) navigator.vibrate(24);
+              playClickSound();
+            },
+            { passive: false },
+          );
+          tapDebugBox.addEventListener(
+            "touchend",
+            function (e) {
+              if (slotDebugState.active) return;
+              e.preventDefault();
+              spinButton.classList.remove("pressed");
+              handleSpin();
+            },
+            { passive: false },
+          );
+          tapDebugBox.addEventListener("click", function () {
+            if (slotDebugState.active) return;
+            handleSpin();
+          });
+        }
 
         function handleSpin() {
+          if (spinButton.style.pointerEvents === "none") return;
           spinCount++;
           spinButton.style.pointerEvents = "none";
           const spinDuration = 1200;
@@ -1763,7 +1897,6 @@
               const callback =
                 i === reels.length - 1
                   ? () => {
-                      setTimeout(dropPetals, 160);
                       setTimeout(showReveal, 960);
                     }
                   : null;
@@ -1843,6 +1976,7 @@
 
         function refitAllLines() {
           document.querySelectorAll(".reveal-line").forEach((el) => {
+            if (el.classList.contains("reveal-question")) return;
             const type = Array.from(el.classList).find(
               (c) => c !== "reveal-line",
             );
@@ -1872,7 +2006,7 @@
           const role = match[1].trim();
           if (!role) return null;
           return {
-            eyebrow: "Will you be my",
+            eyebrow: "WILL YOU BE MY",
             role: `${role.charAt(0).toUpperCase()}${role.slice(1)}?`,
           };
         }
@@ -1881,6 +2015,8 @@
         function showReveal() {
           const allLines = getRevealLinesFromParams(params);
           revealLinesDiv.innerHTML = "";
+          revealOverlay.classList.remove("is-visible");
+          void revealLinesDiv.offsetWidth;
 
           function addLine(line) {
             const div = document.createElement("div");
@@ -1903,7 +2039,10 @@
               const role = document.createElement("span");
               role.className = "reveal-question-role";
               role.textContent = question.role;
-              div.append(eyebrow, role);
+              const divider = document.createElement("span");
+              divider.className = "reveal-card-divider";
+              divider.setAttribute("aria-hidden", "true");
+              div.append(eyebrow, role, divider);
             } else {
               div.textContent =
                 line.type === "sub"
@@ -1938,14 +2077,26 @@
           const hideDelay = 30000;
 
           setBlurState(true, { immediate: true });
+          document.body.classList.add("reveal-active");
           revealOverlay.style.opacity = "1";
           revealOverlay.style.pointerEvents = "auto";
           colorOverlay.style.background =
-            "linear-gradient(180deg, rgba(255, 249, 240, 0.9), rgba(252, 232, 214, 0.86))";
+            "linear-gradient(180deg, rgba(252, 232, 214, 0.74), rgba(247, 239, 228, 0.64) 48%, rgba(238, 190, 178, 0.56))";
+          revealOverlay.classList.add("is-visible");
           refitAllLines();
+          setTimeout(() => {
+            dropPetals({
+              container: revealOverlay,
+              layer: "reveal",
+              light: true,
+              extraLight: true,
+            });
+          }, 260);
           setTimeout(() => {
             revealOverlay.style.opacity = "0";
             revealOverlay.style.pointerEvents = "none";
+            revealOverlay.classList.remove("is-visible");
+            document.body.classList.remove("reveal-active");
           }, hideDelay);
         }
 
@@ -1977,8 +2128,11 @@
           `;
         }
 
-        function dropPetals() {
-          const container = document.getElementById("container");
+        function dropPetals(options = {}) {
+          const container = options.container || document.getElementById("container");
+          const petalCount = options.extraLight ? 10 : options.light ? 24 : 48;
+          const sparkleCount = options.extraLight ? 4 : options.light ? 12 : 32;
+          const particleZ = options.layer === "reveal" ? "1" : null;
           const palette = [
             ["#fce8df", "#e8b9aa"],
             ["#fbd7c9", "#dfaa9c"],
@@ -1989,7 +2143,7 @@
           const created = [];
           const stamp = Date.now();
 
-          for (let i = 0; i < 48; i++) {
+          for (let i = 0; i < petalCount; i++) {
             const particle = document.createElement("div");
             const sway = document.createElement("div");
             const shape = document.createElement("div");
@@ -2003,13 +2157,28 @@
             shape.innerHTML = petalSvg(fill, accent, id);
 
             particle.style.left = `${Math.random() * 100}%`;
-            particle.style.setProperty("--fall-delay", `${Math.random() * 2.4}s`);
-            particle.style.setProperty("--fall-duration", `${6.8 + Math.random() * 5.8}s`);
+            particle.style.setProperty(
+              "--fall-delay",
+              `${options.extraLight && i < 4 ? 0 : Math.random() * (options.extraLight ? 0.85 : 2.4)}s`,
+            );
+            particle.style.setProperty(
+              "--fall-duration",
+              `${options.extraLight ? 10 + Math.random() * 6 : 6.8 + Math.random() * 5.8}s`,
+            );
             particle.style.setProperty("--sway-delay", `${-(Math.random() * 5)}s`);
-            particle.style.setProperty("--sway-duration", `${2.8 + Math.random() * 3.6}s`);
-            particle.style.setProperty("--spin-duration", `${3.8 + Math.random() * 5.8}s`);
+            particle.style.setProperty(
+              "--sway-duration",
+              `${options.extraLight ? 4.2 + Math.random() * 4.4 : 2.8 + Math.random() * 3.6}s`,
+            );
+            particle.style.setProperty(
+              "--spin-duration",
+              `${options.extraLight ? 6 + Math.random() * 7 : 3.8 + Math.random() * 5.8}s`,
+            );
             particle.style.setProperty("--size", `${20 * scale}px`);
-            particle.style.setProperty("--z", Math.random() > 0.38 ? "4300" : "3900");
+            particle.style.setProperty(
+              "--z",
+              particleZ || (Math.random() > 0.38 ? "4300" : "3900"),
+            );
             particle.style.setProperty(
               "--petal-filter",
               Math.random() > 0.72
@@ -2024,7 +2193,7 @@
             particle.addEventListener("animationend", () => particle.remove());
           }
 
-          for (let i = 0; i < 32; i++) {
+          for (let i = 0; i < sparkleCount; i++) {
             const sparkle = document.createElement("div");
             const float = document.createElement("div");
             const scale = 0.48 + Math.random() * 1.1;
@@ -2037,6 +2206,9 @@
             sparkle.style.setProperty("--size", `${15 * scale}px`);
             sparkle.style.setProperty("--sparkle-delay", `${Math.random() * 3.2}s`);
             sparkle.style.setProperty("--sparkle-duration", `${1.9 + Math.random() * 3.1}s`);
+            if (particleZ) {
+              sparkle.style.setProperty("--sparkle-z", particleZ);
+            }
 
             sparkle.appendChild(float);
             container.appendChild(sparkle);
