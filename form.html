@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Rouge+Script&family=Montserrat:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
     <style>
@@ -385,11 +385,17 @@
       .link-actions { display: flex; gap: 8px; flex: none; }
       .copy-btn { min-width: 150px; }
       .copy-btn.copied { background: var(--gold); border-color: var(--gold); color: oklch(0.28 0.03 60); }
+      .download-btn { min-width: 150px; }
 
       .done-banner { text-align: center; margin-bottom: 22px; }
       .done-banner .ring {
         width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 50%;
         display: grid; place-items: center; background: var(--tint-strong); color: var(--rose); font-size: 1.5rem;
+      }
+      .ready-title { color: var(--rose); }
+      .ready-title[hidden] { display: none; }
+      .qr-note {
+        margin: 7px auto 0; max-width: 46ch; color: var(--muted); font-size: 0.98rem;
       }
 
       .toast {
@@ -421,7 +427,7 @@
         .quick-add { flex-direction: column; }
         .link-card { grid-template-columns: 1fr; }
         .link-actions { width: 100%; }
-        .copy-btn { flex: 1; }
+        .copy-btn, .download-btn { flex: 1; }
         .step-chip { padding: 7px 12px 7px 8px; font-size: 0.8rem; }
         .step-chip .lbl { display: none; }
         .wizard-nav { flex-wrap: wrap; }
@@ -594,14 +600,17 @@
         <div class="step-head done-banner">
           <div class="ring">♡</div>
           <p class="step-kicker">Step 4 of 4</p>
-          <h2>Share the links</h2>
-          <p style="margin-inline:auto">One private link per person. Copy it and text it straight to them.</p>
+          <h2 id="readyTitle" class="ready-title" hidden></h2>
+          <h2 id="shareTitle">Share the links</h2>
+          <p id="shareCopy" style="margin-inline:auto">One private link and printable QR card per person.</p>
+          <p class="qr-note">Download each 4 x 6 card, print it, and pair it with the matching proposal.</p>
         </div>
         <div class="results" id="results"></div>
         <div class="wizard-nav">
           <button class="btn btn-ghost" type="button" data-next="3">← Back to personalize</button>
           <div class="spacer"></div>
           <button class="btn btn-ghost" type="button" id="copyAllBtn">Copy all as a list</button>
+          <button class="btn btn-primary" type="button" id="createAnotherBtn">Create Another Proposal</button>
         </div>
       </section>
     </main>
@@ -637,6 +646,7 @@
       </li>
     </template>
 
+    <script src="qrcode.min.js"></script>
     <script>
       "use strict";
       const $ = (id) => document.getElementById(id);
@@ -654,7 +664,8 @@
       const taIntro = $("taIntro"), taReveal = $("taReveal");
       const walkPrev = $("walkPrev"), walkNext = $("walkNext"), walkSkip = $("walkSkip"), walkPreview = $("walkPreview");
 
-      const results = $("results"), copyAllBtn = $("copyAllBtn");
+      const results = $("results"), copyAllBtn = $("copyAllBtn"), createAnotherBtn = $("createAnotherBtn");
+      const readyTitle = $("readyTitle"), shareTitle = $("shareTitle"), shareCopy = $("shareCopy");
       const toast = $("toast");
       const modal = $("modal"), modalFrame = $("modalFrame"), modalName = $("modalName"), modalClose = $("modalClose");
 
@@ -670,6 +681,8 @@
       let walkIndex = 0;
       let previewVersion = 0;
       let toastTimer = null;
+      let proposalRecords = [];
+      const PROPOSAL_STORE_KEY = "bridalProposalRecords";
 
       const defaultReveal = (m) => {
         const name = (m.name || "").trim();
@@ -677,6 +690,7 @@
       };
       const fallbackName = (m, i) => (m.name || "").trim() || `Bridesmaid ${i + 1}`;
       const firstName = (m, i) => fallbackName(m, i).split(" ")[0];
+      const safeFileName = (name) => (name || "Proposal").trim().replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "") || "Proposal";
 
       /* ---------- no draft persistence ---------- */
       const save = () => {};
@@ -713,6 +727,202 @@
         url.searchParams.set("finalIcon", "ringflower.png");
         if (preview) url.searchParams.set("preview", String(++previewVersion));
         return url.toString();
+      };
+
+      /* ---------- QR proposal records + card export ---------- */
+      const loadProposalRecords = () => {
+        try {
+          const saved = JSON.parse(sessionStorage.getItem(PROPOSAL_STORE_KEY) || "[]");
+          proposalRecords = Array.isArray(saved) ? saved : [];
+        } catch (_) {
+          proposalRecords = [];
+        }
+      };
+      const saveProposalRecords = () => {
+        try { sessionStorage.setItem(PROPOSAL_STORE_KEY, JSON.stringify(proposalRecords)); }
+        catch (_) {}
+      };
+      const proposalKey = (m) => String(m.id);
+      const generateQrDataUrl = async (proposalUrl) => {
+        if (!window.QRCode) {
+          throw new Error("QR code library did not load");
+        }
+        const holder = document.createElement("div");
+        holder.style.position = "fixed";
+        holder.style.left = "-9999px";
+        holder.style.top = "0";
+        document.body.appendChild(holder);
+        new window.QRCode(holder, {
+          text: proposalUrl,
+          width: 1024,
+          height: 1024,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: window.QRCode.CorrectLevel.M,
+        });
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+        const canvas = holder.querySelector("canvas");
+        const img = holder.querySelector("img");
+        const dataUrl = canvas ? canvas.toDataURL("image/png") : img && img.src;
+        holder.remove();
+        if (!dataUrl) throw new Error("QR code could not be rendered");
+        return dataUrl;
+      };
+      const createProposalRecords = async () => {
+        const now = new Date().toISOString();
+        const existingByKey = new Map(proposalRecords.map((record) => [record.key, record]));
+        const records = await Promise.all(members.map(async (m, i) => {
+          const recipientName = fallbackName(m, i);
+          const proposalUrl = buildUrl(m);
+          const customMessage = m.introMode === "custom" ? (m.intro || "").trim() : dIntro.value.trim();
+          const previous = existingByKey.get(proposalKey(m));
+          const previousStillMatches = previous && previous.proposalUrl === proposalUrl && previous.recipientName === recipientName;
+          return {
+            key: proposalKey(m),
+            recipientName,
+            roleTitle: roleLabel(m.role),
+            customMessage,
+            proposalUrl,
+            qrCode: previousStillMatches && previous.qrCode ? previous.qrCode : await generateQrDataUrl(proposalUrl),
+            createdAt: previousStillMatches && previous.createdAt ? previous.createdAt : now,
+          };
+        }));
+        proposalRecords = records;
+        saveProposalRecords();
+        return records;
+      };
+      const drawCenteredText = (ctx, text, x, y, maxWidth, lineHeight) => {
+        const words = String(text || "").split(/\s+/).filter(Boolean);
+        const lines = [];
+        let line = "";
+        words.forEach((word) => {
+          const test = line ? `${line} ${word}` : word;
+          if (ctx.measureText(test).width > maxWidth && line) {
+            lines.push(line);
+            line = word;
+          } else {
+            line = test;
+          }
+        });
+        if (line) lines.push(line);
+        lines.forEach((txt, idx) => ctx.fillText(txt, x, y + idx * lineHeight));
+        return lines.length * lineHeight;
+      };
+      const drawSpacedText = (ctx, text, x, y, letterSpacing = 2) => {
+        const chars = String(text || "").split("");
+        const totalWidth = chars.reduce((sum, char, idx) => sum + ctx.measureText(char).width + (idx ? letterSpacing : 0), 0);
+        let cursor = x - totalWidth / 2;
+        chars.forEach((char, idx) => {
+          if (idx) cursor += letterSpacing;
+          ctx.fillText(char, cursor, y);
+          cursor += ctx.measureText(char).width;
+        });
+      };
+      const drawSparkle = (ctx, x, y, size, color) => {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(0, -size);
+        ctx.bezierCurveTo(size * 0.12, -size * 0.28, size * 0.28, -size * 0.12, size, 0);
+        ctx.bezierCurveTo(size * 0.28, size * 0.12, size * 0.12, size * 0.28, 0, size);
+        ctx.bezierCurveTo(-size * 0.12, size * 0.28, -size * 0.28, size * 0.12, -size, 0);
+        ctx.bezierCurveTo(-size * 0.28, -size * 0.12, -size * 0.12, -size * 0.28, 0, -size);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      };
+      const loadImage = (src) => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+      const downloadQrCard = async (record) => {
+        if (document.fonts && document.fonts.load) {
+          await Promise.allSettled([
+            document.fonts.load("74px Rouge Script"),
+            document.fonts.load("600 12px Montserrat"),
+          ]);
+        }
+        const scale = 3;
+        const width = 1200;
+        const height = 1800;
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.style.width = "4in";
+        canvas.style.height = "6in";
+        const ctx = canvas.getContext("2d");
+        ctx.scale(scale, scale);
+        const w = width / scale;
+        const h = height / scale;
+
+        ctx.fillStyle = "#FCFAF5";
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = "#C8A26A";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(15, 15, w - 30, h - 30);
+        drawSparkle(ctx, 30, 30, 7, "rgba(201, 165, 106, 0.82)");
+        drawSparkle(ctx, w - 30, 30, 7, "rgba(201, 165, 106, 0.82)");
+        drawSparkle(ctx, 30, h - 30, 7, "rgba(201, 165, 106, 0.82)");
+        drawSparkle(ctx, w - 30, h - 30, 7, "rgba(201, 165, 106, 0.82)");
+
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#D48D93";
+        let nameFontSize = 74;
+        const nameLine = `for ${record.recipientName || "You"}`;
+        do {
+          ctx.font = `${nameFontSize}px 'Rouge Script', cursive`;
+          if (ctx.measureText(nameLine).width <= w - 70) break;
+          nameFontSize -= 4;
+        } while (nameFontSize > 44);
+        ctx.fillText(`for ${record.recipientName || "You"}`, w / 2, 106);
+
+        ctx.strokeStyle = "#C8A26A";
+        ctx.globalAlpha = 0.68;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(76, 132);
+        ctx.lineTo(174, 132);
+        ctx.moveTo(226, 132);
+        ctx.lineTo(324, 132);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = "#D48D93";
+        ctx.font = "13px Georgia, serif";
+        ctx.fillText("♥", w / 2, 136);
+
+        ctx.fillStyle = "#403126";
+        ctx.font = "500 11px Montserrat, Arial, sans-serif";
+        drawSpacedText(ctx, "SCAN HERE FOR A SPECIAL SURPRISE", w / 2, 164, 2.3);
+
+        const qr = await loadImage(record.qrCode);
+        const frameSize = 266;
+        const frameX = (w - frameSize) / 2;
+        const frameY = 218;
+        const whitePad = 34;
+        const qrBox = frameSize - whitePad * 2;
+        const qrX = frameX + whitePad;
+        const qrY = frameY + whitePad;
+        ctx.strokeStyle = "#C9A56A";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(frameX, frameY, frameSize, frameSize);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(frameX + 17, frameY + 17, frameSize - 34, frameSize - 34);
+        ctx.drawImage(qr, qrX, qrY, qrBox, qrBox);
+
+        ctx.fillStyle = "#403126";
+        ctx.font = "500 12.5px Montserrat, Arial, sans-serif";
+        ctx.fillText("I CAN'T WAIT", w / 2, 544);
+        ctx.fillText("TO CELEBRATE WITH YOU!", w / 2, 570);
+
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = `${safeFileName(record.recipientName)}-QR-Card.png`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
       };
 
       /* ---------- Step 1: default message + optional touches ---------- */
@@ -898,39 +1108,70 @@
       walkPreview.addEventListener("click", () => openPreview(members[walkIndex]));
 
       /* ---------- Step 4: results ---------- */
-      const renderResults = () => {
+      const renderResults = async () => {
         results.innerHTML = "";
-        members.forEach((m, i) => {
-          const url = buildUrl(m), who = fallbackName(m, i);
+        readyTitle.hidden = true;
+        shareTitle.hidden = false;
+        shareCopy.textContent = "Generating QR cards...";
+        let records = [];
+        try {
+          records = await createProposalRecords();
+        } catch (err) {
+          shareCopy.textContent = "The proposal links are ready, but QR generation could not start. Check your internet connection and reload this page.";
+          showToast("QR generator could not load");
+          return;
+        }
+        if (records.length === 1) {
+          readyTitle.textContent = `${records[0].recipientName}'s Proposal is Ready`;
+          readyTitle.hidden = false;
+          shareTitle.hidden = true;
+          shareCopy.textContent = "Copy the private link or download the printable QR card.";
+        } else {
+          shareTitle.textContent = "Proposal Cards Are Ready";
+          shareTitle.hidden = false;
+          shareCopy.textContent = "Copy each private link or download the matching printable QR card.";
+        }
+        records.forEach((record) => {
           const card = document.createElement("div");
           card.className = "link-card";
           card.innerHTML = `
             <div class="link-who"><strong></strong><span class="role-tag"></span></div>
             <div class="link-actions">
-              <button class="btn btn-ghost" type="button" data-act="preview">Preview</button>
-              <button class="btn btn-primary copy-btn" type="button" data-act="copy"></button>
+              <button class="btn btn-ghost copy-btn" type="button" data-act="copy">Copy Link</button>
+              <button class="btn btn-primary download-btn" type="button" data-act="download">Download QR Card</button>
             </div>
             <div class="link-url"></div>`;
-          card.querySelector("strong").textContent = who;
-          card.querySelector(".role-tag").textContent = roleLabel(m.role);
-          card.querySelector(".link-url").textContent = url;
+          card.querySelector("strong").textContent = record.recipientName;
+          card.querySelector(".role-tag").textContent = record.roleTitle;
+          card.querySelector(".link-url").textContent = record.proposalUrl;
           const copyBtn = card.querySelector('[data-act="copy"]');
-          copyBtn.textContent = `Copy ${firstName(m, i)}'s link`;
           copyBtn.addEventListener("click", async () => {
-            const ok = await copyText(url);
+            const ok = await copyText(record.proposalUrl);
             copyBtn.classList.add("copied");
             const prevTxt = copyBtn.textContent; copyBtn.textContent = "Copied ✓";
-            showToast(ok ? `${who}'s link copied — ready to text` : "Copy the link below");
+            showToast(ok ? `${record.recipientName}'s link copied` : "Copy the link below");
             setTimeout(() => { copyBtn.textContent = prevTxt; copyBtn.classList.remove("copied"); }, 1600);
           });
-          card.querySelector('[data-act="preview"]').addEventListener("click", () => openPreview(m));
+          card.querySelector('[data-act="download"]').addEventListener("click", async () => {
+            try {
+              await downloadQrCard(record);
+              showToast(`${record.recipientName}'s QR card downloaded`);
+            } catch (_) {
+              showToast("Could not download QR card");
+            }
+          });
           results.appendChild(card);
         });
       };
       copyAllBtn.addEventListener("click", async () => {
-        const text = members.map((m, i) => `${fallbackName(m, i)} — ${roleLabel(m.role)}\n${buildUrl(m)}`).join("\n\n");
+        const records = proposalRecords.length ? proposalRecords : await createProposalRecords();
+        const text = records.map((record) => `${record.recipientName} — ${record.roleTitle}\n${record.proposalUrl}`).join("\n\n");
         const ok = await copyText(text);
         showToast(ok ? "All links copied as a list" : "Could not copy");
+      });
+      createAnotherBtn.addEventListener("click", () => {
+        goStep(2);
+        setTimeout(() => quickAdd.focus(), 80);
       });
 
       /* ---------- preview modal ---------- */
@@ -980,6 +1221,7 @@
 
       /* ---------- boot ---------- */
       (function init() {
+        loadProposalRecords();
         introChoice = 0;
         dIntro.value = INTRO_PRESETS[0];
         dIntro.hidden = introChoice !== "custom";
